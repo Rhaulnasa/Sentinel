@@ -452,21 +452,66 @@ async function fetchNews(key){
   return articles;
 }
 
-// ── CLAUDE ANALYSIS ──
+// ── LOCAL ANALYSIS ENGINE (CORS-safe, no API needed) ──
+const SECTOR_MAP = {
+  'COBOL':['IBM'],'mainframe':['IBM'],'legacy banking':['IBM','JPM','BAC','WFC','C'],
+  'code migration':['IBM','ACN','CTSH','INFY'],
+  'banking':['JPM','BAC','WFC','C','FIS'],'bank':['JPM','BAC','WFC','C'],
+  'payment':['AXP','MA','V'],'Mastercard':['MA'],'Visa':['V'],'American Express':['AXP'],
+  'cybersecurity':['CRWD','OKTA','NET','ZS','PANW'],'security scanning':['CRWD','OKTA','ZS'],
+  'vulnerability':['CRWD','OKTA','NET','ZS','PANW'],'firewall':['PANW','ZS'],
+  'wealth management':['SCHW','RJF','LPLA'],'financial advisor':['SCHW','RJF','LPLA'],
+  'portfolio':['SCHW','RJF','LPLA'],'Schwab':['SCHW'],'Raymond James':['RJF'],
+  'logistics':['CHRW','LSTR','ULH'],'freight':['CHRW','LSTR'],'supply chain':['CHRW','LSTR','ULH'],
+  'IT consulting':['ACN','CTSH','INFY'],'Accenture':['ACN'],'Cognizant':['CTSH'],'Infosys':['INFY'],
+  'ERP':['SAP','ORCL','NOW'],'enterprise software':['SAP','ORCL','NOW'],'SAP':['SAP'],'Oracle':['ORCL'],
+  'investment banking':['GS','MS'],'Goldman':['GS'],'Morgan Stanley':['MS'],
+  'JPMorgan':['JPM'],'Bank of America':['BAC'],'Wells Fargo':['WFC'],'Citigroup':['C'],
+  'IBM':['IBM'],'CrowdStrike':['CRWD'],'Okta':['OKTA'],'Cloudflare':['NET'],
+  'Palo Alto':['PANW'],'Zscaler':['ZS'],'ServiceNow':['NOW'],
+};
+const HIGH_TRIGGERS=['replace','replaces','automate','threatens','disrupts','disruption',
+  'at risk','drops','falls','selloff','eliminate','eliminates','beats','surpasses','COBOL',
+  'direct threat','obsolete','redundant','no longer needed'];
+const MED_TRIGGERS=['competes','competition','pressure','challenges','testing','piloting',
+  'migrate','migration','modernize','efficiency','cost reduction'];
+
+function analyzeLocal(headline){
+  var hl=headline.toLowerCase();
+  var hasAI=/\b(claude|anthropic|ai|artificial intelligence|llm|chatgpt|gpt|gemini)\b/.test(hl);
+  if(!hasAI) return null;
+  var matchedTickers=new Set(),matchedKws=[];
+  Object.keys(SECTOR_MAP).forEach(function(kw){
+    if(hl.indexOf(kw.toLowerCase())>=0){
+      matchedKws.push(kw);
+      SECTOR_MAP[kw].forEach(function(t){ matchedTickers.add(t); });
+    }
+  });
+  kws.forEach(function(kw){
+    if(hl.indexOf(kw.toLowerCase())>=0 && matchedKws.indexOf(kw)<0) matchedKws.push(kw);
+  });
+  if(!matchedTickers.size) return null;
+  var sev='LOW';
+  for(var i=0;i<HIGH_TRIGGERS.length;i++){
+    if(hl.indexOf(HIGH_TRIGGERS[i].toLowerCase())>=0){sev='HIGH';break;}
+  }
+  if(sev!=='HIGH'){
+    for(var j=0;j<MED_TRIGGERS.length;j++){
+      if(hl.indexOf(MED_TRIGGERS[j])>=0){sev='MEDIUM';break;}
+    }
+  }
+  if(sev==='LOW'&&matchedTickers.size) sev='MEDIUM';
+  var tickers=Array.from(matchedTickers).slice(0,5);
+  var sector=matchedKws[0]||'legacy systems';
+  var analysis='AI threat to '+sector+' — '+tickers.slice(0,3).join(', ')+' flagged';
+  return {isDisruptive:true,severity:sev,matchedKeywords:matchedKws.slice(0,4),affectedTickers:tickers,analysis:analysis};
+}
+
+// ── CLAUDE ANALYSIS (local engine — Anthropic API blocks browser CORS requests) ──
 async function analyze(headline){
-  var tl = WL.map(function(w){ return w.t+'('+w.s+')'; }).join(',');
-  var prompt = 'You are a financial analyst. Analyze this headline for AI disruption risk.\n\nHeadline: "'+headline+'"\n\nWatchlist: '+tl+'\n\nReply ONLY with valid JSON, no markdown:\n{"isDisruptive":true,"severity":"HIGH","matchedKeywords":["keyword"],"affectedTickers":["TICK"],"analysis":"max 18 words on threat"}\n\nHIGH=direct AI vs IBM/banks/payments. MEDIUM=cybersecurity/wealth/logistics/IT consulting. Only truly at-risk tickers.';
-  try{
-    var r = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:260,messages:[{role:'user',content:prompt}]})
-    });
-    var d = await r.json();
-    var txt = (d.content && d.content[0] && d.content[0].text) ? d.content[0].text : '{}';
-    txt = txt.replace(/```json|```/g,'').trim();
-    return JSON.parse(txt);
-  }catch(e){ return null; }
+  return new Promise(function(resolve){
+    setTimeout(function(){ resolve(analyzeLocal(headline)); },60);
+  });
 }
 
 // ── SCAN ──
