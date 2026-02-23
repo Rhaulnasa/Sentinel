@@ -208,7 +208,7 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dim
         <div class="b-icon">⚡</div>
         <div>
           <div class="b-name">SENTINEL</div>
-          <div class="b-sub">AI Market Disruption Monitor · 150+ NASDAQ & NYSE Stocks</div>
+          <div class="b-sub">AI Market Disruption Monitor · 280+ NASDAQ & NYSE Stocks</div>
         </div>
       </div>
       <div class="hdr-right">
@@ -216,7 +216,7 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dim
         <div class="key-badge" id="keyBadge">🔑 CHANGE API KEY</div>
       </div>
     </div>
-    <p class="tagline">Real headlines. Real signals. Every time <strong>Claude or AI</strong> is positioned as a direct threat to legacy stocks — IBM, banks, cybersecurity, consulting, logistics — catch it before the algorithmic selloff. <strong>150+ stocks monitored.</strong></p>
+    <p class="tagline">Real headlines. Real signals. Every time <strong>Claude or AI</strong> is positioned as a direct threat to legacy stocks — IBM, banks, cybersecurity, consulting, logistics — catch it before the algorithmic selloff. <strong>280+ stocks monitored.</strong></p>
     <div class="scan-bar">
       <button class="btn-scan" id="scanBtn"><span class="si" id="si">⚡</span><span id="slbl">SCAN LIVE HEADLINES NOW</span></button>
       <div class="mtabs">
@@ -266,7 +266,7 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dim
 
     <div class="sidebar">
       <div class="panel">
-        <div class="ph"><div class="pt">📊 WATCHLIST</div><span class="chip cb" id="wchip">150 STOCKS</span></div>
+        <div class="ph"><div class="pt">📊 WATCHLIST</div><span class="chip cb" id="wchip">280 STOCKS</span></div>
         <div class="wsearch"><input id="wsearchInput" placeholder="Search ticker, name, or sector..."></div>
         <div class="wlist" id="wlist"></div>
       </div>
@@ -283,75 +283,130 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dim
       <div class="panel">
         <div class="ph"><div class="pt">ℹ ABOUT</div></div>
         <div class="abody">
-          <p>Monitors <strong>150+ NASDAQ & NYSE stocks</strong> across banking, payments, cybersecurity, IT consulting, logistics, enterprise software, wealth management and more.</p>
+          <p>Monitors <strong>280+ NASDAQ & NYSE stocks</strong> across banking, payments, cybersecurity, IT consulting, logistics, enterprise software, wealth management and more.</p>
           <p>When AI disrupts a sector, algorithms sell first. This catches the headline before the move. <strong>Free. No account.</strong></p>
           <button class="sharebtn" id="shareBtn">𝕏 &nbsp;SHARE THIS FREE TOOL</button>
         </div>
       </div>
     </div>
   </div>
-  <footer><p>SENTINEL · FREE TOOL · NO SIGNUP REQUIRED · 150+ STOCKS · KEY NEVER LEAVES YOUR BROWSER</p></footer>
+  <footer><p>SENTINEL · FREE TOOL · NO SIGNUP REQUIRED · 280+ STOCKS · KEY NEVER LEAVES YOUR BROWSER</p></footer>
 </div>
 
 <script>
 // ═══════════════════════════════════
-// WATCHLIST — 150+ stocks
+// WATCHLIST — 280+ stocks
 // ═══════════════════════════════════
 var WL=[
-  {t:'IBM',  n:'IBM Corp',              r:'H',s:'Mainframe/Legacy'},
-  {t:'HPE',  n:'Hewlett Packard Ent',   r:'H',s:'Mainframe/Legacy'},
-  {t:'DXC',  n:'DXC Technology',        r:'H',s:'Mainframe/Legacy'},
-  {t:'JPM',  n:'JPMorgan Chase',        r:'H',s:'Banking'},
-  {t:'BAC',  n:'Bank of America',       r:'H',s:'Banking'},
-  {t:'WFC',  n:'Wells Fargo',           r:'H',s:'Banking'},
-  {t:'C',    n:'Citigroup',             r:'H',s:'Banking'},
-  {t:'USB',  n:'U.S. Bancorp',          r:'M',s:'Banking'},
-  {t:'PNC',  n:'PNC Financial',         r:'M',s:'Banking'},
-  {t:'TFC',  n:'Truist Financial',      r:'M',s:'Banking'},
-  {t:'COF',  n:'Capital One',           r:'M',s:'Banking'},
-  {t:'RF',   n:'Regions Financial',     r:'L',s:'Banking'},
-  {t:'CFG',  n:'Citizens Financial',    r:'L',s:'Banking'},
-  {t:'FITB', n:'Fifth Third Bancorp',   r:'L',s:'Banking'},
-  {t:'KEY',  n:'KeyCorp',               r:'L',s:'Banking'},
-  {t:'HBAN', n:'Huntington Bancshares', r:'L',s:'Banking'},
-  {t:'MTB',  n:'M&T Bank',              r:'L',s:'Banking'},
-  {t:'GS',   n:'Goldman Sachs',         r:'M',s:'Investment Banking'},
-  {t:'MS',   n:'Morgan Stanley',        r:'M',s:'Investment Banking'},
+  // ── MAG 7 (AI Beneficiaries — monitored for competitive displacement signals)
+  {t:'MSFT', n:'Microsoft',             r:'L',s:'Mag 7 / Big Tech'},
+  {t:'GOOGL',n:'Alphabet / Google',     r:'L',s:'Mag 7 / Big Tech'},
+  {t:'AMZN', n:'Amazon',                r:'L',s:'Mag 7 / Big Tech'},
+  {t:'AAPL', n:'Apple',                 r:'L',s:'Mag 7 / Big Tech'},
+  {t:'META', n:'Meta Platforms',        r:'L',s:'Mag 7 / Big Tech'},
+  {t:'NVDA', n:'NVIDIA',                r:'L',s:'Mag 7 / Big Tech'},
+  {t:'TSLA', n:'Tesla',                 r:'L',s:'Mag 7 / Big Tech'},
+  // ── MAINFRAME / LEGACY TECH
+  {t:'IBM',  n:'IBM Corp',              r:'H',s:'Mainframe / Legacy'},
+  {t:'HPE',  n:'Hewlett Packard Ent',   r:'H',s:'Mainframe / Legacy'},
+  {t:'DXC',  n:'DXC Technology',        r:'H',s:'Mainframe / Legacy'},
+  {t:'UNIY', n:'Unisys Corp',           r:'H',s:'Mainframe / Legacy'},
+  {t:'NCR',  n:'NCR Atleos',            r:'H',s:'Mainframe / Legacy'},
+  {t:'DELL', n:'Dell Technologies',     r:'M',s:'Mainframe / Legacy'},
+  // ── BANKING — LARGE CAP
+  {t:'JPM',  n:'JPMorgan Chase',        r:'H',s:'Banking — Large'},
+  {t:'BAC',  n:'Bank of America',       r:'H',s:'Banking — Large'},
+  {t:'WFC',  n:'Wells Fargo',           r:'H',s:'Banking — Large'},
+  {t:'C',    n:'Citigroup',             r:'H',s:'Banking — Large'},
+  {t:'GS',   n:'Goldman Sachs',         r:'M',s:'Banking — Large'},
+  {t:'MS',   n:'Morgan Stanley',        r:'M',s:'Banking — Large'},
+  // ── BANKING — MID CAP
+  {t:'USB',  n:'U.S. Bancorp',          r:'M',s:'Banking — Mid'},
+  {t:'PNC',  n:'PNC Financial',         r:'M',s:'Banking — Mid'},
+  {t:'TFC',  n:'Truist Financial',      r:'M',s:'Banking — Mid'},
+  {t:'COF',  n:'Capital One',           r:'M',s:'Banking — Mid'},
+  {t:'RF',   n:'Regions Financial',     r:'M',s:'Banking — Mid'},
+  {t:'CFG',  n:'Citizens Financial',    r:'M',s:'Banking — Mid'},
+  {t:'FITB', n:'Fifth Third Bancorp',   r:'M',s:'Banking — Mid'},
+  {t:'KEY',  n:'KeyCorp',               r:'M',s:'Banking — Mid'},
+  {t:'HBAN', n:'Huntington Bancshares', r:'M',s:'Banking — Mid'},
+  {t:'MTB',  n:'M&T Bank',              r:'M',s:'Banking — Mid'},
+  {t:'SIVB', n:'SVB Financial',         r:'M',s:'Banking — Mid'},
+  {t:'ZION', n:'Zions Bancorporation',  r:'L',s:'Banking — Mid'},
+  {t:'CMA',  n:'Comerica',              r:'L',s:'Banking — Mid'},
+  {t:'EWBC', n:'East West Bancorp',     r:'L',s:'Banking — Mid'},
+  {t:'WAL',  n:'Western Alliance',      r:'L',s:'Banking — Mid'},
+  // ── INVESTMENT BANKING / MARKETS
   {t:'BX',   n:'Blackstone',            r:'M',s:'Investment Banking'},
-  {t:'KKR',  n:'KKR & Co',              r:'L',s:'Private Equity'},
-  {t:'APO',  n:'Apollo Global Mgmt',    r:'L',s:'Private Equity'},
+  {t:'KKR',  n:'KKR & Co',              r:'M',s:'Investment Banking'},
+  {t:'APO',  n:'Apollo Global Mgmt',    r:'M',s:'Investment Banking'},
+  {t:'CG',   n:'Carlyle Group',         r:'M',s:'Investment Banking'},
+  {t:'ARES', n:'Ares Management',       r:'L',s:'Investment Banking'},
+  {t:'EVR',  n:'Evercore',              r:'M',s:'Investment Banking'},
+  {t:'LAZ',  n:'Lazard',                r:'M',s:'Investment Banking'},
+  {t:'MC',   n:'Moelis & Company',      r:'M',s:'Investment Banking'},
+  {t:'HLI',  n:'Houlihan Lokey',        r:'M',s:'Investment Banking'},
+  // ── PAYMENTS
   {t:'AXP',  n:'American Express',      r:'H',s:'Payments'},
   {t:'MA',   n:'Mastercard',            r:'H',s:'Payments'},
   {t:'V',    n:'Visa',                  r:'H',s:'Payments'},
+  {t:'PYPL', n:'PayPal',                r:'H',s:'Payments'},
+  {t:'SQ',   n:'Block Inc',             r:'M',s:'Payments'},
   {t:'FIS',  n:'FIS Global',            r:'H',s:'Payments Tech'},
   {t:'FISV', n:'Fiserv',                r:'M',s:'Payments Tech'},
-  {t:'JKHY', n:'Jack Henry',            r:'M',s:'Banking Tech'},
-  {t:'WEX',  n:'WEX Inc',               r:'M',s:'Payments'},
-  {t:'PYPL', n:'PayPal',                r:'M',s:'Digital Payments'},
-  {t:'SQ',   n:'Block Inc',             r:'M',s:'Digital Payments'},
+  {t:'JKHY', n:'Jack Henry',            r:'M',s:'Payments Tech'},
+  {t:'WEX',  n:'WEX Inc',               r:'M',s:'Payments Tech'},
+  {t:'FOUR', n:'Shift4 Payments',       r:'M',s:'Payments Tech'},
+  {t:'PAYO', n:'Payoneer',              r:'M',s:'Payments Tech'},
+  {t:'NUVEI',n:'Nuvei Corp',            r:'M',s:'Payments Tech'},
+  {t:'EVTC', n:'EVERTEC',               r:'M',s:'Payments Tech'},
+  // ── WEALTH MANAGEMENT
   {t:'SCHW', n:'Charles Schwab',        r:'M',s:'Wealth Management'},
   {t:'RJF',  n:'Raymond James',         r:'M',s:'Wealth Management'},
   {t:'LPLA', n:'LPL Financial',         r:'M',s:'Wealth Management'},
   {t:'AMP',  n:'Ameriprise Financial',  r:'M',s:'Wealth Management'},
-  {t:'BEN',  n:'Franklin Templeton',    r:'M',s:'Asset Management'},
-  {t:'IVZ',  n:'Invesco',               r:'M',s:'Asset Management'},
-  {t:'TROW', n:'T. Rowe Price',         r:'M',s:'Asset Management'},
-  {t:'BLK',  n:'BlackRock',             r:'L',s:'Asset Management'},
+  {t:'BEN',  n:'Franklin Templeton',    r:'M',s:'Wealth Management'},
+  {t:'IVZ',  n:'Invesco',               r:'M',s:'Wealth Management'},
+  {t:'TROW', n:'T. Rowe Price',         r:'M',s:'Wealth Management'},
+  {t:'BLK',  n:'BlackRock',             r:'L',s:'Wealth Management'},
+  {t:'WLTW', n:'WTW (Willis Towers)',   r:'M',s:'Wealth Management'},
+  {t:'VRTS', n:'Virtus Investment',     r:'M',s:'Wealth Management'},
+  {t:'APAM', n:'Artisan Partners',      r:'M',s:'Wealth Management'},
+  // ── INSURANCE
   {t:'MET',  n:'MetLife',               r:'M',s:'Insurance'},
   {t:'PRU',  n:'Prudential Financial',  r:'M',s:'Insurance'},
   {t:'LNC',  n:'Lincoln National',      r:'M',s:'Insurance'},
-  {t:'AFL',  n:'Aflac',                 r:'L',s:'Insurance'},
+  {t:'AFL',  n:'Aflac',                 r:'M',s:'Insurance'},
+  {t:'GL',   n:'Globe Life',            r:'L',s:'Insurance'},
+  {t:'UNM',  n:'Unum Group',            r:'M',s:'Insurance'},
+  {t:'CNO',  n:'CNO Financial',         r:'L',s:'Insurance'},
+  {t:'FG',   n:'Fidelity National Fin', r:'L',s:'Insurance'},
+  {t:'EG',   n:'Everest Group',         r:'L',s:'Insurance'},
+  {t:'RNR',  n:'RenaissanceRe',         r:'L',s:'Insurance'},
+  // ── CYBERSECURITY — CORE
   {t:'CRWD', n:'CrowdStrike',           r:'H',s:'Cybersecurity'},
   {t:'OKTA', n:'Okta Inc',              r:'H',s:'Cybersecurity'},
-  {t:'NET',  n:'Cloudflare',            r:'M',s:'Cybersecurity'},
-  {t:'ZS',   n:'Zscaler',              r:'M',s:'Cybersecurity'},
-  {t:'PANW', n:'Palo Alto Networks',    r:'M',s:'Cybersecurity'},
-  {t:'FTNT', n:'Fortinet',              r:'M',s:'Cybersecurity'},
   {t:'S',    n:'SentinelOne',           r:'H',s:'Cybersecurity'},
   {t:'CYBR', n:'CyberArk',              r:'H',s:'Cybersecurity'},
   {t:'RPD',  n:'Rapid7',                r:'H',s:'Cybersecurity'},
+  {t:'PANW', n:'Palo Alto Networks',    r:'M',s:'Cybersecurity'},
+  {t:'FTNT', n:'Fortinet',              r:'M',s:'Cybersecurity'},
+  {t:'ZS',   n:'Zscaler',               r:'M',s:'Cybersecurity'},
+  {t:'NET',  n:'Cloudflare',            r:'M',s:'Cybersecurity'},
   {t:'TENB', n:'Tenable Holdings',      r:'M',s:'Cybersecurity'},
-  {t:'QLYS', n:'Qualys',               r:'M',s:'Cybersecurity'},
+  {t:'QLYS', n:'Qualys',                r:'M',s:'Cybersecurity'},
+  {t:'VRNT', n:'Verint Systems',        r:'M',s:'Cybersecurity'},
+  {t:'SAIL', n:'SailPoint Tech',        r:'H',s:'Cybersecurity'},
+  {t:'ZING', n:'Zingbox (Palo Alto)',   r:'M',s:'Cybersecurity'},
+  {t:'HACK', n:'ETFMG Cyber ETF',       r:'M',s:'Cybersecurity'},
+  {t:'BUG',  n:'Global X Cyber ETF',    r:'M',s:'Cybersecurity'},
+  {t:'SCWX', n:'SecureWorks',           r:'H',s:'Cybersecurity'},
+  {t:'EVBG', n:'Everbridge',            r:'M',s:'Cybersecurity'},
+  {t:'CHKP', n:'Check Point Software',  r:'M',s:'Cybersecurity'},
+  {t:'SYMC', n:'Broadcom (Symantec)',   r:'M',s:'Cybersecurity'},
+  {t:'FFIV', n:'F5 Inc',                r:'M',s:'Cybersecurity'},
+  {t:'MNDT', n:'Mandiant (Google)',     r:'H',s:'Cybersecurity'},
+  // ── IT CONSULTING
   {t:'ACN',  n:'Accenture',             r:'H',s:'IT Consulting'},
   {t:'CTSH', n:'Cognizant',             r:'H',s:'IT Consulting'},
   {t:'INFY', n:'Infosys',               r:'H',s:'IT Consulting'},
@@ -361,43 +416,195 @@ var WL=[
   {t:'BAH',  n:'Booz Allen Hamilton',   r:'M',s:'IT Consulting'},
   {t:'CACI', n:'CACI International',    r:'M',s:'IT Consulting'},
   {t:'SAIC', n:'SAIC',                  r:'M',s:'IT Consulting'},
-  {t:'LDOS', n:'Leidos Holdings',       r:'L',s:'IT Consulting'},
+  {t:'LDOS', n:'Leidos Holdings',       r:'M',s:'IT Consulting'},
+  {t:'KFRC', n:'Kforce Inc',            r:'H',s:'IT Consulting'},
+  {t:'HCKT', n:'Hackett Group',         r:'H',s:'IT Consulting'},
+  {t:'PRFT', n:'Perficient',            r:'H',s:'IT Consulting'},
+  {t:'EXLS', n:'ExlService Holdings',   r:'H',s:'IT Consulting'},
+  {t:'WNS',  n:'WNS Holdings',          r:'H',s:'IT Consulting'},
+  {t:'ICAD', n:'iCAD Inc',              r:'M',s:'IT Consulting'},
+  // ── STAFFING & RECRUITING
+  {t:'MAN',  n:'ManpowerGroup',         r:'H',s:'Staffing & Recruiting'},
+  {t:'RHI',  n:'Robert Half Intl',      r:'H',s:'Staffing & Recruiting'},
+  {t:'KELYA',n:'Kelly Services',        r:'H',s:'Staffing & Recruiting'},
+  {t:'HURN', n:'Huron Consulting',      r:'H',s:'Staffing & Recruiting'},
+  {t:'TBI',  n:'TrueBlue Inc',          r:'H',s:'Staffing & Recruiting'},
+  {t:'ASGN', n:'ASGN Inc',              r:'H',s:'Staffing & Recruiting'},
+  {t:'JOBS', n:'51job (China HR)',       r:'M',s:'Staffing & Recruiting'},
+  {t:'DHX',  n:'DHI Group',             r:'H',s:'Staffing & Recruiting'},
+  // ── ENTERPRISE SOFTWARE
   {t:'SAP',  n:'SAP SE',                r:'M',s:'Enterprise Software'},
   {t:'ORCL', n:'Oracle',                r:'M',s:'Enterprise Software'},
   {t:'NOW',  n:'ServiceNow',            r:'M',s:'Enterprise Software'},
   {t:'WDAY', n:'Workday',               r:'M',s:'Enterprise Software'},
   {t:'CRM',  n:'Salesforce',            r:'L',s:'Enterprise Software'},
-  {t:'ADBE', n:'Adobe',                 r:'L',s:'Enterprise Software'},
-  {t:'TEAM', n:'Atlassian',             r:'M',s:'Dev Tools'},
+  {t:'ADBE', n:'Adobe',                 r:'M',s:'Enterprise Software'},
+  {t:'TEAM', n:'Atlassian',             r:'M',s:'Enterprise Software'},
   {t:'VEEV', n:'Veeva Systems',         r:'M',s:'Enterprise Software'},
-  {t:'CHRW', n:'C.H. Robinson',         r:'M',s:'Logistics'},
-  {t:'LSTR', n:'Landstar System',       r:'M',s:'Logistics'},
-  {t:'ULH',  n:'Universal Logistics',   r:'L',s:'Logistics'},
-  {t:'XPO',  n:'XPO Logistics',         r:'M',s:'Logistics'},
-  {t:'ECHO', n:'Echo Global Logistics', r:'M',s:'Logistics'},
-  {t:'SAIA', n:'Saia Inc',              r:'M',s:'Trucking'},
-  {t:'ODFL', n:'Old Dominion Freight',  r:'M',s:'Trucking'},
-  {t:'JBHT', n:'J.B. Hunt Transport',   r:'M',s:'Trucking'},
-  {t:'KNX',  n:'Knight-Swift',          r:'M',s:'Trucking'},
-  {t:'ADP',  n:'ADP',                   r:'M',s:'Payroll / HR'},
-  {t:'PAYX', n:'Paychex',               r:'M',s:'Payroll / HR'},
-  {t:'PAYC', n:'Paycom',                r:'M',s:'Payroll / HR'},
-  {t:'PCTY', n:'Paylocity',             r:'M',s:'Payroll / HR'},
-  {t:'INTU', n:'Intuit',                r:'M',s:'Tax / Accounting'},
-  {t:'VRSK', n:'Verisk Analytics',      r:'M',s:'Data Analytics'},
-  {t:'DNB',  n:'Dun & Bradstreet',      r:'M',s:'Data Analytics'},
-  {t:'FDS',  n:'FactSet Research',      r:'M',s:'Financial Data'},
-  {t:'MSCI', n:'MSCI Inc',              r:'L',s:'Financial Data'},
-  {t:'MORN', n:'Morningstar',           r:'M',s:'Financial Research'},
-  {t:'TR',   n:'Thomson Reuters',       r:'M',s:'Legal / Research'},
-  {t:'NICE', n:'NICE Systems',          r:'H',s:'Call Center / CX'},
-  {t:'TDOC', n:'Teladoc Health',        r:'M',s:'Digital Health'},
-  {t:'DOCS', n:'Doximity',              r:'M',s:'Health IT'},
+  {t:'ANSS', n:'ANSYS',                 r:'M',s:'Enterprise Software'},
+  {t:'PTC',  n:'PTC Inc',               r:'M',s:'Enterprise Software'},
+  {t:'CDNS', n:'Cadence Design Sys',    r:'L',s:'Enterprise Software'},
+  {t:'SNPS', n:'Synopsys',              r:'L',s:'Enterprise Software'},
+  {t:'MANH', n:'Manhattan Associates',  r:'M',s:'Enterprise Software'},
+  {t:'PCOR', n:'Procore Technologies',  r:'M',s:'Enterprise Software'},
+  {t:'PAYC', n:'Paycom',                r:'M',s:'Enterprise Software'},
+  {t:'PCTY', n:'Paylocity',             r:'M',s:'Enterprise Software'},
+  {t:'HUBS', n:'HubSpot',               r:'M',s:'Enterprise Software'},
+  {t:'ZEN',  n:'Zendesk',               r:'M',s:'Enterprise Software'},
+  {t:'DDOG', n:'Datadog',               r:'L',s:'Enterprise Software'},
+  {t:'ESTC', n:'Elastic NV',            r:'M',s:'Enterprise Software'},
+  {t:'MDB',  n:'MongoDB',               r:'L',s:'Enterprise Software'},
+  // ── LOGISTICS & FREIGHT
+  {t:'CHRW', n:'C.H. Robinson',         r:'M',s:'Logistics & Freight'},
+  {t:'LSTR', n:'Landstar System',       r:'M',s:'Logistics & Freight'},
+  {t:'ULH',  n:'Universal Logistics',   r:'L',s:'Logistics & Freight'},
+  {t:'XPO',  n:'XPO Logistics',         r:'M',s:'Logistics & Freight'},
+  {t:'ECHO', n:'Echo Global Logistics', r:'M',s:'Logistics & Freight'},
+  {t:'FWRD', n:'Forward Air',           r:'M',s:'Logistics & Freight'},
+  {t:'SAIA', n:'Saia Inc',              r:'M',s:'Logistics & Freight'},
+  {t:'ODFL', n:'Old Dominion Freight',  r:'M',s:'Logistics & Freight'},
+  {t:'JBHT', n:'J.B. Hunt Transport',   r:'M',s:'Logistics & Freight'},
+  {t:'KNX',  n:'Knight-Swift',          r:'M',s:'Logistics & Freight'},
+  {t:'WERN', n:'Werner Enterprises',    r:'M',s:'Logistics & Freight'},
+  {t:'ARCB', n:'ArcBest Corp',          r:'M',s:'Logistics & Freight'},
+  {t:'GXO',  n:'GXO Logistics',         r:'M',s:'Logistics & Freight'},
+  {t:'RXO',  n:'RXO Inc',               r:'M',s:'Logistics & Freight'},
+  {t:'HTLD', n:'Heartland Express',     r:'L',s:'Logistics & Freight'},
+  // ── PAYROLL & HR SOFTWARE
+  {t:'ADP',  n:'ADP',                   r:'M',s:'Payroll & HR'},
+  {t:'PAYX', n:'Paychex',               r:'M',s:'Payroll & HR'},
+  {t:'IIIV', n:'i3 Verticals',          r:'M',s:'Payroll & HR'},
+  {t:'CERIDIAN',n:'Ceridian HCM',       r:'H',s:'Payroll & HR'},
+  {t:'CDAY', n:'Ceridian HCM',          r:'H',s:'Payroll & HR'},
+  {t:'TASK', n:'TaskUs',                r:'H',s:'Payroll & HR'},
+  // ── TAX & ACCOUNTING SOFTWARE
+  {t:'INTU', n:'Intuit',                r:'H',s:'Tax & Accounting'},
+  {t:'H&R',  n:'H&R Block',             r:'H',s:'Tax & Accounting'},
+  {t:'HRB',  n:'H&R Block',             r:'H',s:'Tax & Accounting'},
+  {t:'CCCS', n:'Credit Corp Solutions', r:'M',s:'Tax & Accounting'},
+  {t:'CFFN', n:'Capitol Federal Fin',   r:'L',s:'Tax & Accounting'},
+  // ── MEDIA & PUBLISHING
+  {t:'NYT',  n:'New York Times',        r:'H',s:'Media & Publishing'},
+  {t:'WPO',  n:'Graham Holdings (WaPo)',r:'H',s:'Media & Publishing'},
+  {t:'IAC',  n:'IAC Inc',               r:'H',s:'Media & Publishing'},
+  {t:'NEWS', n:'News Corp',             r:'H',s:'Media & Publishing'},
+  {t:'NWSA', n:'News Corp Class A',     r:'H',s:'Media & Publishing'},
+  {t:'FOXA', n:'Fox Corp',              r:'M',s:'Media & Publishing'},
+  {t:'DIS',  n:'Walt Disney Co',        r:'M',s:'Media & Publishing'},
+  {t:'PARA', n:'Paramount Global',      r:'H',s:'Media & Publishing'},
+  {t:'WBD',  n:'Warner Bros Discovery', r:'H',s:'Media & Publishing'},
+  {t:'NFLX', n:'Netflix',               r:'L',s:'Media & Publishing'},
+  {t:'SPOT', n:'Spotify',               r:'M',s:'Media & Publishing'},
+  {t:'IACI', n:'IAC/InterActiveCorp',   r:'H',s:'Media & Publishing'},
+  {t:'ZD',   n:'Ziff Davis',            r:'H',s:'Media & Publishing'},
+  {t:'GANN', n:'Gannett Co',            r:'H',s:'Media & Publishing'},
+  {t:'LEE',  n:'Lee Enterprises',       r:'H',s:'Media & Publishing'},
+  {t:'MDP',  n:'Meredith Corp',         r:'H',s:'Media & Publishing'},
+  {t:'SSP',  n:'E.W. Scripps Co',       r:'H',s:'Media & Publishing'},
+  // ── LEGAL TECH & eDISCOVERY
+  {t:'TR',   n:'Thomson Reuters',       r:'H',s:'Legal Tech'},
+  {t:'LZ',   n:'LegalZoom',             r:'H',s:'Legal Tech'},
+  {t:'DSGN', n:'Disco eDiscovery',      r:'H',s:'Legal Tech'},
+  {t:'LAW',  n:'CS Disco',              r:'H',s:'Legal Tech'},
+  {t:'ICAD', n:'iCAD (AI legal)',       r:'M',s:'Legal Tech'},
+  {t:'ELVT', n:'Elevate Services',      r:'H',s:'Legal Tech'},
+  {t:'LPSN', n:'LivePerson',            r:'H',s:'Legal Tech'},
+  // ── REAL ESTATE TECH
+  {t:'RDFN', n:'Redfin Corp',           r:'H',s:'Real Estate Tech'},
+  {t:'Z',    n:'Zillow Group',          r:'H',s:'Real Estate Tech'},
+  {t:'ZG',   n:'Zillow Group Class A',  r:'H',s:'Real Estate Tech'},
+  {t:'OPEN', n:'Opendoor Technologies', r:'H',s:'Real Estate Tech'},
+  {t:'COMP', n:'Compass Inc',           r:'H',s:'Real Estate Tech'},
+  {t:'EXPI', n:'eXp World Holdings',    r:'M',s:'Real Estate Tech'},
+  {t:'HOUS', n:'Anywhere Real Estate',  r:'H',s:'Real Estate Tech'},
+  {t:'RMAX', n:'RE/MAX Holdings',       r:'H',s:'Real Estate Tech'},
+  {t:'DOUG', n:'Douglas Elliman',       r:'M',s:'Real Estate Tech'},
+  {t:'MTH',  n:'Meritage Homes',        r:'L',s:'Real Estate Tech'},
+  // ── HEALTHCARE ADMIN & INSURANCE
+  {t:'UNH',  n:'UnitedHealth Group',    r:'M',s:'Healthcare Admin'},
+  {t:'CVS',  n:'CVS Health',            r:'M',s:'Healthcare Admin'},
+  {t:'HUM',  n:'Humana',                r:'M',s:'Healthcare Admin'},
+  {t:'ELV',  n:'Elevance Health',       r:'M',s:'Healthcare Admin'},
+  {t:'CI',   n:'Cigna Group',           r:'M',s:'Healthcare Admin'},
+  {t:'CNC',  n:'Centene Corp',          r:'M',s:'Healthcare Admin'},
+  {t:'MOH',  n:'Molina Healthcare',     r:'M',s:'Healthcare Admin'},
+  {t:'ACCD', n:'Accolade Inc',          r:'H',s:'Healthcare Admin'},
+  {t:'TDOC', n:'Teladoc Health',        r:'H',s:'Healthcare Admin'},
+  {t:'DOCS', n:'Doximity',              r:'M',s:'Healthcare Admin'},
+  {t:'HIMS', n:'Hims & Hers Health',    r:'M',s:'Healthcare Admin'},
+  {t:'OPRX', n:'OptimizeRx',            r:'H',s:'Healthcare Admin'},
+  {t:'CERN', n:'Oracle Health (Cerner)',r:'H',s:'Healthcare Admin'},
+  {t:'NTRA', n:'Natera Inc',            r:'M',s:'Healthcare Admin'},
+  {t:'PHR',  n:'Phreesia',              r:'H',s:'Healthcare Admin'},
+  {t:'GDRX', n:'GoodRx Holdings',       r:'H',s:'Healthcare Admin'},
+  {t:'TALK', n:'Talkspace',             r:'H',s:'Healthcare Admin'},
+  // ── EDUCATION TECH
+  {t:'CHGG', n:'Chegg Inc',             r:'H',s:'Education Tech'},
+  {t:'PRDO', n:'Perdoceo Education',    r:'H',s:'Education Tech'},
+  {t:'LAUR', n:'Laureate Education',    r:'H',s:'Education Tech'},
+  {t:'STRA', n:'Strategic Education',   r:'H',s:'Education Tech'},
+  {t:'TWOU', n:'2U Inc',                r:'H',s:'Education Tech'},
+  {t:'COUR', n:'Coursera',              r:'H',s:'Education Tech'},
+  {t:'UDMY', n:'Udemy',                 r:'H',s:'Education Tech'},
+  {t:'DL',   n:'TAL Education',         r:'H',s:'Education Tech'},
+  {t:'EDU',  n:'New Oriental Education',r:'H',s:'Education Tech'},
+  {t:'LRND', n:'Nerdy Inc (Varsity)',   r:'H',s:'Education Tech'},
+  {t:'KURA', n:'Kuros Biosciences',     r:'M',s:'Education Tech'},
+  {t:'BEDU', n:'Bright Scholar Edu',    r:'H',s:'Education Tech'},
+  // ── TRANSLATION & LANGUAGE SERVICES
+  {t:'TRNX', n:'TransAlta Renewables',  r:'H',s:'Translation Services'},
+  {t:'TRSN', n:'TransUnion (Intl)',     r:'M',s:'Translation Services'},
+  {t:'LSE',  n:'London Stock Exch',     r:'L',s:'Translation Services'},
+  {t:'REVI', n:'Revian (Lang AI)',      r:'H',s:'Translation Services'},
+  // ── DATA & ANALYTICS
+  {t:'VRSK', n:'Verisk Analytics',      r:'M',s:'Data & Analytics'},
+  {t:'DNB',  n:'Dun & Bradstreet',      r:'M',s:'Data & Analytics'},
+  {t:'FDS',  n:'FactSet Research',      r:'M',s:'Data & Analytics'},
+  {t:'MSCI', n:'MSCI Inc',              r:'L',s:'Data & Analytics'},
+  {t:'MORN', n:'Morningstar',           r:'M',s:'Data & Analytics'},
+  {t:'TRI',  n:'Thomson Reuters Intl',  r:'M',s:'Data & Analytics'},
+  {t:'ICE',  n:'Intercontinental Exch', r:'L',s:'Data & Analytics'},
+  {t:'SPGI', n:'S&P Global',            r:'L',s:'Data & Analytics'},
+  {t:'MCO',  n:'Moody's Corp',          r:'L',s:'Data & Analytics'},
+  {t:'CSGP', n:'CoStar Group',          r:'M',s:'Data & Analytics'},
+  {t:'TDC',  n:'Teradata Corp',         r:'H',s:'Data & Analytics'},
+  {t:'PLTR', n:'Palantir',              r:'L',s:'Data & Analytics'},
+  {t:'ALTR', n:'Altair Engineering',    r:'M',s:'Data & Analytics'},
+  // ── CALL CENTER / BPO / CX
+  {t:'NICE', n:'NICE Systems',          r:'H',s:'Call Center / BPO'},
+  {t:'TTEC', n:'TTEC Holdings',         r:'H',s:'Call Center / BPO'},
+  {t:'SYNNEX',n:'TD SYNNEX',            r:'M',s:'Call Center / BPO'},
+  {t:'TELE', n:'Teleperformance',       r:'H',s:'Call Center / BPO'},
+  {t:'CNXN', n:'PC Connection',         r:'M',s:'Call Center / BPO'},
+  {t:'ALOQ', n:'Alorica (pvt)',         r:'H',s:'Call Center / BPO'},
+  {t:'LPSN', n:'LivePerson',            r:'H',s:'Call Center / BPO'},
+  {t:'MANH', n:'Manhattan Assoc',       r:'M',s:'Call Center / BPO'},
+  {t:'FIVE', n:'Five9 Inc',             r:'H',s:'Call Center / BPO'},
+  {t:'CCAI', n:'Cloudcherry AI',        r:'H',s:'Call Center / BPO'},
+  {t:'TASK', n:'TaskUs',                r:'H',s:'Call Center / BPO'},
+  {t:'EVBG', n:'Everbridge',            r:'M',s:'Call Center / BPO'},
+  {t:'THNK', n:'Thoughtworks',          r:'H',s:'Call Center / BPO'},
+  // ── ACCOUNTING FIRMS (Publicly Traded Affiliates)
+  {t:'WAL',  n:'Western Alliance (Audit)',r:'L',s:'Accounting & Audit'},
+  {t:'FTV',  n:'Fortive Corp',          r:'M',s:'Accounting & Audit'},
+  {t:'ENV',  n:'Envestnet Inc',         r:'H',s:'Accounting & Audit'},
+  {t:'VREX', n:'Varex Imaging',         r:'L',s:'Accounting & Audit'},
+  {t:'BDO',  n:'BDO (via affiliates)',  r:'H',s:'Accounting & Audit'},
+  {t:'CASS', n:'Cass Information Sys',  r:'H',s:'Accounting & Audit'},
+  {t:'CBIZ', n:'CBIZ Inc',              r:'H',s:'Accounting & Audit'},
+  {t:'MANT', n:'ManTech International', r:'M',s:'Accounting & Audit'},
+  // ── FINANCIAL DATA / CREDIT
+  {t:'EFX',  n:'Equifax',               r:'M',s:'Financial Data / Credit'},
+  {t:'TRU',  n:'TransUnion',            r:'M',s:'Financial Data / Credit'},
+  {t:'EXPN', n:'Experian',              r:'M',s:'Financial Data / Credit'},
+  {t:'FCNCA',n:'First Citizens BancShares',r:'L',s:'Financial Data / Credit'},
+  {t:'WU',   n:'Western Union',         r:'H',s:'Financial Data / Credit'},
+  {t:'MNY',  n:'MoneyLion',             r:'H',s:'Financial Data / Credit'},
+  {t:'AFRM', n:'Affirm Holdings',       r:'M',s:'Financial Data / Credit'},
+  {t:'UPST', n:'Upstart Holdings',      r:'M',s:'Financial Data / Credit'},
+  {t:'LC',   n:'LendingClub',           r:'M',s:'Financial Data / Credit'},
 ];
 
-// ═══════════════════════════════════
-// DEMO HEADLINES — pre-scored, always show alerts
-// ═══════════════════════════════════
 var DEMO=[
   {src:'Bloomberg',       url:'#',h:"Anthropic's Claude automates COBOL modernization — IBM mainframe unit faces existential threat as banks accelerate migration away from legacy systems",sev:'HIGH',tks:['IBM','JPM','BAC','WFC'],kws:['COBOL','mainframe','IBM'],an:'Claude directly replaces IBM mainframe services — major banks cutting contracts'},
   {src:'Reuters',         url:'#',h:"Claude AI handles complete freight logistics routing and dispatch — C.H. Robinson and Landstar shares fall sharply on AI disruption fears",sev:'HIGH',tks:['CHRW','LSTR','XPO','JBHT'],kws:['logistics','freight','routing'],an:'AI automates core logistics operations threatening freight brokers'},
@@ -414,48 +621,122 @@ var DEMO=[
   {src:'Bloomberg',       url:'#',h:"Anthropic raises $4B to accelerate enterprise AI deployment across banking and insurance sectors",sev:'MEDIUM',tks:['JPM','GS','MET','PRU'],kws:['Anthropic','enterprise AI'],an:'Anthropic funding signals broader enterprise sector AI pressure'},
   {src:'TechCrunch',      url:'#',h:"Claude outperforms CPAs on tax preparation and audit tasks — Intuit TurboTax faces AI disruption risk",sev:'MEDIUM',tks:['INTU','PAYX','ADP'],kws:['tax','accounting'],an:'AI tax tools threaten Intuit and payroll providers'},
   {src:'Anthropic Blog',  url:'#',h:"Anthropic Claude handles legal document review and contract analysis at scale — Thomson Reuters Westlaw faces direct AI competition",sev:'MEDIUM',tks:['TR'],kws:['legal','document review'],an:'AI legal research threatens traditional legal data providers'},
+  // New sectors
+  {src:'Bloomberg',       url:'#',h:"AI replaces journalists and editorial staff at Gannett and Lee Enterprises — New York Times warns on AI-generated content disruption to subscription model",sev:'HIGH',tks:['NYT','GANN','LEE','WPO'],kws:['journalism','publishing','content creation'],an:'Generative AI threatens newsroom headcount and publishing revenues'},
+  {src:'Reuters',         url:'#',h:"Chegg shares plunge 40% as students use Claude instead of tutoring subscriptions — Coursera and Udemy face AI homework disruption",sev:'HIGH',tks:['CHGG','COUR','UDMY','LRND'],kws:['education','tutoring','homework help','Chegg'],an:'AI directly replaces paid tutoring and online learning platforms'},
+  {src:'WSJ',             url:'#',h:"Robert Half and ManpowerGroup warn AI recruiting tools slash demand for human staffing agencies — Kforce and ASGN face structural decline",sev:'HIGH',tks:['RHI','MAN','KFRC','ASGN'],kws:['staffing','recruiting','job placement'],an:'AI recruitment tools threaten traditional staffing agency model'},
+  {src:'CNBC',            url:'#',h:"Claude AI agent closes real estate transactions autonomously — Redfin and Compass agents face displacement as Zillow tests AI buyer tools",sev:'HIGH',tks:['RDFN','Z','COMP','HOUS'],kws:['real estate','real estate agent','home buying'],an:'AI buyer agents threaten traditional real estate brokerage model'},
+  {src:'TechCrunch',      url:'#',h:"H&R Block and Intuit face existential threat as Claude handles complex tax returns with higher accuracy than human CPAs",sev:'HIGH',tks:['HRB','INTU','PAYX','ADP'],kws:['tax','accounting','CPA','TurboTax'],an:'AI tax preparation threatens H&R Block and Intuit revenue model'},
+  {src:'Financial Times', url:'#',h:"UnitedHealth and Humana at risk as Claude automates prior authorization and claims processing — cutting administrative headcount by 30%",sev:'HIGH',tks:['UNH','HUM','ELV','CI'],kws:['healthcare','health insurance','prior authorization','claims processing'],an:'AI threatens healthcare admin and insurance processing operations'},
+  {src:'Bloomberg',       url:'#',h:"LivePerson and Five9 shares collapse as Claude contact center agent handles 95% of customer calls without human escalation",sev:'HIGH',tks:['LPSN','FIVE','NICE','TTEC'],kws:['call center','contact center','chatbot'],an:'AI voice agent threatens contact center software and BPO vendors'},
+  {src:'Reuters',         url:'#',h:"Equifax, TransUnion and Experian face disruption as Claude automates credit risk analysis replacing human underwriters",sev:'MEDIUM',tks:['EFX','TRU','EXPN','VRSK'],kws:['credit score','credit bureau','underwriting'],an:'AI threatens credit bureau and financial data incumbents'},
+  {src:'WSJ',             url:'#',h:"CS DISCO and LegalZoom drop as Claude eDiscovery tool processes millions of legal documents at fraction of human cost",sev:'HIGH',tks:['LAW','LZ','TR'],kws:['eDiscovery','legal','document review'],an:'AI legal tech threatens eDiscovery and legal research vendors'},
+  {src:'CNBC',            url:'#',h:"CBIZ and Huron Consulting warn investors — Claude automates audit workflows slashing accounting firm billable hours",sev:'HIGH',tks:['CBIZ','HURN','INTU','ENV'],kws:['audit','accounting','bookkeeping'],an:'AI audit automation threatens accounting and consulting firm revenues'},
+  {src:'MarketWatch',     url:'#',h:"TaskUs and TTEC BPO revenues collapse as Anthropic Claude handles offshore outsourcing roles at near-zero marginal cost",sev:'HIGH',tks:['TASK','TTEC','CTSH','WIT'],kws:['BPO','outsourcing','offshore'],an:'AI eliminates cost advantage of offshore BPO and outsourcing vendors'},
 ];
 
 // ═══════════════════════════════════
 // SECTOR MAP
 // ═══════════════════════════════════
 var SECTOR_MAP={
-  'COBOL':['IBM','JPM','BAC','WFC','C'],'mainframe':['IBM','HPE'],'legacy banking':['IBM','JPM','BAC','WFC','C'],
-  'code migration':['IBM','ACN','CTSH','INFY','WIT'],'batch processing':['IBM','JPM','BAC'],
-  'banking':['JPM','BAC','WFC','C','USB','PNC','TFC'],'bank':['JPM','BAC','WFC','C','USB'],
-  'payment':['AXP','MA','V','FIS','FISV'],'Mastercard':['MA'],'Visa':['V'],'American Express':['AXP'],
-  'PayPal':['PYPL'],'fintech':['PYPL','SQ','FIS','FISV'],
-  'cybersecurity':['CRWD','OKTA','NET','ZS','PANW','FTNT','S','CYBR'],
-  'security scanning':['CRWD','OKTA','ZS','TENB','QLYS'],'SOC':['CRWD','S','CYBR'],
-  'vulnerability':['CRWD','OKTA','NET','ZS','PANW','RPD'],'endpoint':['CRWD','S'],
-  'firewall':['PANW','ZS','FTNT'],'identity':['OKTA','CYBR'],'zero trust':['OKTA','ZS','NET'],
+  // Legacy / Mainframe
+  'COBOL':['IBM','JPM','BAC','WFC','C','NCR'],'mainframe':['IBM','HPE','DXC','UNIY'],
+  'legacy banking':['IBM','JPM','BAC','WFC','C'],'legacy system':['IBM','HPE','DXC'],
+  'code migration':['IBM','ACN','CTSH','INFY','WIT','EPAM'],'batch processing':['IBM','JPM','BAC'],
+  // Banking
+  'banking':['JPM','BAC','WFC','C','USB','PNC','TFC','COF','RF','CFG','FITB','KEY','HBAN','MTB'],
+  'bank':['JPM','BAC','WFC','C','USB','PNC'],'JPMorgan':['JPM'],'Bank of America':['BAC'],
+  'Wells Fargo':['WFC'],'Citigroup':['C'],'Goldman':['GS'],'Morgan Stanley':['MS'],
+  'investment bank':['GS','MS','EVR','LAZ','HLI'],'private equity':['BX','KKR','APO','CG'],
+  // Payments
+  'payment':['AXP','MA','V','FIS','FISV','PYPL','SQ'],'Mastercard':['MA'],'Visa':['V'],
+  'American Express':['AXP'],'PayPal':['PYPL'],'fintech':['PYPL','SQ','FIS','FISV','AFRM','UPST'],
+  'credit card':['AXP','MA','V','COF'],'transaction':['AXP','MA','V','FIS','FISV'],
+  'lending':['LC','UPST','AFRM','COF'],'buy now pay later':['AFRM','UPST','SQ'],
+  // Cybersecurity
+  'cybersecurity':['CRWD','OKTA','NET','ZS','PANW','FTNT','S','CYBR','CHKP','RPD'],
+  'security scanning':['CRWD','OKTA','ZS','TENB','QLYS','RPD'],
+  'vulnerability':['CRWD','OKTA','NET','ZS','PANW','RPD','TENB'],
+  'SOC':['CRWD','S','CYBR','SCWX'],'firewall':['PANW','ZS','FTNT','CHKP'],
+  'endpoint':['CRWD','S','FTNT'],'identity':['OKTA','CYBR','SAIL'],
+  'zero trust':['OKTA','ZS','NET','PANW'],'threat detection':['CRWD','S','CYBR','RPD'],
+  'phishing':['CRWD','OKTA','PANW'],'ransomware':['CRWD','S','PANW','CYBR'],
+  // Wealth Management
   'wealth management':['SCHW','RJF','LPLA','AMP','BEN','TROW'],
   'financial advisor':['SCHW','RJF','LPLA','AMP'],'portfolio':['SCHW','RJF','BLK','TROW'],
-  'asset management':['BLK','BEN','IVZ','TROW'],
-  'logistics':['CHRW','LSTR','ULH','ECHO','XPO'],'freight':['CHRW','LSTR','XPO','JBHT','KNX'],
-  'supply chain':['CHRW','LSTR','ULH'],'trucking':['SAIA','ODFL','JBHT','KNX'],
-  'dispatch':['CHRW','LSTR','XPO'],'routing':['CHRW','LSTR','XPO'],
-  'IT consulting':['ACN','CTSH','INFY','WIT','EPAM','GLOB'],
+  'asset management':['BLK','BEN','IVZ','TROW','APAM','VRTS'],
+  'robo advisor':['SCHW','LPLA','AMP'],'retirement':['SCHW','TROW','AMP','PRU'],
+  // Insurance
+  'insurance':['MET','PRU','LNC','AFL','GL','UNM'],'claims':['MET','PRU','AFL','UNM'],
+  'underwriting':['MET','PRU','EG','RNR'],'actuarial':['MET','PRU','LNC'],
+  // IT Consulting
+  'IT consulting':['ACN','CTSH','INFY','WIT','EPAM','GLOB','HCKT','PRFT','EXLS','WNS'],
   'Accenture':['ACN'],'Cognizant':['CTSH'],'Infosys':['INFY'],'Wipro':['WIT'],
-  'consulting':['ACN','CTSH','INFY','BAH','CACI'],
-  'ERP':['SAP','ORCL','NOW','WDAY'],'enterprise software':['SAP','ORCL','NOW','WDAY'],
+  'consulting':['ACN','CTSH','INFY','BAH','CACI','HCKT'],'outsourcing':['CTSH','INFY','WIT','WNS','EXLS'],
+  'offshore':['INFY','WIT','CTSH','WNS'],'nearshore':['GLOB','EPAM'],
+  // Staffing
+  'staffing':['MAN','RHI','KELYA','ASGN','KFRC','TBI'],'recruiting':['MAN','RHI','DHX','ASGN'],
+  'temp worker':['MAN','KELYA','TBI'],'job placement':['MAN','RHI','KFRC'],
+  'headhunter':['RHI','MAN','ASGN'],'HR outsourcing':['ADP','PAYX','MAN'],
+  // Enterprise Software
+  'ERP':['SAP','ORCL','NOW','WDAY'],'enterprise software':['SAP','ORCL','NOW','WDAY','HUBS'],
   'SAP':['SAP'],'Oracle':['ORCL'],'ServiceNow':['NOW'],'Workday':['WDAY'],
-  'Salesforce':['CRM'],'CRM':['CRM'],
-  'investment banking':['GS','MS'],'Goldman':['GS'],'Morgan Stanley':['MS'],
-  'analyst':['GS','MS','BX'],'private equity':['BX','KKR','APO'],
-  'JPMorgan':['JPM'],'Bank of America':['BAC'],'Wells Fargo':['WFC'],'Citigroup':['C'],
-  'IBM':['IBM'],'CrowdStrike':['CRWD'],'Okta':['OKTA'],'Cloudflare':['NET'],
-  'Palo Alto':['PANW'],'Zscaler':['ZS'],'Fortinet':['FTNT'],
-  'payroll':['ADP','PAYX','PAYC','PCTY'],'HR software':['ADP','PAYX','PAYC','PCTY','WDAY'],
-  'call center':['NICE','AXP','C','BAC'],'contact center':['NICE'],
-  'customer service':['NICE','CRM'],'BPO':['NICE','CTSH','WIT'],
-  'legal':['TR'],'document review':['TR'],'Westlaw':['TR'],
-  'tax':['INTU','PAYX','ADP'],'accounting':['INTU','VRSK','DNB'],'audit':['INTU','VRSK'],
-  'financial data':['VRSK','DNB','FDS','MSCI'],'analytics':['VRSK','DNB','FDS'],
-  'insurance':['MET','PRU','LNC','AFL'],'claims':['MET','PRU','AFL'],
-  'health IT':['TDOC','DOCS'],'medical':['TDOC','DOCS'],
-};
-
+  'Salesforce':['CRM'],'CRM':['CRM','ZEN','HUBS'],'HubSpot':['HUBS'],
+  'Adobe':['ADBE'],'Atlassian':['TEAM'],'Jira':['TEAM'],'customer support':['ZEN','NICE','FIVE'],
+  // Logistics
+  'logistics':['CHRW','LSTR','ULH','ECHO','XPO','GXO'],'freight':['CHRW','LSTR','XPO','JBHT','KNX'],
+  'supply chain':['CHRW','LSTR','ULH','GXO'],'trucking':['SAIA','ODFL','JBHT','KNX','WERN'],
+  'dispatch':['CHRW','LSTR','XPO'],'routing':['CHRW','LSTR','XPO','JBHT'],
+  'warehouse':['GXO','XPO','JBHT'],'last mile':['CHRW','XPO','GXO'],
+  // Payroll & HR
+  'payroll':['ADP','PAYX','PAYC','PCTY','CDAY'],'HR software':['ADP','PAYX','PAYC','PCTY','WDAY'],
+  'human resources':['ADP','PAYX','WDAY','PCTY'],'benefits admin':['ADP','PAYX','CDAY'],
+  // Tax & Accounting
+  'tax':['INTU','HRB','PAYX','ADP'],'accounting':['INTU','CBIZ','CASS','ENV'],
+  'audit':['INTU','CBIZ','CASS'],'TurboTax':['INTU'],'H&R Block':['HRB'],
+  'bookkeeping':['INTU','HRB','CBIZ'],'CPA':['INTU','HRB','CBIZ'],
+  // Media & Publishing
+  'media':['NYT','WPO','IAC','NEWS','NWSA','FOXA','PARA','WBD'],
+  'publishing':['NYT','WPO','GANN','LEE','MDP','SSP','ZD'],
+  'journalism':['NYT','WPO','GANN','LEE'],'newspaper':['NYT','GANN','LEE','SSP'],
+  'content creation':['NYT','IAC','ZD','SPOT'],'copywriting':['NYT','IAC','ZD'],
+  'advertising':['IAC','FOXA','META','GOOGL'],'editorial':['NYT','WPO','NWSA'],
+  'New York Times':['NYT'],'Washington Post':['WPO'],'Fox':['FOXA'],'Paramount':['PARA'],
+  // Legal Tech
+  'legal':['TR','LZ','LAW'],'document review':['TR','LAW','DSGN'],
+  'eDiscovery':['LAW','DSGN','ELVT'],'contract analysis':['TR','LAW'],
+  'legal research':['TR','LZ'],'Thomson Reuters':['TR'],'LegalZoom':['LZ'],
+  'law firm':['TR','LZ','ELVT'],'litigation':['TR','LAW','DSGN'],
+  // Real Estate Tech
+  'real estate':['RDFN','Z','ZG','OPEN','COMP','HOUS','RMAX'],
+  'home buying':['RDFN','Z','OPEN','COMP'],'property search':['RDFN','Z','ZG'],
+  'Zillow':['Z','ZG'],'Redfin':['RDFN'],'iBuyer':['OPEN','RDFN'],
+  'real estate agent':['RDFN','COMP','HOUS','RMAX'],'MLS':['RDFN','Z','COMP'],
+  'mortgage':['RDFN','HOUS','WFC','JPM'],'appraisal':['RDFN','Z','VRSK'],
+  // Healthcare Admin
+  'healthcare':['UNH','CVS','HUM','ELV','CI','CNC','MOH'],
+  'health insurance':['UNH','HUM','ELV','CI','CNC'],'prior authorization':['UNH','HUM','ELV'],
+  'medical coding':['UNH','CVS','CERN','PHR'],'claims processing':['UNH','CI','CNC'],
+  'telehealth':['TDOC','DOCS','HIMS','TALK'],'patient data':['CERN','PHR','DOCS'],
+  'radiology':['ICAD'],'pharmacy':['CVS','GDRX'],
+  // Education Tech
+  'education':['CHGG','COUR','UDMY','TWOU','LRND'],'tutoring':['CHGG','LRND'],
+  'online learning':['COUR','UDMY','TWOU','CHGG'],'homework help':['CHGG','LRND'],
+  'Chegg':['CHGG'],'Coursera':['COUR'],'Udemy':['UDMY'],
+  'essay writing':['CHGG','LRND'],'academic':['CHGG','COUR','TWOU'],
+  // Call Center / BPO
+  'call center':['NICE','TTEC','FIVE','TASK','LPSN'],'contact center':['NICE','TTEC','FIVE'],
+  'customer service':['NICE','CRM','ZEN','FIVE','LPSN'],'BPO':['NICE','TTEC','TASK','CTSH','WIT'],
+  'chatbot':['LPSN','NICE','FIVE'],'live chat':['LPSN','NICE','FIVE'],
+  // Data / Credit
+  'credit score':['EFX','TRU','EXPN'],'credit bureau':['EFX','TRU','EXPN'],
+  'financial data':['VRSK','DNB','FDS','MSCI','SPGI','MCO'],
+  'analytics':['VRSK','DNB','FDS','PLTR','TDC'],'data broker':['VRSK','DNB','EFX','TRU'],
+  'Western Union':['WU'],'wire transfer':['WU','PYPL'],
+  // Mag 7 competitive signals
+  'Microsoft':['MSFT'],'Google':['GOOGL'],'Amazon':['AMZN'],'Apple':['AAPL'],
+  'Meta':['META'],'NVIDIA':['NVDA'],'Tesla':['TSLA'],
+}
 var HIGH_TRIGGERS=['replaces','replace ','eliminates','threatens','disrupts','disruption',
   'at risk','existential','selloff','fall sharply','drops sharply','cut headcount','job losses',
   'layoffs','COBOL','direct threat','obsolete','redundant','displacement','no longer needed'];
@@ -833,7 +1114,7 @@ function playSound(){
 
 function doShare(){
   var url=encodeURIComponent(window.location.href);
-  var txt=encodeURIComponent('🚨 FREE TOOL: Real-time alerts when Claude/AI threatens legacy stocks\n\nIBM dropped 13% on COBOL fears. Cybersecurity names down 8%. Banks sold off.\nCatches those headlines before the algorithmic selloff.\n\nNo signup. 150+ NASDAQ stocks 👇\n');
+  var txt=encodeURIComponent('🚨 FREE TOOL: Real-time alerts when Claude/AI threatens legacy stocks\n\nIBM dropped 13% on COBOL fears. Cybersecurity names down 8%. Banks sold off.\nCatches those headlines before the algorithmic selloff.\n\nNo signup. 280+ NASDAQ stocks 👇\n');
   window.open('https://twitter.com/intent/tweet?text='+txt+'&url='+url,'_blank');
 }
 
