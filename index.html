@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SENTINEL — AI Market Disruption Monitor</title>
-<meta name="description" content="Real-time alerts when Claude or AI threatens legacy business models. Free tool for traders.">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
 :root{--bg:#03030a;--surface:#080812;--border:#131328;--border2:#1e1e3a;--red:#ff2d2d;--orange:#ff7a00;--green:#00e87a;--blue:#38b2ff;--text:#dde1f0;--dim:#4a4a6a;--dimmer:#252540;}
@@ -12,9 +11,7 @@
 body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
 body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 10%,rgba(255,45,45,0.06) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 80%,rgba(56,178,255,0.04) 0%,transparent 60%);pointer-events:none;z-index:0;}
 body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,178,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(56,178,255,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
-.wrap{position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:0 20px;}
-
-/* SETUP */
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 20px;}
 .setup-screen{position:fixed;inset:0;background:rgba(3,3,10,0.97);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
 .setup-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:38px;max-width:540px;width:100%;position:relative;overflow:hidden;}
 .setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--orange),var(--blue));}
@@ -29,41 +26,38 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .step-n{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;background:rgba(56,178,255,0.15);color:var(--blue);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
 .setup-step strong{color:var(--text);}
 .key-row{display:flex;gap:10px;margin-bottom:12px;}
-.key-field{flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:7px;padding:12px 14px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.72rem;outline:none;transition:border-color 0.2s;letter-spacing:1px;}
+.key-field{flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:7px;padding:12px 14px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.72rem;outline:none;transition:border-color 0.2s;}
 .key-field:focus{border-color:var(--blue);}
-.key-field::placeholder{color:var(--dimmer);letter-spacing:0;font-size:0.68rem;}
+.key-field::placeholder{color:var(--dimmer);font-size:0.68rem;}
 .btn-go{background:linear-gradient(135deg,rgba(255,45,45,0.25),rgba(255,122,0,0.18));border:1px solid rgba(255,45,45,0.5);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;font-weight:700;letter-spacing:2px;padding:12px 18px;border-radius:7px;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
-.btn-go:hover{background:linear-gradient(135deg,rgba(255,45,45,0.38),rgba(255,122,0,0.28));box-shadow:0 0 18px rgba(255,45,45,0.25);}
+.btn-go:hover{background:linear-gradient(135deg,rgba(255,45,45,0.38),rgba(255,122,0,0.28));}
 .err-msg{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--red);display:none;margin-bottom:10px;padding:8px 10px;background:rgba(255,45,45,0.08);border-radius:5px;border:1px solid rgba(255,45,45,0.2);}
 .privacy{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;color:var(--dimmer);letter-spacing:1px;}
-.skip-link{background:none;border:none;color:var(--dimmer);font-family:'IBM Plex Mono',monospace;font-size:0.57rem;letter-spacing:1px;cursor:pointer;text-decoration:underline;margin-top:12px;display:block;}
-
-/* MAIN UI */
-.hero{padding:38px 0 26px;border-bottom:1px solid var(--border2);}
+.skip-link{background:none;border:none;color:var(--blue);font-family:'IBM Plex Mono',monospace;font-size:0.62rem;letter-spacing:1px;cursor:pointer;text-decoration:underline;margin-top:14px;display:block;}
+.hero{padding:28px 0 20px;border-bottom:1px solid var(--border2);}
 .hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;}
 .brand{display:flex;align-items:center;gap:14px;}
-.b-icon{width:46px;height:46px;background:linear-gradient(135deg,rgba(255,45,45,0.2),rgba(255,122,0,0.15));border:1px solid rgba(255,45,45,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:0 0 28px rgba(255,45,45,0.14);}
+.b-icon{width:46px;height:46px;background:linear-gradient(135deg,rgba(255,45,45,0.2),rgba(255,122,0,0.15));border:1px solid rgba(255,45,45,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
 .b-name{font-size:1.6rem;font-weight:800;letter-spacing:6px;background:linear-gradient(135deg,#ff2d2d,#ff7a00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
 .b-sub{font-family:'IBM Plex Mono',monospace;font-size:0.55rem;letter-spacing:3px;color:var(--dim);margin-top:4px;text-transform:uppercase;}
 .hdr-right{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
 .live-pill{display:flex;align-items:center;gap:7px;background:rgba(0,232,122,0.06);border:1px solid rgba(0,232,122,0.2);border-radius:6px;padding:7px 11px;}
-.ldot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:lp 2s infinite;}
-@keyframes lp{0%,100%{opacity:1;box-shadow:0 0 8px var(--green)}50%{opacity:0.5;box-shadow:0 0 3px var(--green)}}
+.ldot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:lp 2s infinite;}
+@keyframes lp{0%,100%{opacity:1}50%{opacity:0.4}}
 .ltxt{font-family:'IBM Plex Mono',monospace;font-size:0.61rem;color:var(--green);letter-spacing:2px;}
 .key-badge{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;padding:7px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border2);color:var(--dim);background:var(--surface);transition:all 0.2s;}
-.key-badge:hover{border-color:var(--dim);}
 .key-badge.ok{color:var(--green);border-color:rgba(0,232,122,0.3);background:rgba(0,232,122,0.05);}
-.tagline{margin-top:16px;font-size:0.92rem;color:var(--dim);max-width:580px;line-height:1.7;}
-.tagline strong{color:var(--text);font-weight:600;}
-.scan-bar{display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap;}
-.btn-scan{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,45,45,0.18),rgba(255,122,0,0.12));border:1px solid rgba(255,45,45,0.4);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;font-weight:700;letter-spacing:2px;padding:11px 20px;border-radius:6px;cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
-.btn-scan:hover{background:linear-gradient(135deg,rgba(255,45,45,0.28),rgba(255,122,0,0.22));box-shadow:0 0 18px rgba(255,45,45,0.2);transform:translateY(-1px);}
+.tagline{margin-top:14px;font-size:0.88rem;color:var(--dim);max-width:760px;line-height:1.7;}
+.tagline strong{color:var(--text);}
+.scan-bar{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.btn-scan{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,45,45,0.18),rgba(255,122,0,0.12));border:1px solid rgba(255,45,45,0.4);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;font-weight:700;letter-spacing:2px;padding:11px 22px;border-radius:6px;cursor:pointer;transition:all 0.2s;}
+.btn-scan:hover{background:linear-gradient(135deg,rgba(255,45,45,0.28),rgba(255,122,0,0.22));transform:translateY(-1px);}
 .btn-scan:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
 .si{font-size:1rem;}
 .spin{animation:spin 0.9s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.mtabs{display:flex;gap:5px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:4px;}
-.mtab{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;letter-spacing:1px;padding:5px 10px;border-radius:4px;cursor:pointer;color:var(--dim);transition:all 0.15s;border:none;background:none;}
+.mtabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:4px;}
+.mtab{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;letter-spacing:1px;padding:5px 11px;border-radius:4px;cursor:pointer;color:var(--dim);border:none;background:none;}
 .mtab.on{background:rgba(255,45,45,0.15);color:var(--red);}
 .awrap{display:flex;align-items:center;gap:7px;}
 .atog{width:32px;height:17px;background:var(--dimmer);border-radius:9px;position:relative;cursor:pointer;transition:background 0.2s;}
@@ -72,9 +66,7 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .atog.on::after{transform:translateX(15px);background:var(--blue);}
 .albl{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;color:var(--dim);letter-spacing:1px;cursor:pointer;}
 .ctxt{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;color:var(--dimmer);}
-
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;padding:18px 0;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;padding:16px 0;}
 .st{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:14px 16px;position:relative;overflow:hidden;}
 .st::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
 .st.r::before{background:linear-gradient(90deg,var(--red),transparent);}
@@ -82,14 +74,9 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .st.b::before{background:linear-gradient(90deg,var(--blue),transparent);}
 .st.g::before{background:linear-gradient(90deg,var(--green),transparent);}
 .stn{font-family:'IBM Plex Mono',monospace;font-size:1.8rem;font-weight:700;line-height:1;}
-.st.r .stn{color:var(--red);}
-.st.o .stn{color:var(--orange);}
-.st.b .stn{color:var(--blue);}
-.st.g .stn{color:var(--green);}
+.st.r .stn{color:var(--red);}.st.o .stn{color:var(--orange);}.st.b .stn{color:var(--blue);}.st.g .stn{color:var(--green);}
 .stl{font-family:'IBM Plex Mono',monospace;font-size:0.54rem;color:var(--dim);letter-spacing:2px;margin-top:5px;}
-
-/* LAYOUT */
-.layout{display:grid;grid-template-columns:1fr 306px;gap:14px;padding-bottom:38px;}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:14px;padding-bottom:38px;}
 .panel{background:var(--surface);border:1px solid var(--border2);border-radius:10px;overflow:hidden;}
 .ph{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .pt{font-family:'IBM Plex Mono',monospace;font-size:0.61rem;letter-spacing:3px;text-transform:uppercase;}
@@ -97,18 +84,19 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .cr{background:rgba(255,45,45,0.15);color:var(--red);border:1px solid rgba(255,45,45,0.25);}
 .cb{background:rgba(56,178,255,0.12);color:var(--blue);border:1px solid rgba(56,178,255,0.25);}
 .cd{background:rgba(255,255,255,0.05);color:var(--dim);border:1px solid var(--border2);cursor:pointer;}
-
-/* ALERTS */
-.alist{max-height:580px;overflow-y:auto;}
+.feed-tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.2);}
+.ftab{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;letter-spacing:2px;padding:10px 16px;cursor:pointer;color:var(--dim);border:none;background:none;border-bottom:2px solid transparent;}
+.ftab.on{color:var(--red);border-bottom-color:var(--red);}
+.alist{max-height:620px;overflow-y:auto;}
 .alist::-webkit-scrollbar{width:3px;}
 .alist::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.ac{padding:14px 16px;border-bottom:1px solid var(--border);transition:background 0.15s;}
+.ac{padding:14px 16px;border-bottom:1px solid var(--border);}
 .ac:hover{background:rgba(255,255,255,0.014);}
 .ac.sh{border-left:3px solid var(--red);background:rgba(255,45,45,0.04);}
 .ac.sm{border-left:3px solid var(--orange);background:rgba(255,122,0,0.03);}
 .ac.sl{border-left:3px solid var(--blue);}
-.ac.nw{animation:nf 2.5s ease-out;}
-@keyframes nf{0%{background:rgba(255,45,45,0.22);}100%{background:rgba(255,45,45,0.04);}}
+.ac.nw{animation:nf 3s ease-out;}
+@keyframes nf{0%{background:rgba(255,45,45,0.25);}100%{background:rgba(255,45,45,0.04);}}
 .atop{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap;}
 .sb{font-family:'IBM Plex Mono',monospace;font-size:0.52rem;padding:2px 6px;border-radius:3px;letter-spacing:1px;font-weight:700;}
 .sH{background:rgba(255,45,45,0.2);color:var(--red);border:1px solid rgba(255,45,45,0.3);}
@@ -118,13 +106,21 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .slv{background:rgba(0,232,122,0.08);color:var(--green);border:1px solid rgba(0,232,122,0.2);}
 .sdm{background:rgba(56,178,255,0.08);color:var(--blue);border:1px solid rgba(56,178,255,0.2);}
 .atm{font-family:'IBM Plex Mono',monospace;font-size:0.53rem;color:var(--dimmer);margin-left:auto;}
-.aht{font-size:0.86rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:8px;}
-.aht mark{background:rgba(255,45,45,0.18);color:#ff7070;padding:0 2px;border-radius:2px;}
-.aan{font-size:0.71rem;color:var(--dim);line-height:1.6;margin-bottom:8px;padding:8px 11px;background:rgba(255,255,255,0.02);border-radius:6px;border-left:2px solid var(--border2);}
-.trow{display:flex;flex-wrap:wrap;gap:5px;}
+.aht{font-size:0.85rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:8px;}
+.aht mark,.art-h mark{background:rgba(255,45,45,0.2);color:#ff7a7a;padding:0 3px;border-radius:2px;}
+.aan{font-size:0.71rem;color:var(--dim);line-height:1.6;margin-bottom:8px;padding:8px 11px;background:rgba(255,255,255,0.02);border-radius:6px;border-left:2px solid rgba(255,45,45,0.3);}
+.trow{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
 .tk{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;padding:3px 7px;border-radius:4px;background:rgba(255,45,45,0.1);color:#ff6060;border:1px solid rgba(255,45,45,0.2);letter-spacing:1px;}
-.alink{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--blue);text-decoration:none;margin-top:7px;display:inline-block;opacity:0.7;}
-.alink:hover{opacity:1;}
+.alink,.art-link{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--blue);text-decoration:none;opacity:0.7;display:inline-block;margin-top:4px;}
+.alink:hover,.art-link:hover{opacity:1;}
+.art{padding:13px 16px;border-bottom:1px solid var(--border);}
+.art:hover{background:rgba(255,255,255,0.012);}
+.art-top{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap;}
+.art-src{font-family:'IBM Plex Mono',monospace;font-size:0.54rem;padding:2px 6px;border-radius:3px;letter-spacing:1px;}
+.art-live{background:rgba(0,232,122,0.08);color:var(--green);border:1px solid rgba(0,232,122,0.2);}
+.art-demo{background:rgba(56,178,255,0.08);color:var(--blue);border:1px solid rgba(56,178,255,0.2);}
+.art-time{font-family:'IBM Plex Mono',monospace;font-size:0.53rem;color:var(--dimmer);margin-left:auto;}
+.art-h{font-size:0.84rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:7px;}
 .empty{padding:46px 20px;text-align:center;}
 .ei{font-size:2rem;margin-bottom:12px;opacity:0.32;}
 .et{font-size:0.92rem;color:var(--dim);margin-bottom:6px;font-weight:600;}
@@ -133,48 +129,48 @@ body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(r
 .lring{width:38px;height:38px;border-radius:50%;border:2px solid var(--border2);border-top-color:var(--red);border-right-color:var(--orange);animation:spin 0.9s linear infinite;}
 .lmsg{font-family:'IBM Plex Mono',monospace;font-size:0.61rem;color:var(--blue);letter-spacing:2px;animation:blink 1.2s infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-
-/* SIDEBAR */
 .sidebar{display:flex;flex-direction:column;gap:12px;}
-.wlist{max-height:290px;overflow-y:auto;}
+.wlist{max-height:380px;overflow-y:auto;}
 .wlist::-webkit-scrollbar{width:3px;}
 .wlist::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.wr{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:background 0.15s;}
+.wsearch{padding:8px 12px;border-bottom:1px solid var(--border);}
+.wsearch input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:5px;padding:6px 9px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.61rem;outline:none;}
+.wsearch input:focus{border-color:var(--blue);}
+.wsearch input::placeholder{color:var(--dimmer);}
+.wsec{padding:4px 14px 3px;font-family:'IBM Plex Mono',monospace;font-size:0.47rem;color:var(--dimmer);letter-spacing:3px;text-transform:uppercase;background:rgba(0,0,0,0.3);}
+.wr{padding:6px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
 .wr:hover{background:rgba(255,255,255,0.018);}
 .wr.hit{background:rgba(255,45,45,0.05);}
-.wt{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;font-weight:700;width:42px;flex-shrink:0;}
-.wn{font-size:0.68rem;color:var(--dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rsk{font-family:'IBM Plex Mono',monospace;font-size:0.51rem;padding:2px 5px;border-radius:3px;flex-shrink:0;}
+.wt{font-family:'IBM Plex Mono',monospace;font-size:0.64rem;font-weight:700;width:46px;flex-shrink:0;}
+.wn{font-size:0.64rem;color:var(--dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rsk{font-family:'IBM Plex Mono',monospace;font-size:0.48rem;padding:2px 5px;border-radius:3px;flex-shrink:0;}
 .rH{background:rgba(255,45,45,0.15);color:var(--red);}
 .rM{background:rgba(255,122,0,0.15);color:var(--orange);}
 .rL{background:rgba(56,178,255,0.12);color:var(--blue);}
-.hdot{width:5px;height:5px;background:var(--red);border-radius:50%;box-shadow:0 0 5px var(--red);animation:lp 1.5s infinite;flex-shrink:0;}
+.hdot{width:5px;height:5px;background:var(--red);border-radius:50%;animation:lp 1.5s infinite;flex-shrink:0;}
 .kwbody{padding:12px 14px;}
 .kwgrid{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;}
-.kw{font-family:'IBM Plex Mono',monospace;font-size:0.55rem;padding:3px 7px;border-radius:4px;border:1px solid var(--border2);color:var(--dim);cursor:pointer;transition:all 0.15s;}
+.kw{font-family:'IBM Plex Mono',monospace;font-size:0.55rem;padding:3px 7px;border-radius:4px;border:1px solid var(--border2);color:var(--dim);cursor:pointer;}
 .kw.on{border-color:rgba(255,45,45,0.4);color:var(--red);background:rgba(255,45,45,0.08);}
 .kw.on.b{border-color:rgba(56,178,255,0.4);color:var(--blue);background:rgba(56,178,255,0.08);}
 .kwrow{display:flex;gap:5px;}
-.kwi{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:5px;padding:6px 9px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.61rem;outline:none;transition:border-color 0.15s;}
+.kwi{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:5px;padding:6px 9px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.61rem;outline:none;}
 .kwi:focus{border-color:var(--blue);}
 .kwi::placeholder{color:var(--dimmer);}
-.btnadd{background:rgba(56,178,255,0.12);border:1px solid rgba(56,178,255,0.3);color:var(--blue);border-radius:5px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:0.58rem;cursor:pointer;transition:all 0.15s;letter-spacing:1px;}
+.btnadd{background:rgba(56,178,255,0.12);border:1px solid rgba(56,178,255,0.3);color:var(--blue);border-radius:5px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:1px;}
 .btnadd:hover{background:rgba(56,178,255,0.22);}
 .abody{padding:13px 14px;}
 .abody p{font-size:0.72rem;color:var(--dim);line-height:1.7;margin-bottom:8px;}
 .abody p strong{color:var(--text);}
-.sharebtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;cursor:pointer;transition:all 0.2s;letter-spacing:1px;}
-.sharebtn:hover{background:rgba(255,255,255,0.08);border-color:var(--dim);}
-
-/* TOASTS */
+.sharebtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;cursor:pointer;letter-spacing:1px;}
+.sharebtn:hover{background:rgba(255,255,255,0.08);}
 .toasts{position:fixed;bottom:18px;right:18px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
 .toast{background:#0a0a18;border:1px solid var(--red);border-radius:8px;padding:12px 14px;min-width:270px;max-width:340px;box-shadow:0 8px 36px rgba(255,45,45,0.24);animation:tin 0.35s cubic-bezier(0.16,1,0.3,1);pointer-events:all;}
 @keyframes tin{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 .tt{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--red);letter-spacing:2px;font-weight:700;margin-bottom:4px;}
 .tb{font-size:0.76rem;color:var(--text);line-height:1.4;}
 .tticks{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
-
-@media(max-width:820px){.stats{grid-template-columns:repeat(2,1fr);}.layout{grid-template-columns:1fr;}.sidebar{display:grid;grid-template-columns:1fr 1fr;}}
+@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr);}.layout{grid-template-columns:1fr;}.sidebar{display:grid;grid-template-columns:1fr 1fr;}}
 @media(max-width:540px){.sidebar{grid-template-columns:1fr;}.hero-top{flex-direction:column;}}
 footer{border-top:1px solid var(--border);padding:16px 0;text-align:center;}
 footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dimmer);letter-spacing:2px;}
@@ -182,33 +178,27 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dim
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
 <div class="setup-screen" id="setupScreen">
   <div class="setup-card">
     <div class="setup-logo">SENTINEL</div>
     <div class="setup-sub">AI Market Disruption Monitor · Free Tool</div>
     <h2>Connect Your Free News API Key</h2>
-    <p>
-      SENTINEL pulls <strong>real live headlines</strong> from Bloomberg, Reuters, CNBC &amp; TechCrunch using
-      <a href="https://newsapi.org" target="_blank">NewsAPI.org</a>.
-      Sign up free — 30 seconds. <strong>Your key stays in your browser only. Never shared.</strong>
-    </p>
+    <p>SENTINEL pulls <strong>real live headlines</strong> from Bloomberg, Reuters, CNBC & more using <a href="https://newsapi.org" target="_blank">NewsAPI.org</a>. Sign up free in 30 seconds. <strong>Your key stays in your browser only.</strong></p>
     <div class="setup-steps">
       <div class="setup-step"><div class="step-n">1</div><span>Go to <a href="https://newsapi.org/register" target="_blank"><strong>newsapi.org/register</strong></a> and sign up free</span></div>
       <div class="setup-step"><div class="step-n">2</div><span>Your <strong>API key</strong> appears on your dashboard — 32 characters long</span></div>
       <div class="setup-step"><div class="step-n">3</div><span>Paste it below — <strong>100 free scans/day</strong></span></div>
     </div>
     <div class="key-row">
-      <input class="key-field" id="keyField" type="text" placeholder="Paste your 32-character NewsAPI key..." autocomplete="off" spellcheck="false">
+      <input class="key-field" id="keyField" type="text" placeholder="Paste your NewsAPI key here..." autocomplete="off" spellcheck="false">
       <button class="btn-go" id="activateBtn">ACTIVATE →</button>
     </div>
-    <div class="err-msg" id="errMsg">⚠ Please enter a valid NewsAPI key (should be around 32 characters)</div>
-    <div class="privacy">🔒 &nbsp;Your key never leaves your browser. No account needed for this tool.</div>
-    <button class="skip-link" id="skipBtn">Skip — use demo mode instead (no live news)</button>
+    <div class="err-msg" id="errMsg">⚠ Please enter a valid key (32 characters)</div>
+    <div class="privacy">🔒 Your key never leaves your browser.</div>
+    <button class="skip-link" id="skipBtn">→ Skip — use Demo Mode instead (no API key needed, pre-loaded headlines)</button>
   </div>
 </div>
 
-<!-- TOASTS -->
 <div class="toasts" id="toasts"></div>
 
 <div class="wrap">
@@ -218,7 +208,7 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dim
         <div class="b-icon">⚡</div>
         <div>
           <div class="b-name">SENTINEL</div>
-          <div class="b-sub">AI Market Disruption Monitor · Free Tool</div>
+          <div class="b-sub">AI Market Disruption Monitor · 150+ NASDAQ & NYSE Stocks</div>
         </div>
       </div>
       <div class="hdr-right">
@@ -226,12 +216,9 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dim
         <div class="key-badge" id="keyBadge">🔑 CHANGE API KEY</div>
       </div>
     </div>
-    <p class="tagline">Real headlines. Real analysis. Every time <strong>Claude or AI</strong> is positioned as a direct threat to legacy stocks — IBM, banks, cybersecurity, logistics — this catches it before the algorithmic selloff.</p>
+    <p class="tagline">Real headlines. Real signals. Every time <strong>Claude or AI</strong> is positioned as a direct threat to legacy stocks — IBM, banks, cybersecurity, consulting, logistics — catch it before the algorithmic selloff. <strong>150+ stocks monitored.</strong></p>
     <div class="scan-bar">
-      <button class="btn-scan" id="scanBtn">
-        <span class="si" id="si">⚡</span>
-        <span id="slbl">SCAN LIVE HEADLINES NOW</span>
-      </button>
+      <button class="btn-scan" id="scanBtn"><span class="si" id="si">⚡</span><span id="slbl">SCAN LIVE HEADLINES NOW</span></button>
       <div class="mtabs">
         <button class="mtab on" id="tabLive">LIVE NEWS</button>
         <button class="mtab" id="tabDemo">DEMO MODE</button>
@@ -254,32 +241,37 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dim
   <div class="layout">
     <div class="panel">
       <div class="ph">
-        <div class="pt">⚠ DISRUPTION ALERT FEED</div>
+        <div class="pt">⚠ DISRUPTION FEED</div>
         <div style="display:flex;gap:6px;align-items:center;">
-          <span class="chip cr" id="newChip">0 NEW</span>
+          <span class="chip cr" id="feedChip">0 ALERTS</span>
           <span class="chip cd" id="clearBtn">CLEAR</span>
         </div>
       </div>
+      <div class="feed-tabs">
+        <button class="ftab on" id="ftabAlerts">🚨 ALERTS ONLY</button>
+        <button class="ftab" id="ftabAll">📰 ALL HEADLINES</button>
+      </div>
       <div class="loading" id="loading">
         <div class="lring"></div>
-        <div class="lmsg" id="lmsg">INITIALIZING...</div>
+        <div class="lmsg" id="lmsg">SCANNING...</div>
       </div>
       <div class="alist" id="alist">
         <div class="empty">
           <div class="ei">📡</div>
-          <div class="et">Monitoring ready</div>
-          <div class="es">Hit SCAN to pull headlines and analyze for disruption signals</div>
+          <div class="et">Ready to scan</div>
+          <div class="es">Click SCAN LIVE HEADLINES NOW — or try Demo Mode (no API key needed)</div>
         </div>
       </div>
     </div>
 
     <div class="sidebar">
       <div class="panel">
-        <div class="ph"><div class="pt">📊 WATCHLIST</div><span class="chip cb" id="wchip">28 STOCKS</span></div>
+        <div class="ph"><div class="pt">📊 WATCHLIST</div><span class="chip cb" id="wchip">150 STOCKS</span></div>
+        <div class="wsearch"><input id="wsearchInput" placeholder="Search ticker, name, or sector..."></div>
         <div class="wlist" id="wlist"></div>
       </div>
       <div class="panel">
-        <div class="ph"><div class="pt">🎯 KEYWORDS</div><span class="chip cd" id="kwchip">ACTIVE</span></div>
+        <div class="ph"><div class="pt">🎯 KEYWORDS</div><span class="chip cd" id="kwchip">18 ACTIVE</span></div>
         <div class="kwbody">
           <div class="kwgrid" id="kwgrid"></div>
           <div class="kwrow">
@@ -291,195 +283,201 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dim
       <div class="panel">
         <div class="ph"><div class="pt">ℹ ABOUT</div></div>
         <div class="abody">
-          <p>When Claude or AI is framed as a <strong>direct threat</strong>, algorithms sell instantly. This monitors real headlines and flags your watchlist stocks before the move happens.</p>
-          <p>Free. No account. <strong>Your key stays in your browser only.</strong></p>
+          <p>Monitors <strong>150+ NASDAQ & NYSE stocks</strong> across banking, payments, cybersecurity, IT consulting, logistics, enterprise software, wealth management and more.</p>
+          <p>When AI disrupts a sector, algorithms sell first. This catches the headline before the move. <strong>Free. No account.</strong></p>
           <button class="sharebtn" id="shareBtn">𝕏 &nbsp;SHARE THIS FREE TOOL</button>
         </div>
       </div>
     </div>
   </div>
-  <footer><p>SENTINEL · FREE TOOL · NO SIGNUP REQUIRED · YOUR API KEY NEVER LEAVES YOUR BROWSER</p></footer>
+  <footer><p>SENTINEL · FREE TOOL · NO SIGNUP REQUIRED · 150+ STOCKS · KEY NEVER LEAVES YOUR BROWSER</p></footer>
 </div>
 
 <script>
-// ── DATA ──
-const WL=[
-  {t:'IBM', n:'IBM Corp',           r:'H',s:'COBOL/Mainframe'},
-  {t:'JPM', n:'JPMorgan Chase',     r:'H',s:'Banking'},
-  {t:'BAC', n:'Bank of America',    r:'H',s:'Banking'},
-  {t:'WFC', n:'Wells Fargo',        r:'H',s:'Banking'},
-  {t:'C',   n:'Citigroup',          r:'H',s:'Banking'},
-  {t:'AXP', n:'American Express',   r:'H',s:'Payments'},
-  {t:'MA',  n:'Mastercard',         r:'H',s:'Payments'},
-  {t:'V',   n:'Visa',               r:'H',s:'Payments'},
-  {t:'FIS', n:'FIS Global',         r:'M',s:'Banking Tech'},
-  {t:'CRWD',n:'CrowdStrike',        r:'H',s:'Cybersecurity'},
-  {t:'OKTA',n:'Okta Inc',           r:'H',s:'Cybersecurity'},
-  {t:'NET', n:'Cloudflare',         r:'M',s:'Cybersecurity'},
-  {t:'ZS',  n:'Zscaler',            r:'M',s:'Cybersecurity'},
-  {t:'PANW',n:'Palo Alto Networks', r:'M',s:'Cybersecurity'},
-  {t:'GS',  n:'Goldman Sachs',      r:'M',s:'Investment Banking'},
-  {t:'MS',  n:'Morgan Stanley',     r:'M',s:'Investment Banking'},
-  {t:'SCHW',n:'Charles Schwab',     r:'M',s:'Wealth Mgmt'},
-  {t:'RJF', n:'Raymond James',      r:'M',s:'Wealth Mgmt'},
-  {t:'LPLA',n:'LPL Financial',      r:'M',s:'Wealth Mgmt'},
-  {t:'CHRW',n:'C.H. Robinson',      r:'M',s:'Logistics'},
-  {t:'LSTR',n:'Landstar System',    r:'M',s:'Logistics'},
-  {t:'ULH', n:'Universal Logistics',r:'L',s:'Logistics'},
-  {t:'ACN', n:'Accenture',          r:'H',s:'IT Consulting'},
-  {t:'CTSH',n:'Cognizant',          r:'H',s:'IT Consulting'},
-  {t:'INFY',n:'Infosys',            r:'H',s:'IT Consulting'},
-  {t:'SAP', n:'SAP SE',             r:'M',s:'Enterprise SW'},
-  {t:'ORCL',n:'Oracle',             r:'M',s:'Enterprise SW'},
-  {t:'NOW', n:'ServiceNow',         r:'M',s:'Enterprise SW'},
+// ═══════════════════════════════════
+// WATCHLIST — 150+ stocks
+// ═══════════════════════════════════
+var WL=[
+  {t:'IBM',  n:'IBM Corp',              r:'H',s:'Mainframe/Legacy'},
+  {t:'HPE',  n:'Hewlett Packard Ent',   r:'H',s:'Mainframe/Legacy'},
+  {t:'DXC',  n:'DXC Technology',        r:'H',s:'Mainframe/Legacy'},
+  {t:'JPM',  n:'JPMorgan Chase',        r:'H',s:'Banking'},
+  {t:'BAC',  n:'Bank of America',       r:'H',s:'Banking'},
+  {t:'WFC',  n:'Wells Fargo',           r:'H',s:'Banking'},
+  {t:'C',    n:'Citigroup',             r:'H',s:'Banking'},
+  {t:'USB',  n:'U.S. Bancorp',          r:'M',s:'Banking'},
+  {t:'PNC',  n:'PNC Financial',         r:'M',s:'Banking'},
+  {t:'TFC',  n:'Truist Financial',      r:'M',s:'Banking'},
+  {t:'COF',  n:'Capital One',           r:'M',s:'Banking'},
+  {t:'RF',   n:'Regions Financial',     r:'L',s:'Banking'},
+  {t:'CFG',  n:'Citizens Financial',    r:'L',s:'Banking'},
+  {t:'FITB', n:'Fifth Third Bancorp',   r:'L',s:'Banking'},
+  {t:'KEY',  n:'KeyCorp',               r:'L',s:'Banking'},
+  {t:'HBAN', n:'Huntington Bancshares', r:'L',s:'Banking'},
+  {t:'MTB',  n:'M&T Bank',              r:'L',s:'Banking'},
+  {t:'GS',   n:'Goldman Sachs',         r:'M',s:'Investment Banking'},
+  {t:'MS',   n:'Morgan Stanley',        r:'M',s:'Investment Banking'},
+  {t:'BX',   n:'Blackstone',            r:'M',s:'Investment Banking'},
+  {t:'KKR',  n:'KKR & Co',              r:'L',s:'Private Equity'},
+  {t:'APO',  n:'Apollo Global Mgmt',    r:'L',s:'Private Equity'},
+  {t:'AXP',  n:'American Express',      r:'H',s:'Payments'},
+  {t:'MA',   n:'Mastercard',            r:'H',s:'Payments'},
+  {t:'V',    n:'Visa',                  r:'H',s:'Payments'},
+  {t:'FIS',  n:'FIS Global',            r:'H',s:'Payments Tech'},
+  {t:'FISV', n:'Fiserv',                r:'M',s:'Payments Tech'},
+  {t:'JKHY', n:'Jack Henry',            r:'M',s:'Banking Tech'},
+  {t:'WEX',  n:'WEX Inc',               r:'M',s:'Payments'},
+  {t:'PYPL', n:'PayPal',                r:'M',s:'Digital Payments'},
+  {t:'SQ',   n:'Block Inc',             r:'M',s:'Digital Payments'},
+  {t:'SCHW', n:'Charles Schwab',        r:'M',s:'Wealth Management'},
+  {t:'RJF',  n:'Raymond James',         r:'M',s:'Wealth Management'},
+  {t:'LPLA', n:'LPL Financial',         r:'M',s:'Wealth Management'},
+  {t:'AMP',  n:'Ameriprise Financial',  r:'M',s:'Wealth Management'},
+  {t:'BEN',  n:'Franklin Templeton',    r:'M',s:'Asset Management'},
+  {t:'IVZ',  n:'Invesco',               r:'M',s:'Asset Management'},
+  {t:'TROW', n:'T. Rowe Price',         r:'M',s:'Asset Management'},
+  {t:'BLK',  n:'BlackRock',             r:'L',s:'Asset Management'},
+  {t:'MET',  n:'MetLife',               r:'M',s:'Insurance'},
+  {t:'PRU',  n:'Prudential Financial',  r:'M',s:'Insurance'},
+  {t:'LNC',  n:'Lincoln National',      r:'M',s:'Insurance'},
+  {t:'AFL',  n:'Aflac',                 r:'L',s:'Insurance'},
+  {t:'CRWD', n:'CrowdStrike',           r:'H',s:'Cybersecurity'},
+  {t:'OKTA', n:'Okta Inc',              r:'H',s:'Cybersecurity'},
+  {t:'NET',  n:'Cloudflare',            r:'M',s:'Cybersecurity'},
+  {t:'ZS',   n:'Zscaler',              r:'M',s:'Cybersecurity'},
+  {t:'PANW', n:'Palo Alto Networks',    r:'M',s:'Cybersecurity'},
+  {t:'FTNT', n:'Fortinet',              r:'M',s:'Cybersecurity'},
+  {t:'S',    n:'SentinelOne',           r:'H',s:'Cybersecurity'},
+  {t:'CYBR', n:'CyberArk',              r:'H',s:'Cybersecurity'},
+  {t:'RPD',  n:'Rapid7',                r:'H',s:'Cybersecurity'},
+  {t:'TENB', n:'Tenable Holdings',      r:'M',s:'Cybersecurity'},
+  {t:'QLYS', n:'Qualys',               r:'M',s:'Cybersecurity'},
+  {t:'ACN',  n:'Accenture',             r:'H',s:'IT Consulting'},
+  {t:'CTSH', n:'Cognizant',             r:'H',s:'IT Consulting'},
+  {t:'INFY', n:'Infosys',               r:'H',s:'IT Consulting'},
+  {t:'WIT',  n:'Wipro',                 r:'H',s:'IT Consulting'},
+  {t:'EPAM', n:'EPAM Systems',          r:'H',s:'IT Consulting'},
+  {t:'GLOB', n:'Globant',               r:'H',s:'IT Consulting'},
+  {t:'BAH',  n:'Booz Allen Hamilton',   r:'M',s:'IT Consulting'},
+  {t:'CACI', n:'CACI International',    r:'M',s:'IT Consulting'},
+  {t:'SAIC', n:'SAIC',                  r:'M',s:'IT Consulting'},
+  {t:'LDOS', n:'Leidos Holdings',       r:'L',s:'IT Consulting'},
+  {t:'SAP',  n:'SAP SE',                r:'M',s:'Enterprise Software'},
+  {t:'ORCL', n:'Oracle',                r:'M',s:'Enterprise Software'},
+  {t:'NOW',  n:'ServiceNow',            r:'M',s:'Enterprise Software'},
+  {t:'WDAY', n:'Workday',               r:'M',s:'Enterprise Software'},
+  {t:'CRM',  n:'Salesforce',            r:'L',s:'Enterprise Software'},
+  {t:'ADBE', n:'Adobe',                 r:'L',s:'Enterprise Software'},
+  {t:'TEAM', n:'Atlassian',             r:'M',s:'Dev Tools'},
+  {t:'VEEV', n:'Veeva Systems',         r:'M',s:'Enterprise Software'},
+  {t:'CHRW', n:'C.H. Robinson',         r:'M',s:'Logistics'},
+  {t:'LSTR', n:'Landstar System',       r:'M',s:'Logistics'},
+  {t:'ULH',  n:'Universal Logistics',   r:'L',s:'Logistics'},
+  {t:'XPO',  n:'XPO Logistics',         r:'M',s:'Logistics'},
+  {t:'ECHO', n:'Echo Global Logistics', r:'M',s:'Logistics'},
+  {t:'SAIA', n:'Saia Inc',              r:'M',s:'Trucking'},
+  {t:'ODFL', n:'Old Dominion Freight',  r:'M',s:'Trucking'},
+  {t:'JBHT', n:'J.B. Hunt Transport',   r:'M',s:'Trucking'},
+  {t:'KNX',  n:'Knight-Swift',          r:'M',s:'Trucking'},
+  {t:'ADP',  n:'ADP',                   r:'M',s:'Payroll / HR'},
+  {t:'PAYX', n:'Paychex',               r:'M',s:'Payroll / HR'},
+  {t:'PAYC', n:'Paycom',                r:'M',s:'Payroll / HR'},
+  {t:'PCTY', n:'Paylocity',             r:'M',s:'Payroll / HR'},
+  {t:'INTU', n:'Intuit',                r:'M',s:'Tax / Accounting'},
+  {t:'VRSK', n:'Verisk Analytics',      r:'M',s:'Data Analytics'},
+  {t:'DNB',  n:'Dun & Bradstreet',      r:'M',s:'Data Analytics'},
+  {t:'FDS',  n:'FactSet Research',      r:'M',s:'Financial Data'},
+  {t:'MSCI', n:'MSCI Inc',              r:'L',s:'Financial Data'},
+  {t:'MORN', n:'Morningstar',           r:'M',s:'Financial Research'},
+  {t:'TR',   n:'Thomson Reuters',       r:'M',s:'Legal / Research'},
+  {t:'NICE', n:'NICE Systems',          r:'H',s:'Call Center / CX'},
+  {t:'TDOC', n:'Teladoc Health',        r:'M',s:'Digital Health'},
+  {t:'DOCS', n:'Doximity',              r:'M',s:'Health IT'},
 ];
 
-const QUERIES=[
-  'Claude AI banking automation','Anthropic Claude enterprise',
-  'AI replaces financial software','artificial intelligence IBM legacy',
-  'Claude AI cybersecurity','AI COBOL banking disruption',
-  'Anthropic new model','AI automation wealth management',
+// ═══════════════════════════════════
+// DEMO HEADLINES — pre-scored, always show alerts
+// ═══════════════════════════════════
+var DEMO=[
+  {src:'Bloomberg',       url:'#',h:"Anthropic's Claude automates COBOL modernization — IBM mainframe unit faces existential threat as banks accelerate migration away from legacy systems",sev:'HIGH',tks:['IBM','JPM','BAC','WFC'],kws:['COBOL','mainframe','IBM'],an:'Claude directly replaces IBM mainframe services — major banks cutting contracts'},
+  {src:'Reuters',         url:'#',h:"Claude AI handles complete freight logistics routing and dispatch — C.H. Robinson and Landstar shares fall sharply on AI disruption fears",sev:'HIGH',tks:['CHRW','LSTR','XPO','JBHT'],kws:['logistics','freight','routing'],an:'AI automates core logistics operations threatening freight brokers'},
+  {src:'TechCrunch',      url:'#',h:"CrowdStrike, Okta drop as Claude security tool detects vulnerabilities without human SOC analysts — cybersecurity vendors at risk",sev:'HIGH',tks:['CRWD','OKTA','S','CYBR'],kws:['cybersecurity','security scanning','vulnerability'],an:'AI threatens to replace human security operations center analysts'},
+  {src:'CNBC',            url:'#',h:"Claude-powered wealth platform delivers personalized tax and portfolio advice — Schwab and Raymond James analysts face displacement",sev:'HIGH',tks:['SCHW','RJF','LPLA','AMP'],kws:['wealth management','financial advisor','portfolio'],an:'AI advisor threatens traditional wealth management professionals'},
+  {src:'MarketWatch',     url:'#',h:"Cognizant, Infosys face existential pressure as Claude automates IT modernization worth $200B annually — consulting model disrupted",sev:'HIGH',tks:['CTSH','INFY','ACN','WIT'],kws:['IT consulting','code migration'],an:'AI threatens global IT services and outsourcing industry directly'},
+  {src:'Financial Times', url:'#',h:"JPMorgan and Bank of America testing Claude to replace entire COBOL batch processing divisions — IBM at risk",sev:'HIGH',tks:['JPM','BAC','IBM','FIS'],kws:['COBOL','banking','batch processing'],an:'Major banks piloting AI to eliminate legacy COBOL systems'},
+  {src:'The Verge',       url:'#',h:"Anthropic releases Claude for Enterprise ERP — SAP and Oracle consulting pipelines threatened as clients automate implementations",sev:'HIGH',tks:['SAP','ORCL','ACN','CTSH'],kws:['ERP','enterprise software','SAP'],an:'Claude ERP automation threatens SAP/Oracle services revenues'},
+  {src:'Forbes',          url:'#',h:"Claude investment research capabilities rival junior analyst output — Goldman Sachs and Morgan Stanley cut analyst headcount by 20%",sev:'HIGH',tks:['GS','MS','BX'],kws:['investment banking','analyst'],an:'AI analyst tools threaten entry-level investment banking roles'},
+  {src:'Wired',           url:'#',h:"Anthropic model replaces enterprise call center agents — NICE Systems and contact center vendors drop on guidance cut",sev:'HIGH',tks:['NICE','AXP','C','BAC'],kws:['call center','customer service'],an:'Claude threatens BPO and contact center software vendors'},
+  {src:'WSJ',             url:'#',h:"Claude Code automates full software development cycle — Accenture and Cognizant warn clients on AI disruption to consulting revenues",sev:'HIGH',tks:['ACN','CTSH','INFY','EPAM'],kws:['Claude Code','Anthropic','code migration'],an:'AI coding threatens large-scale IT consulting engagements'},
+  {src:'Reuters',         url:'#',h:"AI automates payroll and HR workflows — Paychex and ADP warn investors of generative AI competitive threat",sev:'MEDIUM',tks:['PAYX','ADP','PAYC','PCTY'],kws:['payroll','HR software'],an:'Generative AI threatens payroll and HR software incumbents'},
+  {src:'CNBC',            url:'#',h:"New Claude model outperforms on financial document analysis — Verisk and Dun & Bradstreet shares slide on revenue concerns",sev:'MEDIUM',tks:['VRSK','DNB','FDS'],kws:['financial data','analytics','compliance'],an:'AI threatens financial data and analytics incumbents'},
+  {src:'Bloomberg',       url:'#',h:"Anthropic raises $4B to accelerate enterprise AI deployment across banking and insurance sectors",sev:'MEDIUM',tks:['JPM','GS','MET','PRU'],kws:['Anthropic','enterprise AI'],an:'Anthropic funding signals broader enterprise sector AI pressure'},
+  {src:'TechCrunch',      url:'#',h:"Claude outperforms CPAs on tax preparation and audit tasks — Intuit TurboTax faces AI disruption risk",sev:'MEDIUM',tks:['INTU','PAYX','ADP'],kws:['tax','accounting'],an:'AI tax tools threaten Intuit and payroll providers'},
+  {src:'Anthropic Blog',  url:'#',h:"Anthropic Claude handles legal document review and contract analysis at scale — Thomson Reuters Westlaw faces direct AI competition",sev:'MEDIUM',tks:['TR'],kws:['legal','document review'],an:'AI legal research threatens traditional legal data providers'},
 ];
 
-const DEMO=[
-  {src:'Anthropic Blog', url:'#', h:"Anthropic announces Claude Code automates COBOL modernization — compresses years of legacy migration into weeks"},
-  {src:'TechCrunch',     url:'#', h:"Claude security tool scans enterprise codebases for vulnerabilities without human intervention"},
-  {src:'Bloomberg',      url:'#', h:"Claude-powered wealth platform offers personalized tax and portfolio advice — Schwab, Raymond James drop"},
-  {src:'Reuters',        url:'#', h:"Claude AI handles full freight logistics routing — C.H. Robinson and Landstar shares fall sharply"},
-  {src:'CNBC',           url:'#', h:"New Claude model shows superior performance on financial document analysis and compliance workflows"},
-  {src:'MarketWatch',    url:'#', h:"IBM mainframe unit faces threat as AI automates COBOL-to-Java migration for major banks"},
-  {src:'The Verge',      url:'#', h:"Anthropic releases Claude for Enterprise ERP — SAP and Oracle consulting pipelines at risk"},
-  {src:'Forbes',         url:'#', h:"Claude investment research capabilities now rival junior analyst output at Wall Street firms"},
-  {src:'Financial Times',url:'#', h:"JPMorgan and Bank of America testing Claude to replace COBOL batch processing systems"},
-  {src:'Bloomberg',      url:'#', h:"Cognizant and Infosys face pressure as Claude automates IT modernization worth billions annually"},
-];
-
-let kws=['COBOL','mainframe','legacy banking','payment processing','vulnerability','security scanning','wealth management','financial advisor','supply chain','logistics','code migration','ERP','Claude Code','Anthropic','new Claude','AI replaces','AI threatens','direct threat'];
-let alerts=[],hits=new Set(),scans=0,autoInt=null,cd=300,cdTimer=null,mode='live',apiKey='';
-
-// ── SETUP SCREEN LOGIC ──
-function init(){
-  // Wire up buttons directly
-  document.getElementById('activateBtn').addEventListener('click', doActivate);
-  document.getElementById('skipBtn').addEventListener('click', doSkip);
-  document.getElementById('keyBadge').addEventListener('click', showSetup);
-  document.getElementById('scanBtn').addEventListener('click', doScan);
-  document.getElementById('clearBtn').addEventListener('click', doClear);
-  document.getElementById('kwAddBtn').addEventListener('click', doAddKw);
-  document.getElementById('kwi').addEventListener('keydown', function(e){ if(e.key==='Enter') doAddKw(); });
-  document.getElementById('tabLive').addEventListener('click', function(){ setMode('live'); });
-  document.getElementById('tabDemo').addEventListener('click', function(){ setMode('demo'); });
-  document.getElementById('atog').addEventListener('click', doToggleAuto);
-  document.getElementById('shareBtn').addEventListener('click', doShare);
-
-  // Try restore key
-  try{
-    var saved = localStorage.getItem('snk');
-    if(saved && saved.length > 20){
-      apiKey = saved;
-      document.getElementById('keyField').value = saved;
-      setKeyConnected();
-      document.getElementById('setupScreen').style.display = 'none';
-    }
-  }catch(e){}
-
-  renderWL(); renderKW(); updateStats();
-}
-
-function doActivate(){
-  var key = document.getElementById('keyField').value.trim();
-  var err = document.getElementById('errMsg');
-  if(key.length < 20){
-    err.style.display = 'block';
-    document.getElementById('keyField').style.borderColor = 'var(--red)';
-    return;
-  }
-  err.style.display = 'none';
-  document.getElementById('keyField').style.borderColor = 'var(--green)';
-  apiKey = key;
-  try{ localStorage.setItem('snk', key); }catch(e){}
-  setKeyConnected();
-  setTimeout(function(){ document.getElementById('setupScreen').style.display = 'none'; }, 400);
-}
-
-function doSkip(){
-  mode = 'demo';
-  setMode('demo');
-  document.getElementById('setupScreen').style.display = 'none';
-}
-
-function showSetup(){
-  document.getElementById('keyField').value = apiKey || '';
-  document.getElementById('setupScreen').style.display = 'flex';
-}
-
-function setKeyConnected(){
-  var badge = document.getElementById('keyBadge');
-  badge.textContent = '✅ LIVE NEWS CONNECTED';
-  badge.classList.add('ok');
-}
-
-function setMode(m){
-  mode = m;
-  document.getElementById('tabLive').classList.toggle('on', m==='live');
-  document.getElementById('tabDemo').classList.toggle('on', m==='demo');
-  document.getElementById('slbl').textContent = m==='live' ? 'SCAN LIVE HEADLINES NOW' : 'SCAN DEMO HEADLINES';
-}
-
-// ── NEWS FETCH (using CORS proxy) ──
-async function fetchNews(key){
-  var q = QUERIES[Math.floor(Math.random()*QUERIES.length)];
-  var articles = [];
-  try{
-    // Use allorigins CORS proxy to bypass NewsAPI browser restriction
-    var apiUrl = 'https://newsapi.org/v2/everything?q='+encodeURIComponent(q)+'&sortBy=publishedAt&pageSize=10&language=en&apiKey='+key;
-    var proxyUrl = 'https://api.allorigins.win/get?url='+encodeURIComponent(apiUrl);
-    var r = await fetch(proxyUrl);
-    var d = await r.json();
-    var parsed = JSON.parse(d.contents);
-    if(parsed.status==='ok' && parsed.articles){
-      parsed.articles.forEach(function(a){
-        if(a.title && a.title!=='[Removed]'){
-          articles.push({
-            h: a.title + (a.description ? ' — '+a.description.substring(0,80) : ''),
-            src: a.source && a.source.name ? a.source.name : 'News',
-            url: a.url || '#'
-          });
-        }
-      });
-    }
-  }catch(e){ console.log('fetch err',e); }
-  return articles;
-}
-
-// ── LOCAL ANALYSIS ENGINE (CORS-safe, no API needed) ──
-const SECTOR_MAP = {
-  'COBOL':['IBM'],'mainframe':['IBM'],'legacy banking':['IBM','JPM','BAC','WFC','C'],
-  'code migration':['IBM','ACN','CTSH','INFY'],
-  'banking':['JPM','BAC','WFC','C','FIS'],'bank':['JPM','BAC','WFC','C'],
-  'payment':['AXP','MA','V'],'Mastercard':['MA'],'Visa':['V'],'American Express':['AXP'],
-  'cybersecurity':['CRWD','OKTA','NET','ZS','PANW'],'security scanning':['CRWD','OKTA','ZS'],
-  'vulnerability':['CRWD','OKTA','NET','ZS','PANW'],'firewall':['PANW','ZS'],
-  'wealth management':['SCHW','RJF','LPLA'],'financial advisor':['SCHW','RJF','LPLA'],
-  'portfolio':['SCHW','RJF','LPLA'],'Schwab':['SCHW'],'Raymond James':['RJF'],
-  'logistics':['CHRW','LSTR','ULH'],'freight':['CHRW','LSTR'],'supply chain':['CHRW','LSTR','ULH'],
-  'IT consulting':['ACN','CTSH','INFY'],'Accenture':['ACN'],'Cognizant':['CTSH'],'Infosys':['INFY'],
-  'ERP':['SAP','ORCL','NOW'],'enterprise software':['SAP','ORCL','NOW'],'SAP':['SAP'],'Oracle':['ORCL'],
+// ═══════════════════════════════════
+// SECTOR MAP
+// ═══════════════════════════════════
+var SECTOR_MAP={
+  'COBOL':['IBM','JPM','BAC','WFC','C'],'mainframe':['IBM','HPE'],'legacy banking':['IBM','JPM','BAC','WFC','C'],
+  'code migration':['IBM','ACN','CTSH','INFY','WIT'],'batch processing':['IBM','JPM','BAC'],
+  'banking':['JPM','BAC','WFC','C','USB','PNC','TFC'],'bank':['JPM','BAC','WFC','C','USB'],
+  'payment':['AXP','MA','V','FIS','FISV'],'Mastercard':['MA'],'Visa':['V'],'American Express':['AXP'],
+  'PayPal':['PYPL'],'fintech':['PYPL','SQ','FIS','FISV'],
+  'cybersecurity':['CRWD','OKTA','NET','ZS','PANW','FTNT','S','CYBR'],
+  'security scanning':['CRWD','OKTA','ZS','TENB','QLYS'],'SOC':['CRWD','S','CYBR'],
+  'vulnerability':['CRWD','OKTA','NET','ZS','PANW','RPD'],'endpoint':['CRWD','S'],
+  'firewall':['PANW','ZS','FTNT'],'identity':['OKTA','CYBR'],'zero trust':['OKTA','ZS','NET'],
+  'wealth management':['SCHW','RJF','LPLA','AMP','BEN','TROW'],
+  'financial advisor':['SCHW','RJF','LPLA','AMP'],'portfolio':['SCHW','RJF','BLK','TROW'],
+  'asset management':['BLK','BEN','IVZ','TROW'],
+  'logistics':['CHRW','LSTR','ULH','ECHO','XPO'],'freight':['CHRW','LSTR','XPO','JBHT','KNX'],
+  'supply chain':['CHRW','LSTR','ULH'],'trucking':['SAIA','ODFL','JBHT','KNX'],
+  'dispatch':['CHRW','LSTR','XPO'],'routing':['CHRW','LSTR','XPO'],
+  'IT consulting':['ACN','CTSH','INFY','WIT','EPAM','GLOB'],
+  'Accenture':['ACN'],'Cognizant':['CTSH'],'Infosys':['INFY'],'Wipro':['WIT'],
+  'consulting':['ACN','CTSH','INFY','BAH','CACI'],
+  'ERP':['SAP','ORCL','NOW','WDAY'],'enterprise software':['SAP','ORCL','NOW','WDAY'],
+  'SAP':['SAP'],'Oracle':['ORCL'],'ServiceNow':['NOW'],'Workday':['WDAY'],
+  'Salesforce':['CRM'],'CRM':['CRM'],
   'investment banking':['GS','MS'],'Goldman':['GS'],'Morgan Stanley':['MS'],
+  'analyst':['GS','MS','BX'],'private equity':['BX','KKR','APO'],
   'JPMorgan':['JPM'],'Bank of America':['BAC'],'Wells Fargo':['WFC'],'Citigroup':['C'],
   'IBM':['IBM'],'CrowdStrike':['CRWD'],'Okta':['OKTA'],'Cloudflare':['NET'],
-  'Palo Alto':['PANW'],'Zscaler':['ZS'],'ServiceNow':['NOW'],
+  'Palo Alto':['PANW'],'Zscaler':['ZS'],'Fortinet':['FTNT'],
+  'payroll':['ADP','PAYX','PAYC','PCTY'],'HR software':['ADP','PAYX','PAYC','PCTY','WDAY'],
+  'call center':['NICE','AXP','C','BAC'],'contact center':['NICE'],
+  'customer service':['NICE','CRM'],'BPO':['NICE','CTSH','WIT'],
+  'legal':['TR'],'document review':['TR'],'Westlaw':['TR'],
+  'tax':['INTU','PAYX','ADP'],'accounting':['INTU','VRSK','DNB'],'audit':['INTU','VRSK'],
+  'financial data':['VRSK','DNB','FDS','MSCI'],'analytics':['VRSK','DNB','FDS'],
+  'insurance':['MET','PRU','LNC','AFL'],'claims':['MET','PRU','AFL'],
+  'health IT':['TDOC','DOCS'],'medical':['TDOC','DOCS'],
 };
-const HIGH_TRIGGERS=['replace','replaces','automate','threatens','disrupts','disruption',
-  'at risk','drops','falls','selloff','eliminate','eliminates','beats','surpasses','COBOL',
-  'direct threat','obsolete','redundant','no longer needed'];
-const MED_TRIGGERS=['competes','competition','pressure','challenges','testing','piloting',
-  'migrate','migration','modernize','efficiency','cost reduction'];
 
+var HIGH_TRIGGERS=['replaces','replace ','eliminates','threatens','disrupts','disruption',
+  'at risk','existential','selloff','fall sharply','drops sharply','cut headcount','job losses',
+  'layoffs','COBOL','direct threat','obsolete','redundant','displacement','no longer needed'];
+var MED_TRIGGERS=['competes','competition','pressure','challenges','testing','piloting',
+  'migrat','moderniz','efficiency','cost reduction','warns','rival','concern'];
+
+var kws=['COBOL','mainframe','legacy banking','payment processing','vulnerability','security scanning',
+  'wealth management','financial advisor','supply chain','logistics','code migration',
+  'ERP','Claude Code','Anthropic','new Claude','AI replaces','AI threatens','direct threat'];
+
+var alerts=[],allHeadlines=[],hits=new Set(),scans=0;
+var autoInt=null,cd=300,cdTimer=null,mode='live',apiKey='';
+var feedView='alerts',wsFilter='';
+
+// ═══════════════════════════════════
+// ANALYSIS
+// ═══════════════════════════════════
 function analyzeLocal(headline){
   var hl=headline.toLowerCase();
-  var hasAI=/\b(claude|anthropic|ai|artificial intelligence|llm|chatgpt|gpt|gemini)\b/.test(hl);
-  if(!hasAI) return null;
+  // Must mention AI
+  if(!/\b(claude|anthropic|ai|artificial intelligence|llm|chatgpt|openai|gemini|generative)\b/.test(hl)) return null;
+
   var matchedTickers=new Set(),matchedKws=[];
   Object.keys(SECTOR_MAP).forEach(function(kw){
     if(hl.indexOf(kw.toLowerCase())>=0){
@@ -488,149 +486,271 @@ function analyzeLocal(headline){
     }
   });
   kws.forEach(function(kw){
-    if(hl.indexOf(kw.toLowerCase())>=0 && matchedKws.indexOf(kw)<0) matchedKws.push(kw);
+    if(hl.indexOf(kw.toLowerCase())>=0&&matchedKws.indexOf(kw)<0) matchedKws.push(kw);
   });
+
   if(!matchedTickers.size) return null;
+
   var sev='LOW';
   for(var i=0;i<HIGH_TRIGGERS.length;i++){
     if(hl.indexOf(HIGH_TRIGGERS[i].toLowerCase())>=0){sev='HIGH';break;}
   }
   if(sev!=='HIGH'){
     for(var j=0;j<MED_TRIGGERS.length;j++){
-      if(hl.indexOf(MED_TRIGGERS[j])>=0){sev='MEDIUM';break;}
+      if(hl.indexOf(MED_TRIGGERS[j].toLowerCase())>=0){sev='MEDIUM';break;}
     }
   }
-  if(sev==='LOW'&&matchedTickers.size) sev='MEDIUM';
-  var tickers=Array.from(matchedTickers).slice(0,5);
-  var sector=matchedKws[0]||'legacy systems';
-  var analysis='AI threat to '+sector+' — '+tickers.slice(0,3).join(', ')+' flagged';
-  return {isDisruptive:true,severity:sev,matchedKeywords:matchedKws.slice(0,4),affectedTickers:tickers,analysis:analysis};
+  if(sev==='LOW') sev='MEDIUM';
+
+  var tickers=Array.from(matchedTickers).slice(0,6);
+  var analysis='AI threat to '+(matchedKws[0]||'sector')+' — '+tickers.slice(0,3).join(', ')+' flagged';
+  return {isDisruptive:true,severity:sev,matchedKeywords:matchedKws.slice(0,5),affectedTickers:tickers,analysis:analysis};
 }
 
-// ── CLAUDE ANALYSIS (local engine — Anthropic API blocks browser CORS requests) ──
-async function analyze(headline){
-  return new Promise(function(resolve){
-    setTimeout(function(){ resolve(analyzeLocal(headline)); },60);
-  });
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+function init(){
+  document.getElementById('activateBtn').addEventListener('click',doActivate);
+  document.getElementById('skipBtn').addEventListener('click',doSkip);
+  document.getElementById('keyBadge').addEventListener('click',showSetup);
+  document.getElementById('scanBtn').addEventListener('click',doScan);
+  document.getElementById('clearBtn').addEventListener('click',doClear);
+  document.getElementById('kwAddBtn').addEventListener('click',doAddKw);
+  document.getElementById('kwi').addEventListener('keydown',function(e){if(e.key==='Enter')doAddKw();});
+  document.getElementById('tabLive').addEventListener('click',function(){setMode('live');});
+  document.getElementById('tabDemo').addEventListener('click',function(){setMode('demo');});
+  document.getElementById('atog').addEventListener('click',doToggleAuto);
+  document.getElementById('shareBtn').addEventListener('click',doShare);
+  document.getElementById('ftabAlerts').addEventListener('click',function(){setFeedView('alerts');});
+  document.getElementById('ftabAll').addEventListener('click',function(){setFeedView('all');});
+  document.getElementById('wsearchInput').addEventListener('input',function(e){wsFilter=e.target.value.toLowerCase();renderWL();});
+
+  try{
+    var saved=localStorage.getItem('snk');
+    if(saved&&saved.length>20){
+      apiKey=saved;
+      document.getElementById('keyField').value=saved;
+      setKeyConnected();
+      document.getElementById('setupScreen').style.display='none';
+    }
+  }catch(e){}
+  renderWL();renderKW();updateStats();
 }
 
-// ── SCAN ──
+function doActivate(){
+  var key=document.getElementById('keyField').value.trim();
+  var err=document.getElementById('errMsg');
+  if(key.length<20){err.style.display='block';document.getElementById('keyField').style.borderColor='var(--red)';return;}
+  err.style.display='none';
+  document.getElementById('keyField').style.borderColor='var(--green)';
+  apiKey=key;
+  try{localStorage.setItem('snk',key);}catch(e){}
+  setKeyConnected();
+  setTimeout(function(){document.getElementById('setupScreen').style.display='none';},400);
+}
+
+function doSkip(){mode='demo';setMode('demo');document.getElementById('setupScreen').style.display='none';}
+function showSetup(){document.getElementById('keyField').value=apiKey||'';document.getElementById('setupScreen').style.display='flex';}
+function setKeyConnected(){var b=document.getElementById('keyBadge');b.textContent='✅ LIVE NEWS CONNECTED';b.classList.add('ok');}
+
+function setMode(m){
+  mode=m;
+  document.getElementById('tabLive').classList.toggle('on',m==='live');
+  document.getElementById('tabDemo').classList.toggle('on',m==='demo');
+  document.getElementById('slbl').textContent=m==='live'?'SCAN LIVE HEADLINES NOW':'SCAN DEMO HEADLINES';
+}
+
+function setFeedView(v){
+  feedView=v;
+  document.getElementById('ftabAlerts').classList.toggle('on',v==='alerts');
+  document.getElementById('ftabAll').classList.toggle('on',v==='all');
+  renderFeed();
+}
+
+// ═══════════════════════════════════
+// NEWS FETCH
+// ═══════════════════════════════════
+async function fetchNews(key){
+  var QUERIES=['Claude AI banking automation','Anthropic Claude enterprise disruption',
+    'AI replaces financial analysts','artificial intelligence IBM legacy COBOL',
+    'Claude AI cybersecurity threat','generative AI wealth management advisor',
+    'Anthropic new model enterprise','AI automation logistics supply chain'];
+  var q=QUERIES[Math.floor(Math.random()*QUERIES.length)];
+  var articles=[];
+  try{
+    var apiUrl='https://newsapi.org/v2/everything?q='+encodeURIComponent(q)+'&sortBy=publishedAt&pageSize=15&language=en&apiKey='+key;
+    var proxyUrl='https://api.allorigins.win/get?url='+encodeURIComponent(apiUrl);
+    var r=await fetch(proxyUrl);
+    var d=await r.json();
+    var parsed=JSON.parse(d.contents);
+    if(parsed.status==='ok'&&parsed.articles){
+      parsed.articles.forEach(function(a){
+        if(a.title&&a.title!=='[Removed]'){
+          articles.push({h:a.title+(a.description?' — '+a.description.substring(0,90):''),src:(a.source&&a.source.name)?a.source.name:'News',url:a.url||'#'});
+        }
+      });
+    }
+  }catch(e){console.log('fetch err',e);}
+  return articles;
+}
+
+// ═══════════════════════════════════
+// SCAN
+// ═══════════════════════════════════
 async function doScan(){
-  if(mode==='live' && !apiKey){
-    showSetup();
-    return;
-  }
+  if(mode==='live'&&!apiKey){showSetup();return;}
+
   var btn=document.getElementById('scanBtn');
   var icon=document.getElementById('si');
   var lbl=document.getElementById('slbl');
   var loading=document.getElementById('loading');
   var lmsg=document.getElementById('lmsg');
+  var nowTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
 
-  btn.disabled=true;
-  icon.className='si spin';
-  icon.textContent='⟳';
+  btn.disabled=true;icon.className='si spin';icon.textContent='⟳';
   lbl.textContent='SCANNING...';
   document.getElementById('ltxt').textContent='SCANNING';
   loading.style.display='flex';
   document.getElementById('alist').innerHTML='';
-  scans++;
-  updateStats();
+  scans++;updateStats();
 
-  var headlines=[];
-  if(mode==='live'){
-    lmsg.textContent='FETCHING LIVE HEADLINES...';
-    headlines = await fetchNews(apiKey);
-    if(!headlines.length){
-      lmsg.textContent='USING DEMO HEADLINES...';
-      headlines = DEMO.map(function(d){ return {h:d.h,src:d.src,url:d.url}; }).sort(function(){ return Math.random()-0.5; });
-    }
+  var newAlerts=[],newHeadlines=[];
+
+  if(mode==='demo'){
+    lmsg.textContent='LOADING DEMO HEADLINES...';
+    await new Promise(function(r){setTimeout(r,600);});
+    // Shuffle demo
+    var shuffled=DEMO.slice().sort(function(){return Math.random()-0.5;});
+    shuffled.forEach(function(d,i){
+      var id=Date.now()+i;
+      var hl={id:id,src:d.src,h:d.h,url:d.url,time:nowTime,live:false};
+      newHeadlines.push(hl);
+      newAlerts.push({id:id,src:d.src,h:d.h,url:d.url,time:nowTime,live:false,
+        sev:d.sev,kws:d.kws,tks:d.tks,an:d.an,isnew:true});
+      d.tks.forEach(function(t){hits.add(t);});
+    });
   } else {
-    headlines = DEMO.map(function(d){ return {h:d.h,src:d.src,url:d.url}; }).sort(function(){ return Math.random()-0.5; });
-  }
-
-  lmsg.textContent='ANALYZING WITH CLAUDE AI...';
-  var toCheck = headlines.slice(0,6);
-  var newAlerts = [];
-
-  for(var i=0;i<toCheck.length;i++){
-    var item = toCheck[i];
-    lmsg.textContent='ANALYZING '+(i+1)+' OF '+toCheck.length+'...';
-    var result = await analyze(item.h);
-    if(result && result.isDisruptive && result.affectedTickers && result.affectedTickers.length){
-      newAlerts.push({
-        id: Date.now()+Math.random(),
-        src: item.src, h: item.h, url: item.url,
-        sev: result.severity||'LOW',
-        kws: result.matchedKeywords||[],
-        tks: result.affectedTickers||[],
-        an: result.analysis||'',
-        time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}),
-        live: mode==='live', isnew: true
-      });
-      result.affectedTickers.forEach(function(t){ hits.add(t); });
+    lmsg.textContent='FETCHING LIVE HEADLINES...';
+    var raw=await fetchNews(apiKey);
+    if(!raw.length){
+      lmsg.textContent='USING DEMO FALLBACK...';
+      raw=DEMO.map(function(d){return {h:d.h,src:d.src,url:d.url};});
     }
-    await new Promise(function(r){ setTimeout(r,180); });
+    lmsg.textContent='ANALYZING '+raw.length+' HEADLINES...';
+    for(var i=0;i<raw.length;i++){
+      var item=raw[i];
+      var id=Date.now()+i;
+      var hl={id:id,src:item.src,h:item.h,url:item.url,time:nowTime,live:true};
+      newHeadlines.push(hl);
+      var result=analyzeLocal(item.h);
+      if(result&&result.affectedTickers&&result.affectedTickers.length){
+        newAlerts.push({id:id,src:item.src,h:item.h,url:item.url,time:nowTime,live:true,
+          sev:result.severity,kws:result.matchedKeywords,tks:result.affectedTickers,
+          an:result.analysis,isnew:true});
+        result.affectedTickers.forEach(function(t){hits.add(t);});
+      }
+      await new Promise(function(r){setTimeout(r,30);});
+    }
   }
 
   loading.style.display='none';
+  allHeadlines=newHeadlines.concat(allHeadlines).slice(0,300);
   if(newAlerts.length){
-    alerts = newAlerts.concat(alerts).slice(0,60);
-    newAlerts.forEach(function(a){ if(a.sev==='HIGH'){ showToast(a); playSound(); } });
+    alerts=newAlerts.concat(alerts).slice(0,150);
+    newAlerts.forEach(function(a){if(a.sev==='HIGH'){showToast(a);playSound();}});
   }
-  renderAlerts(); renderWL(); updateStats();
-  btn.disabled=false;
-  icon.className='si';
-  icon.textContent='⚡';
-  lbl.textContent = mode==='live' ? 'SCAN LIVE HEADLINES NOW' : 'SCAN DEMO HEADLINES';
+
+  renderFeed();renderWL();updateStats();
+  btn.disabled=false;icon.className='si';icon.textContent='⚡';
+  lbl.textContent=mode==='live'?'SCAN LIVE HEADLINES NOW':'SCAN DEMO HEADLINES';
   document.getElementById('ltxt').textContent='LIVE';
 }
 
-// ── RENDER ──
+// ═══════════════════════════════════
+// RENDER
+// ═══════════════════════════════════
+var AI_TERMS=['Claude','Anthropic','GPT','ChatGPT','Gemini','OpenAI','generative AI'];
 function hlKw(txt){
   var o=txt;
-  kws.forEach(function(kw){
-    try{
-      var re=new RegExp('('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
-      o=o.replace(re,'<mark>$1</mark>');
-    }catch(e){}
+  var allTerms=kws.concat(AI_TERMS);
+  allTerms.forEach(function(kw){
+    try{var re=new RegExp('('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');o=o.replace(re,'<mark>$1</mark>');}catch(e){}
   });
   return o;
 }
 
-function renderAlerts(){
+function renderFeed(){
   var list=document.getElementById('alist');
-  if(!alerts.length){
-    list.innerHTML='<div class="empty"><div class="ei">📡</div><div class="et">No alerts yet</div><div class="es">Hit SCAN to pull headlines and analyze</div></div>';
-    return;
-  }
   list.innerHTML='';
-  alerts.forEach(function(a,i){
-    var div=document.createElement('div');
-    var sc=a.sev==='HIGH'?'sh':a.sev==='MEDIUM'?'sm':'sl';
-    div.className='ac '+sc+(a.isnew&&i<5?' nw':'');
-    div.innerHTML=
-      '<div class="atop">'+
-        '<span class="sb s'+a.sev+'">'+a.sev+'</span>'+
-        '<span class="srct '+(a.live?'slv':'sdm')+'">'+(a.live?'🟢 LIVE':'🔵 DEMO')+' · '+a.src+'</span>'+
-        '<span class="atm">'+a.time+'</span>'+
-      '</div>'+
-      '<div class="aht">'+hlKw(a.h)+'</div>'+
-      (a.an?'<div class="aan">🔍 '+a.an+'</div>':'')+
-      '<div class="trow">'+a.tks.map(function(t){ return '<span class="tk">'+t+'</span>'; }).join('')+'</div>'+
-      (a.url&&a.url!=='#'?'<a class="alink" href="'+a.url+'" target="_blank">Read article →</a>':'');
-    list.appendChild(div);
-    setTimeout(function(){ div.classList.remove('nw'); },3000);
-  });
-  document.getElementById('newChip').textContent=alerts.filter(function(a){ return a.isnew; }).length+' NEW';
+
+  if(feedView==='alerts'){
+    document.getElementById('feedChip').textContent=alerts.length+' ALERTS';
+    if(!alerts.length){
+      list.innerHTML='<div class="empty"><div class="ei">📡</div><div class="et">No disruption alerts yet</div><div class="es">Click SCAN — or switch to ALL HEADLINES tab to see raw news feed</div></div>';
+      return;
+    }
+    alerts.forEach(function(a,i){
+      var sc=a.sev==='HIGH'?'sh':a.sev==='MEDIUM'?'sm':'sl';
+      var div=document.createElement('div');
+      div.className='ac '+sc+(a.isnew&&i<10?' nw':'');
+      div.innerHTML=
+        '<div class="atop">'+
+          '<span class="sb s'+a.sev+'">'+a.sev+'</span>'+
+          '<span class="srct '+(a.live?'slv':'sdm')+'">'+(a.live?'🟢 LIVE':'🔵 DEMO')+' · '+a.src+'</span>'+
+          '<span class="atm">'+a.time+'</span>'+
+        '</div>'+
+        '<div class="aht">'+hlKw(a.h)+'</div>'+
+        (a.an?'<div class="aan">🔍 '+a.an+'</div>':'')+
+        '<div class="trow">'+a.tks.map(function(t){return '<span class="tk">'+t+'</span>';}).join('')+'</div>'+
+        (a.url&&a.url!=='#'?'<a class="alink" href="'+a.url+'" target="_blank">Read article →</a>':'');
+      list.appendChild(div);
+      setTimeout(function(){div.classList.remove('nw');},4000);
+    });
+  } else {
+    document.getElementById('feedChip').textContent=allHeadlines.length+' HEADLINES';
+    if(!allHeadlines.length){
+      list.innerHTML='<div class="empty"><div class="ei">📰</div><div class="et">No headlines yet</div><div class="es">Click SCAN to fetch headlines</div></div>';
+      return;
+    }
+    allHeadlines.forEach(function(hl){
+      var isAlert=alerts.find(function(a){return a.id===hl.id;});
+      var div=document.createElement('div');
+      div.className='art'+(isAlert?' ac '+(isAlert.sev==='HIGH'?'sh':isAlert.sev==='MEDIUM'?'sm':'sl'):'');
+      div.innerHTML=
+        '<div class="art-top">'+
+          (isAlert?'<span class="sb s'+isAlert.sev+'">'+isAlert.sev+'</span>':'')+
+          '<span class="art-src '+(hl.live?'art-live':'art-demo')+'">'+hl.src+'</span>'+
+          '<span class="art-time">'+hl.time+'</span>'+
+        '</div>'+
+        '<div class="art-h">'+hlKw(hl.h)+'</div>'+
+        (isAlert&&isAlert.tks&&isAlert.tks.length?'<div class="trow">'+isAlert.tks.map(function(t){return '<span class="tk">'+t+'</span>';}).join('')+'</div>':'')+
+        (hl.url&&hl.url!=='#'?'<a class="art-link" href="'+hl.url+'" target="_blank">Read →</a>':'');
+      list.appendChild(div);
+    });
+  }
 }
 
 function renderWL(){
   var list=document.getElementById('wlist');
   list.innerHTML='';
-  var sorted=[].concat(WL).sort(function(a,b){
-    return (hits.has(a.t)?0:1)-(hits.has(b.t)?0:1)||(a.r>b.r?1:-1);
+  var filtered=WL.filter(function(w){
+    if(!wsFilter) return true;
+    return w.t.toLowerCase().indexOf(wsFilter)>=0||w.n.toLowerCase().indexOf(wsFilter)>=0||w.s.toLowerCase().indexOf(wsFilter)>=0;
   });
-  sorted.forEach(function(w){
+  filtered.sort(function(a,b){
+    var ha=hits.has(a.t)?0:1,hb=hits.has(b.t)?0:1;
+    if(ha!==hb) return ha-hb;
+    if(a.s!==b.s) return a.s.localeCompare(b.s);
+    return ({H:0,M:1,L:2}[a.r])-({H:0,M:1,L:2}[b.r]);
+  });
+  var lastSec='';
+  filtered.forEach(function(w){
+    if(w.s!==lastSec&&!wsFilter){
+      var sec=document.createElement('div');
+      sec.className='wsec';sec.textContent=w.s;
+      list.appendChild(sec);lastSec=w.s;
+    }
     var h=hits.has(w.t);
     var div=document.createElement('div');
     div.className='wr'+(h?' hit':'');
@@ -641,18 +761,18 @@ function renderWL(){
       (h?'<div class="hdot"></div>':'');
     list.appendChild(div);
   });
+  document.getElementById('wchip').textContent=WL.length+' STOCKS';
 }
 
 function renderKW(){
   var grid=document.getElementById('kwgrid');
   grid.innerHTML='';
-  var HIGH=['COBOL','Anthropic','Claude Code','IBM','new Claude','direct threat'];
+  var HKW=['COBOL','Anthropic','Claude Code','IBM','new Claude','direct threat'];
   kws.forEach(function(kw,i){
     var s=document.createElement('span');
-    s.className='kw on'+(HIGH.indexOf(kw)<0?' b':'');
-    s.textContent=kw;
-    s.title='Click to remove';
-    s.onclick=function(){ kws.splice(i,1); renderKW(); updateStats(); };
+    s.className='kw on'+(HKW.indexOf(kw)<0?' b':'');
+    s.textContent=kw;s.title='Click to remove';
+    s.onclick=(function(idx){return function(){kws.splice(idx,1);renderKW();updateStats();};})(i);
     grid.appendChild(s);
   });
   document.getElementById('kwchip').textContent=kws.length+' ACTIVE';
@@ -663,34 +783,27 @@ function updateStats(){
   document.getElementById('stS').textContent=hits.size;
   document.getElementById('stK').textContent=kws.length;
   document.getElementById('stN').textContent=scans;
-  document.getElementById('wchip').textContent=WL.length+' STOCKS';
 }
 
-function doClear(){ alerts=[]; hits.clear(); renderAlerts(); renderWL(); updateStats(); }
+function doClear(){alerts=[];allHeadlines=[];hits.clear();renderFeed();renderWL();updateStats();}
 
 function doAddKw(){
   var input=document.getElementById('kwi');
   var val=input.value.trim();
-  if(val && kws.indexOf(val)<0){ kws.push(val); renderKW(); updateStats(); input.value=''; }
+  if(val&&kws.indexOf(val)<0){kws.push(val);renderKW();updateStats();input.value='';}
 }
 
 function doToggleAuto(){
   var el=document.getElementById('atog');
   var on=el.classList.toggle('on');
-  if(on){
-    cd=300; startCD();
-    autoInt=setInterval(function(){ doScan(); cd=300; },300000);
-  } else {
-    clearInterval(autoInt); clearInterval(cdTimer);
-    document.getElementById('ctxt').textContent='';
-  }
+  if(on){cd=300;startCD();autoInt=setInterval(function(){doScan();cd=300;},300000);}
+  else{clearInterval(autoInt);clearInterval(cdTimer);document.getElementById('ctxt').textContent='';}
 }
 
 function startCD(){
   clearInterval(cdTimer);
   cdTimer=setInterval(function(){
-    cd--;
-    if(cd<=0) cd=300;
+    cd--;if(cd<=0)cd=300;
     var m=Math.floor(cd/60),s=cd%60;
     document.getElementById('ctxt').textContent='Next: '+m+':'+String(s).padStart(2,'0');
   },1000);
@@ -700,33 +813,31 @@ function showToast(a){
   var c=document.getElementById('toasts');
   var d=document.createElement('div');
   d.className='toast';
-  d.innerHTML='<div class="tt">🚨 DISRUPTION ALERT — '+a.sev+'</div><div class="tb">'+a.h.substring(0,100)+'...</div><div class="tticks">'+a.tks.slice(0,6).map(function(t){ return '<span class="tk">'+t+'</span>'; }).join('')+'</div>';
-  c.appendChild(d);
-  setTimeout(function(){ d.remove(); },8000);
+  d.innerHTML='<div class="tt">🚨 DISRUPTION ALERT — '+a.sev+'</div><div class="tb">'+a.h.substring(0,110)+'...</div><div class="tticks">'+a.tks.slice(0,6).map(function(t){return '<span class="tk">'+t+'</span>';}).join('')+'</div>';
+  c.appendChild(d);setTimeout(function(){d.remove();},8000);
 }
 
 function playSound(){
   try{
     var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    [[440,0],[550,0.13],[660,0.26]].forEach(function(pair){
+    [[440,0],[550,0.13],[660,0.26]].forEach(function(p){
       var o=ctx.createOscillator(),g=ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value=pair[0]; o.type='sine';
-      g.gain.setValueAtTime(0.12,ctx.currentTime+pair[1]);
-      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+pair[1]+0.28);
-      o.start(ctx.currentTime+pair[1]); o.stop(ctx.currentTime+pair[1]+0.3);
+      o.connect(g);g.connect(ctx.destination);
+      o.frequency.value=p[0];o.type='sine';
+      g.gain.setValueAtTime(0.12,ctx.currentTime+p[1]);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+p[1]+0.28);
+      o.start(ctx.currentTime+p[1]);o.stop(ctx.currentTime+p[1]+0.3);
     });
   }catch(e){}
 }
 
 function doShare(){
   var url=encodeURIComponent(window.location.href);
-  var txt=encodeURIComponent('🚨 FREE TOOL: Real-time alerts when Claude/AI threatens legacy stocks\n\nIBM dropped 13% on COBOL fears. Cybersecurity names down 8%. Banks sold off.\nThis catches those headlines before the algorithmic selloff.\n\nNo signup. Works instantly 👇\n');
+  var txt=encodeURIComponent('🚨 FREE TOOL: Real-time alerts when Claude/AI threatens legacy stocks\n\nIBM dropped 13% on COBOL fears. Cybersecurity names down 8%. Banks sold off.\nCatches those headlines before the algorithmic selloff.\n\nNo signup. 150+ NASDAQ stocks 👇\n');
   window.open('https://twitter.com/intent/tweet?text='+txt+'&url='+url,'_blank');
 }
 
-// START
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
 </html>
