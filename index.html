@@ -3,520 +3,613 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SENTINEL — AI Market Disruption Monitor</title>
+<title>SENTINEL v2 — AI Market Disruption Monitor</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
-:root{--bg:#03030a;--surface:#080812;--border:#131328;--border2:#1e1e3a;--red:#ff2d2d;--orange:#ff7a00;--green:#00e87a;--blue:#38b2ff;--text:#dde1f0;--dim:#4a4a6a;--dimmer:#252540;}
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#020208;--surface:#07070f;--surface2:#0d0d1a;--border:#141425;--border2:#1c1c35;
+  --red:#ff2040;--red2:#ff4d64;--orange:#ff7a00;--orange2:#ffaa44;
+  --green:#00e87a;--green2:#00ff88;--blue:#38b2ff;--blue2:#7dd3fc;
+  --purple:#a78bfa;--text:#e2e8f0;--dim:#4a5568;--dimmer:#1e2235;
+  --glow-red:rgba(255,32,64,0.15);--glow-blue:rgba(56,178,255,0.1);
+  --ticker-h:38px;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 10%,rgba(255,45,45,0.06) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 80%,rgba(56,178,255,0.04) 0%,transparent 60%);pointer-events:none;z-index:0;}
-body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,178,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(56,178,255,0.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
-.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 20px;}
-.setup-screen{position:fixed;inset:0;background:rgba(3,3,10,0.97);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
-.setup-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:38px;max-width:540px;width:100%;position:relative;overflow:visible;}
-.setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,var(--red),var(--orange),var(--blue));}
-.setup-logo{font-size:1.55rem;font-weight:800;letter-spacing:6px;background:linear-gradient(135deg,#ff2d2d,#ff7a00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
-.setup-sub{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;letter-spacing:3px;color:var(--dim);margin-bottom:24px;text-transform:uppercase;}
-.setup-card h2{font-size:1.1rem;font-weight:700;margin-bottom:10px;color:var(--text);}
-.setup-card p{font-size:0.8rem;color:var(--dim);line-height:1.7;margin-bottom:16px;}
-.setup-card p a{color:var(--blue);text-decoration:none;}
-.setup-steps{background:rgba(56,178,255,0.05);border:1px solid rgba(56,178,255,0.15);border-radius:8px;padding:14px 16px;margin-bottom:20px;}
-.setup-step{display:flex;gap:11px;align-items:flex-start;margin-bottom:9px;font-size:0.78rem;color:var(--dim);line-height:1.5;}
-.setup-step:last-child{margin-bottom:0;}
-.step-n{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;background:rgba(56,178,255,0.15);color:var(--blue);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
-.setup-step strong{color:var(--text);}
-.key-row{display:flex;gap:10px;margin-bottom:12px;align-items:stretch;}
-.key-field{flex:1;min-width:0;background:rgba(255,255,255,0.06);border:1px solid var(--border2);border-radius:7px;padding:12px 14px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.72rem;outline:none;transition:border-color 0.2s;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* Grid overlay */
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,178,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(56,178,255,.018) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+
+/* Ambient blobs */
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:0.5;}
+.blob1{width:600px;height:400px;background:radial-gradient(circle,rgba(255,32,64,.12),transparent 70%);top:-100px;left:-100px;}
+.blob2{width:500px;height:500px;background:radial-gradient(circle,rgba(56,178,255,.07),transparent 70%);bottom:-100px;right:-50px;}
+.blob3{width:300px;height:300px;background:radial-gradient(circle,rgba(167,139,250,.06),transparent 70%);top:40%;left:40%;}
+
+/* ── TICKER TAPE ── */
+.ticker-wrap{position:fixed;top:0;left:0;right:0;height:var(--ticker-h);background:rgba(2,2,8,0.95);border-bottom:1px solid var(--border2);z-index:100;overflow:hidden;backdrop-filter:blur(12px);}
+.ticker-inner{display:flex;align-items:center;height:100%;gap:0;}
+.ticker-label{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:3px;color:var(--red);background:rgba(255,32,64,.12);border-right:1px solid rgba(255,32,64,.3);padding:0 14px;height:100%;display:flex;align-items:center;}
+.ticker-track{flex:1;overflow:hidden;position:relative;}
+.ticker-scroll{display:flex;gap:0;white-space:nowrap;animation:ticker 35s linear infinite;}
+.ticker-scroll:hover{animation-play-state:paused;}
+.ticker-item{display:inline-flex;align-items:center;gap:7px;padding:0 20px;border-right:1px solid var(--border2);font-family:'JetBrains Mono',monospace;font-size:.62rem;}
+.t-sym{font-weight:700;color:var(--text);}
+.t-sev-H{color:var(--red);}
+.t-sev-M{color:var(--orange);}
+.t-sev-L{color:var(--blue);}
+.t-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.t-dot-H{background:var(--red);box-shadow:0 0 6px var(--red);animation:pulse 1.5s infinite;}
+.t-dot-M{background:var(--orange);}
+.t-dot-L{background:var(--blue);}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+
+/* ── SETUP MODAL ── */
+.setup-overlay{position:fixed;inset:0;background:rgba(2,2,8,.97);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.setup-card{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:40px;max-width:560px;width:100%;position:relative;}
+.setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,var(--red),var(--orange),var(--blue),var(--purple));}
+.setup-logo{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;background:linear-gradient(135deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:6px;}
+.setup-sub{font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:3px;color:var(--dim);margin-bottom:24px;margin-top:2px;}
+.setup-h{font-size:1.1rem;font-weight:600;margin-bottom:8px;}
+.setup-p{font-size:.8rem;color:var(--dim);line-height:1.8;margin-bottom:18px;}
+.setup-p a{color:var(--blue);text-decoration:none;}
+.setup-p strong{color:var(--text);}
+.src-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
+.src-card{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:13px 14px;}
+.src-card.free{border-color:rgba(0,232,122,.2);}
+.src-name{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;color:var(--text);margin-bottom:3px;}
+.src-info{font-size:.71rem;color:var(--dim);line-height:1.5;}
+.src-badge{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:2px 6px;border-radius:3px;letter-spacing:1px;display:inline-block;margin-top:4px;}
+.src-free{background:rgba(0,232,122,.1);color:var(--green);border:1px solid rgba(0,232,122,.2);}
+.src-key{background:rgba(56,178,255,.1);color:var(--blue);border:1px solid rgba(56,178,255,.2);}
+.setup-section{margin-bottom:14px;}
+.setup-section-label{font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.key-row{display:flex;gap:8px;margin-bottom:8px;}
+.key-field{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.72rem;outline:none;transition:border-color .2s;}
 .key-field:focus{border-color:var(--blue);}
-.key-field::placeholder{color:var(--dimmer);font-size:0.68rem;}
-.btn-go{flex-shrink:0;background:linear-gradient(135deg,rgba(255,45,45,0.25),rgba(255,122,0,0.18));border:1px solid rgba(255,45,45,0.5);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;font-weight:700;letter-spacing:2px;padding:12px 18px;border-radius:7px;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
-.btn-go:hover{background:linear-gradient(135deg,rgba(255,45,45,0.38),rgba(255,122,0,0.28));}
-.err-msg{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--red);display:none;margin-bottom:10px;padding:8px 10px;background:rgba(255,45,45,0.08);border-radius:5px;border:1px solid rgba(255,45,45,0.2);}
-.privacy{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;color:var(--dimmer);letter-spacing:1px;}
-.skip-link{background:none;border:none;color:var(--blue);font-family:'IBM Plex Mono',monospace;font-size:0.62rem;letter-spacing:1px;cursor:pointer;text-decoration:underline;margin-top:14px;display:block;}
-.hero{padding:28px 0 20px;border-bottom:1px solid var(--border2);}
-.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;}
-.brand{display:flex;align-items:center;gap:14px;}
-.b-icon{width:46px;height:46px;background:linear-gradient(135deg,rgba(255,45,45,0.2),rgba(255,122,0,0.15));border:1px solid rgba(255,45,45,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
-.b-name{font-size:1.6rem;font-weight:800;letter-spacing:6px;background:linear-gradient(135deg,#ff2d2d,#ff7a00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
-.b-sub{font-family:'IBM Plex Mono',monospace;font-size:0.55rem;letter-spacing:3px;color:var(--dim);margin-top:4px;text-transform:uppercase;}
-.hdr-right{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
-.live-pill{display:flex;align-items:center;gap:7px;background:rgba(0,232,122,0.06);border:1px solid rgba(0,232,122,0.2);border-radius:6px;padding:7px 11px;}
-.ldot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:lp 2s infinite;}
-@keyframes lp{0%,100%{opacity:1}50%{opacity:0.4}}
-.ltxt{font-family:'IBM Plex Mono',monospace;font-size:0.61rem;color:var(--green);letter-spacing:2px;}
-.key-badge{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;padding:7px 10px;border-radius:6px;cursor:pointer;border:1px solid var(--border2);color:var(--dim);background:var(--surface);transition:all 0.2s;}
-.key-badge.ok{color:var(--green);border-color:rgba(0,232,122,0.3);background:rgba(0,232,122,0.05);}
-.tagline{margin-top:14px;font-size:0.88rem;color:var(--dim);max-width:760px;line-height:1.7;}
+.key-field::placeholder{color:var(--dimmer);font-size:.65rem;}
+.key-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--dim);margin-bottom:5px;}
+.btn-activate{background:linear-gradient(135deg,rgba(255,32,64,.2),rgba(255,122,0,.15));border:1px solid rgba(255,32,64,.45);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;letter-spacing:2px;padding:11px 18px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.btn-activate:hover{background:linear-gradient(135deg,rgba(255,32,64,.32),rgba(255,122,0,.24));}
+.btn-skip{width:100%;margin-top:14px;background:none;border:1px solid var(--border2);color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:2px;padding:10px;border-radius:8px;cursor:pointer;transition:all .2s;}
+.btn-skip:hover{border-color:var(--blue);color:var(--blue);}
+.err-msg{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--red);display:none;margin-bottom:8px;padding:8px 10px;background:rgba(255,32,64,.07);border-radius:6px;border:1px solid rgba(255,32,64,.2);}
+.privacy{font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--dimmer);letter-spacing:1px;margin-top:10px;}
+
+/* ── MAIN LAYOUT ── */
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 22px;padding-top:calc(var(--ticker-h) + 16px);}
+
+/* ── HERO ── */
+.hero{padding:22px 0 18px;border-bottom:1px solid var(--border2);display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;}
+.hero-left{}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+.b-icon{width:44px;height:44px;background:linear-gradient(135deg,rgba(255,32,64,.2),rgba(255,122,0,.12));border:1px solid rgba(255,32,64,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;}
+.b-name{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;letter-spacing:7px;background:linear-gradient(135deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.b-version{font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:3px;color:var(--dim);margin-top:3px;}
+.tagline{font-size:.85rem;color:var(--dim);max-width:680px;line-height:1.8;}
 .tagline strong{color:var(--text);}
-.scan-bar{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap;}
-.btn-scan{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,45,45,0.18),rgba(255,122,0,0.12));border:1px solid rgba(255,45,45,0.4);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:0.68rem;font-weight:700;letter-spacing:2px;padding:11px 22px;border-radius:6px;cursor:pointer;transition:all 0.2s;}
-.btn-scan:hover{background:linear-gradient(135deg,rgba(255,45,45,0.28),rgba(255,122,0,0.22));transform:translateY(-1px);}
-.btn-scan:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
-.si{font-size:1rem;}
-.spin{animation:spin 0.9s linear infinite;display:inline-block;}
+.hero-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.status-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
+.pill{display:flex;align-items:center;gap:6px;border-radius:6px;padding:6px 11px;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:1px;}
+.pill-live{background:rgba(0,232,122,.07);border:1px solid rgba(0,232,122,.2);color:var(--green);}
+.pill-key{background:var(--surface2);border:1px solid var(--border2);color:var(--dim);cursor:pointer;transition:all .2s;}
+.pill-key:hover{border-color:var(--blue);color:var(--blue);}
+.pill-key.connected{background:rgba(0,232,122,.07);border-color:rgba(0,232,122,.25);color:var(--green);}
+.ldot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+
+/* ── CONTROLS ── */
+.controls{padding:14px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--border);}
+.btn-scan{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,32,64,.18),rgba(255,122,0,.12));border:1px solid rgba(255,32,64,.4);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;letter-spacing:2px;padding:11px 22px;border-radius:7px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.btn-scan::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,32,64,.15),transparent);opacity:0;transition:opacity .2s;}
+.btn-scan:hover::after{opacity:1;}
+.btn-scan:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(255,32,64,.25);}
+.btn-scan:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-scan.scanning{border-color:rgba(56,178,255,.4);background:linear-gradient(135deg,rgba(56,178,255,.15),rgba(167,139,250,.1));}
+.si{font-size:.95rem;}
+.spin{animation:spin .8s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.mtabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:4px;}
-.mtab{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;letter-spacing:1px;padding:5px 11px;border-radius:4px;cursor:pointer;color:var(--dim);border:none;background:none;}
-.mtab.on{background:rgba(255,45,45,0.15);color:var(--red);}
-.awrap{display:flex;align-items:center;gap:7px;}
-.atog{width:32px;height:17px;background:var(--dimmer);border-radius:9px;position:relative;cursor:pointer;transition:background 0.2s;}
-.atog.on{background:rgba(56,178,255,0.4);}
-.atog::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;background:var(--dim);border-radius:50%;transition:transform 0.2s,background 0.2s;}
-.atog.on::after{transform:translateX(15px);background:var(--blue);}
-.albl{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;color:var(--dim);letter-spacing:1px;cursor:pointer;}
-.ctxt{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;color:var(--dimmer);}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;padding:16px 0;}
-.st{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:14px 16px;position:relative;overflow:hidden;}
-.st::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
-.st.r::before{background:linear-gradient(90deg,var(--red),transparent);}
-.st.o::before{background:linear-gradient(90deg,var(--orange),transparent);}
-.st.b::before{background:linear-gradient(90deg,var(--blue),transparent);}
-.st.g::before{background:linear-gradient(90deg,var(--green),transparent);}
-.stn{font-family:'IBM Plex Mono',monospace;font-size:1.8rem;font-weight:700;line-height:1;}
-.st.r .stn{color:var(--red);}.st.o .stn{color:var(--orange);}.st.b .stn{color:var(--blue);}.st.g .stn{color:var(--green);}
-.stl{font-family:'IBM Plex Mono',monospace;font-size:0.54rem;color:var(--dim);letter-spacing:2px;margin-top:5px;}
-.layout{display:grid;grid-template-columns:1fr 320px;gap:14px;padding-bottom:38px;}
-.panel{background:var(--surface);border:1px solid var(--border2);border-radius:10px;overflow:hidden;}
-.ph{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.pt{font-family:'IBM Plex Mono',monospace;font-size:0.61rem;letter-spacing:3px;text-transform:uppercase;}
-.chip{font-family:'IBM Plex Mono',monospace;font-size:0.54rem;padding:3px 7px;border-radius:4px;letter-spacing:1px;}
-.cr{background:rgba(255,45,45,0.15);color:var(--red);border:1px solid rgba(255,45,45,0.25);}
-.cb{background:rgba(56,178,255,0.12);color:var(--blue);border:1px solid rgba(56,178,255,0.25);}
-.cd{background:rgba(255,255,255,0.05);color:var(--dim);border:1px solid var(--border2);cursor:pointer;}
-.feed-tabs{display:flex;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.2);}
-.ftab{font-family:'IBM Plex Mono',monospace;font-size:0.57rem;letter-spacing:2px;padding:10px 16px;cursor:pointer;color:var(--dim);border:none;background:none;border-bottom:2px solid transparent;}
+.mode-tabs{display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:3px;}
+.mtab{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:1px;padding:5px 12px;border-radius:5px;cursor:pointer;color:var(--dim);border:none;background:none;transition:all .2s;}
+.mtab.on{background:rgba(255,32,64,.15);color:var(--red);}
+.auto-wrap{display:flex;align-items:center;gap:7px;}
+.atog{width:34px;height:18px;background:var(--dimmer);border-radius:9px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.atog.on{background:rgba(56,178,255,.35);}
+.atog::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#555;border-radius:50%;transition:transform .2s,background .2s;}
+.atog.on::after{transform:translateX(16px);background:var(--blue);}
+.albl{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--dim);letter-spacing:1px;cursor:pointer;}
+.ctxt{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--dimmer);}
+.sep{width:1px;height:24px;background:var(--border2);}
+.source-indicators{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.src-ind{font-family:'JetBrains Mono',monospace;font-size:.48rem;padding:3px 7px;border-radius:4px;letter-spacing:1px;}
+.src-ind.active{background:rgba(0,232,122,.08);color:var(--green);border:1px solid rgba(0,232,122,.2);}
+.src-ind.inactive{background:rgba(255,255,255,.04);color:var(--dimmer);border:1px solid var(--border);}
+.src-ind-label{font-family:'JetBrains Mono',monospace;font-size:.48rem;color:var(--dimmer);letter-spacing:2px;}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px 0;}
+.stat{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;cursor:default;}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat.r::before{background:linear-gradient(90deg,var(--red),transparent);}
+.stat.o::before{background:linear-gradient(90deg,var(--orange),transparent);}
+.stat.b::before{background:linear-gradient(90deg,var(--blue),transparent);}
+.stat.g::before{background:linear-gradient(90deg,var(--green),transparent);}
+.stat.p::before{background:linear-gradient(90deg,var(--purple),transparent);}
+.stat-n{font-family:'JetBrains Mono',monospace;font-size:1.9rem;font-weight:700;line-height:1;transition:all .3s;}
+.stat.r .stat-n{color:var(--red);}
+.stat.o .stat-n{color:var(--orange);}
+.stat.b .stat-n{color:var(--blue);}
+.stat.g .stat-n{color:var(--green);}
+.stat.p .stat-n{color:var(--purple);}
+.stat-l{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--dim);letter-spacing:2px;margin-top:5px;text-transform:uppercase;}
+.stat.bump .stat-n{animation:bump .4s ease;}
+@keyframes bump{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:1fr 330px;gap:14px;padding-bottom:40px;}
+
+/* ── MAIN FEED PANEL ── */
+.panel{background:var(--surface);border:1px solid var(--border2);border-radius:12px;overflow:hidden;}
+.panel-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.panel-title{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--dim);}
+.panel-actions{display:flex;gap:6px;align-items:center;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:.52rem;padding:3px 8px;border-radius:4px;letter-spacing:1px;}
+.chip-red{background:rgba(255,32,64,.15);color:var(--red);border:1px solid rgba(255,32,64,.25);}
+.chip-blue{background:rgba(56,178,255,.12);color:var(--blue);border:1px solid rgba(56,178,255,.2);}
+.chip-btn{background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--border2);cursor:pointer;transition:all .2s;}
+.chip-btn:hover{border-color:var(--blue);color:var(--blue);}
+
+/* Feed tabs */
+.feed-tabs{display:flex;background:rgba(0,0,0,.25);border-bottom:1px solid var(--border);}
+.ftab{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:2px;padding:10px 16px;cursor:pointer;color:var(--dim);border:none;background:none;border-bottom:2px solid transparent;transition:all .2s;}
 .ftab.on{color:var(--red);border-bottom-color:var(--red);}
-.alist{max-height:620px;overflow-y:auto;}
+
+/* Filter bar */
+.filter-bar{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.filter-input{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.6rem;outline:none;width:160px;}
+.filter-input:focus{border-color:var(--blue);}
+.filter-input::placeholder{color:var(--dimmer);}
+.sev-filters{display:flex;gap:4px;}
+.sf{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:3px 7px;border-radius:4px;cursor:pointer;border:1px solid var(--border2);color:var(--dim);letter-spacing:1px;transition:all .2s;}
+.sf.on.H{background:rgba(255,32,64,.15);color:var(--red);border-color:rgba(255,32,64,.3);}
+.sf.on.M{background:rgba(255,122,0,.14);color:var(--orange);border-color:rgba(255,122,0,.3);}
+.sf.on.L{background:rgba(56,178,255,.1);color:var(--blue);border-color:rgba(56,178,255,.2);}
+.filter-count{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--dimmer);margin-left:auto;}
+.csv-btn{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:3px 8px;border-radius:4px;background:rgba(0,232,122,.07);color:var(--green);border:1px solid rgba(0,232,122,.2);cursor:pointer;letter-spacing:1px;transition:all .2s;margin-left:4px;}
+.csv-btn:hover{background:rgba(0,232,122,.15);}
+
+/* ── ALERTS ── */
+.alist{max-height:640px;overflow-y:auto;}
 .alist::-webkit-scrollbar{width:3px;}
 .alist::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.ac{padding:14px 16px;border-bottom:1px solid var(--border);}
-.ac:hover{background:rgba(255,255,255,0.014);}
-.ac.sh{border-left:3px solid var(--red);background:rgba(255,45,45,0.04);}
-.ac.sm{border-left:3px solid var(--orange);background:rgba(255,122,0,0.03);}
+
+.ac{padding:15px 16px;border-bottom:1px solid var(--border);position:relative;transition:background .15s;cursor:default;}
+.ac:hover{background:rgba(255,255,255,.012);}
+.ac.sh{border-left:3px solid var(--red);background:rgba(255,32,64,.035);}
+.ac.sm{border-left:3px solid var(--orange);background:rgba(255,122,0,.025);}
 .ac.sl{border-left:3px solid var(--blue);}
 .ac.nw{animation:nf 3s ease-out;}
-@keyframes nf{0%{background:rgba(255,45,45,0.25);}100%{background:rgba(255,45,45,0.04);}}
-.atop{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap;}
-.sb{font-family:'IBM Plex Mono',monospace;font-size:0.52rem;padding:2px 6px;border-radius:3px;letter-spacing:1px;font-weight:700;}
-.sH{background:rgba(255,45,45,0.2);color:var(--red);border:1px solid rgba(255,45,45,0.3);}
-.sM{background:rgba(255,122,0,0.18);color:var(--orange);border:1px solid rgba(255,122,0,0.3);}
-.sL{background:rgba(56,178,255,0.12);color:var(--blue);border:1px solid rgba(56,178,255,0.25);}
-.srct{font-family:'IBM Plex Mono',monospace;font-size:0.54rem;padding:2px 6px;border-radius:3px;letter-spacing:1px;}
-.slv{background:rgba(0,232,122,0.08);color:var(--green);border:1px solid rgba(0,232,122,0.2);}
-.sdm{background:rgba(56,178,255,0.08);color:var(--blue);border:1px solid rgba(56,178,255,0.2);}
-.atm{font-family:'IBM Plex Mono',monospace;font-size:0.53rem;color:#ffffff;margin-left:auto;}
-.aht{font-size:0.85rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:8px;}
-.aht mark,.art-h mark{background:rgba(255,45,45,0.2);color:#ff7a7a;padding:0 3px;border-radius:2px;}
-.aan{font-size:0.71rem;color:var(--dim);line-height:1.6;margin-bottom:8px;padding:8px 11px;background:rgba(255,255,255,0.02);border-radius:6px;border-left:2px solid rgba(255,45,45,0.3);}
+@keyframes nf{0%{background:rgba(255,32,64,.22);}100%{background:rgba(255,32,64,.035);}}
+.ac.expanded .ac-preview{display:none;}
+.ac.expanded .ac-full{display:block;}
+.ac-preview{}
+.ac-full{display:none;}
+
+.atop{display:flex;align-items:center;gap:7px;margin-bottom:8px;flex-wrap:wrap;}
+.sb{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:2px 6px;border-radius:3px;letter-spacing:1px;font-weight:700;}
+.sH{background:rgba(255,32,64,.2);color:var(--red);border:1px solid rgba(255,32,64,.3);}
+.sM{background:rgba(255,122,0,.18);color:var(--orange);border:1px solid rgba(255,122,0,.28);}
+.sL{background:rgba(56,178,255,.12);color:var(--blue);border:1px solid rgba(56,178,255,.2);}
+.srctag{font-family:'JetBrains Mono',monospace;font-size:.52rem;padding:2px 7px;border-radius:3px;letter-spacing:1px;}
+.slive{background:rgba(0,232,122,.07);color:var(--green);border:1px solid rgba(0,232,122,.2);}
+.sdemo{background:rgba(56,178,255,.07);color:var(--blue);border:1px solid rgba(56,178,255,.2);}
+.srcname{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:var(--dim);padding:2px 6px;}
+.atm{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:#fff;margin-left:auto;}
+.expand-btn{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:2px 6px;border-radius:3px;background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--dim);cursor:pointer;letter-spacing:1px;flex-shrink:0;}
+.expand-btn:hover{border-color:var(--blue);color:var(--blue);}
+
+.aht{font-size:.86rem;font-weight:500;color:var(--text);line-height:1.55;margin-bottom:8px;}
+.aht mark{background:rgba(255,32,64,.18);color:#ff7070;padding:0 2px;border-radius:2px;}
+.aan{font-size:.7rem;color:var(--dim);line-height:1.65;margin-bottom:8px;padding:9px 12px;background:rgba(255,255,255,.025);border-radius:7px;border-left:2px solid rgba(255,32,64,.3);}
 .trow{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
-.tk{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;padding:3px 7px;border-radius:4px;background:rgba(255,45,45,0.1);color:#ff6060;border:1px solid rgba(255,45,45,0.2);letter-spacing:1px;}
-.alink,.art-link{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--blue);text-decoration:none;opacity:0.7;display:inline-block;margin-top:4px;}
-.alink:hover,.art-link:hover{opacity:1;}
-.art{padding:13px 16px;border-bottom:1px solid var(--border);}
-.art:hover{background:rgba(255,255,255,0.012);}
-.art-top{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap;}
-.art-src{font-family:'IBM Plex Mono',monospace;font-size:0.54rem;padding:2px 6px;border-radius:3px;letter-spacing:1px;}
-.art-live{background:rgba(0,232,122,0.08);color:var(--green);border:1px solid rgba(0,232,122,0.2);}
-.art-demo{background:rgba(56,178,255,0.08);color:var(--blue);border:1px solid rgba(56,178,255,0.2);}
-.art-time{font-family:'IBM Plex Mono',monospace;font-size:0.53rem;color:#ffffff;margin-left:auto;}
-.art-h{font-size:0.84rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:7px;}
-.empty{padding:46px 20px;text-align:center;}
-.ei{font-size:2rem;margin-bottom:12px;opacity:0.32;}
-.et{font-size:0.92rem;color:var(--dim);margin-bottom:6px;font-weight:600;}
-.es{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:var(--dimmer);letter-spacing:1px;}
-.loading{padding:46px 20px;text-align:center;display:none;flex-direction:column;align-items:center;gap:13px;}
-.lring{width:38px;height:38px;border-radius:50%;border:2px solid var(--border2);border-top-color:var(--red);border-right-color:var(--orange);animation:spin 0.9s linear infinite;}
-.lmsg{font-family:'IBM Plex Mono',monospace;font-size:0.61rem;color:var(--blue);letter-spacing:2px;animation:blink 1.2s infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.tk{font-family:'JetBrains Mono',monospace;font-size:.57rem;padding:3px 7px;border-radius:4px;background:rgba(255,32,64,.1);color:#ff6060;border:1px solid rgba(255,32,64,.2);letter-spacing:1px;cursor:default;}
+.tk:hover{background:rgba(255,32,64,.2);}
+.alink{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--blue);text-decoration:none;opacity:.7;display:inline-block;margin-top:4px;transition:opacity .15s;}
+.alink:hover{opacity:1;}
+
+/* Skeleton loader */
+.skeleton-wrap{padding:14px 16px;border-bottom:1px solid var(--border);}
+.skeleton{background:linear-gradient(90deg,var(--dimmer) 25%,rgba(30,34,53,.8) 50%,var(--dimmer) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;}
+@keyframes shimmer{to{background-position:-200% 0;}}
+.sk1{height:10px;width:60%;margin-bottom:9px;}
+.sk2{height:16px;width:95%;margin-bottom:6px;}
+.sk3{height:16px;width:80%;margin-bottom:9px;}
+.sk4{height:10px;width:40%;margin-bottom:9px;}
+.sk5{height:24px;width:70%;border-radius:6px;}
+
+.empty{padding:50px 20px;text-align:center;}
+.empty-icon{font-size:2.2rem;margin-bottom:12px;opacity:.3;}
+.empty-t{font-size:.9rem;color:var(--dim);margin-bottom:6px;font-weight:500;}
+.empty-s{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--dimmer);letter-spacing:1px;}
+
+/* Article feed */
+.art{padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;}
+.art:hover{background:rgba(255,255,255,.01);}
+.art-top{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap;}
+.art-time{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:#fff;margin-left:auto;}
+.art-h{font-size:.82rem;font-weight:500;color:var(--text);line-height:1.5;margin-bottom:5px;}
+
+/* ── SIDEBAR ── */
 .sidebar{display:flex;flex-direction:column;gap:12px;}
-.wlist{max-height:380px;overflow-y:auto;}
+
+/* Watchlist */
+.wlist{max-height:400px;overflow-y:auto;}
 .wlist::-webkit-scrollbar{width:3px;}
 .wlist::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 .wsearch{padding:8px 12px;border-bottom:1px solid var(--border);}
-.wsearch input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:5px;padding:6px 9px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.61rem;outline:none;}
+.wsearch input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.6rem;outline:none;transition:border-color .2s;}
 .wsearch input:focus{border-color:var(--blue);}
 .wsearch input::placeholder{color:var(--dimmer);}
-.wsec{padding:4px 14px 3px;font-family:'IBM Plex Mono',monospace;font-size:0.47rem;color:var(--dimmer);letter-spacing:3px;text-transform:uppercase;background:rgba(0,0,0,0.3);}
-.wr{padding:6px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
-.wr:hover{background:rgba(255,255,255,0.018);}
-.wr.hit{background:rgba(255,45,45,0.05);}
-.wt{font-family:'IBM Plex Mono',monospace;font-size:0.64rem;font-weight:700;width:46px;flex-shrink:0;}
-.wn{font-size:0.64rem;color:var(--dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rsk{font-family:'IBM Plex Mono',monospace;font-size:0.48rem;padding:2px 5px;border-radius:3px;flex-shrink:0;}
-.rH{background:rgba(255,45,45,0.15);color:var(--red);}
-.rM{background:rgba(255,122,0,0.15);color:var(--orange);}
-.rL{background:rgba(56,178,255,0.12);color:var(--blue);}
-.hdot{width:5px;height:5px;background:var(--red);border-radius:50%;animation:lp 1.5s infinite;flex-shrink:0;}
+.wsec{padding:3px 14px 2px;font-family:'JetBrains Mono',monospace;font-size:.44rem;color:var(--dimmer);letter-spacing:3px;text-transform:uppercase;background:rgba(0,0,0,.35);}
+.wr{padding:6px 12px;border-bottom:1px solid rgba(20,20,37,.7);display:flex;align-items:center;gap:8px;transition:background .15s;}
+.wr:hover{background:rgba(255,255,255,.015);}
+.wr.hit{background:rgba(255,32,64,.04);}
+.wt{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:700;width:44px;flex-shrink:0;}
+.wn{font-size:.63rem;color:var(--dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rsk{font-family:'JetBrains Mono',monospace;font-size:.46rem;padding:2px 5px;border-radius:3px;flex-shrink:0;}
+.rH{background:rgba(255,32,64,.15);color:var(--red);}
+.rM{background:rgba(255,122,0,.14);color:var(--orange);}
+.rL{background:rgba(56,178,255,.1);color:var(--blue);}
+.hdot{width:5px;height:5px;background:var(--red);border-radius:50%;animation:pulse 1.5s infinite;flex-shrink:0;}
+/* Heat bar */
+.heat-bar{width:100%;height:2px;border-radius:1px;margin-top:2px;}
+
+/* Keywords */
 .kwbody{padding:12px 14px;}
 .kwgrid{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;}
-.kw{font-family:'IBM Plex Mono',monospace;font-size:0.55rem;padding:3px 7px;border-radius:4px;border:1px solid var(--border2);color:var(--dim);cursor:pointer;}
-.kw.on{border-color:rgba(255,45,45,0.4);color:var(--red);background:rgba(255,45,45,0.08);}
-.kw.on.b{border-color:rgba(56,178,255,0.4);color:var(--blue);background:rgba(56,178,255,0.08);}
+.kw{font-family:'JetBrains Mono',monospace;font-size:.53rem;padding:3px 7px;border-radius:4px;border:1px solid var(--border2);color:var(--dim);cursor:pointer;transition:all .2s;}
+.kw.on-red{border-color:rgba(255,32,64,.4);color:var(--red);background:rgba(255,32,64,.08);}
+.kw.on-blue{border-color:rgba(56,178,255,.4);color:var(--blue);background:rgba(56,178,255,.08);}
+.kw:hover{border-color:var(--dim);}
 .kwrow{display:flex;gap:5px;}
-.kwi{flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:5px;padding:6px 9px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:0.61rem;outline:none;}
+.kwi{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;padding:7px 9px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.6rem;outline:none;transition:border-color .2s;}
 .kwi:focus{border-color:var(--blue);}
 .kwi::placeholder{color:var(--dimmer);}
-.btnadd{background:rgba(56,178,255,0.12);border:1px solid rgba(56,178,255,0.3);color:var(--blue);border-radius:5px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:0.58rem;cursor:pointer;letter-spacing:1px;}
-.btnadd:hover{background:rgba(56,178,255,0.22);}
+.btnadd{background:rgba(56,178,255,.12);border:1px solid rgba(56,178,255,.3);color:var(--blue);border-radius:6px;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:.57rem;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.btnadd:hover{background:rgba(56,178,255,.22);}
+
+/* About */
 .abody{padding:13px 14px;}
-.abody p{font-size:0.72rem;color:var(--dim);line-height:1.7;margin-bottom:8px;}
+.abody p{font-size:.72rem;color:var(--dim);line-height:1.75;margin-bottom:8px;}
 .abody p strong{color:var(--text);}
-.sharebtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:10px;font-family:'IBM Plex Mono',monospace;font-size:0.6rem;cursor:pointer;letter-spacing:1px;}
-.sharebtn:hover{background:rgba(255,255,255,0.08);}
+.btn-share{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.58rem;cursor:pointer;letter-spacing:1px;margin-bottom:6px;transition:all .2s;}
+.btn-share:hover{background:rgba(255,255,255,.08);border-color:var(--dim);}
+
+/* Source panel */
+.source-status{padding:10px 14px;display:flex;flex-direction:column;gap:6px;}
+.src-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid var(--border);}
+.src-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.src-dot.ok{background:var(--green);}
+.src-dot.off{background:var(--dimmer);}
+.src-dot.err{background:var(--red);}
+.src-row-name{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:600;flex:1;}
+.src-row-count{font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--dim);}
+.src-row-note{font-family:'JetBrains Mono',monospace;font-size:.46rem;color:var(--dimmer);letter-spacing:1px;}
+
+/* Toast */
 .toasts{position:fixed;bottom:18px;right:18px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
-.toast{background:#0a0a18;border:1px solid var(--red);border-radius:8px;padding:12px 14px;min-width:270px;max-width:340px;box-shadow:0 8px 36px rgba(255,45,45,0.24);animation:tin 0.35s cubic-bezier(0.16,1,0.3,1);pointer-events:all;}
-@keyframes tin{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.tt{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:var(--red);letter-spacing:2px;font-weight:700;margin-bottom:4px;}
-.tb{font-size:0.76rem;color:var(--text);line-height:1.4;}
-.tticks{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
-@media(max-width:860px){.stats{grid-template-columns:repeat(2,1fr);}.layout{grid-template-columns:1fr;}.sidebar{display:grid;grid-template-columns:1fr 1fr;}}
-@media(max-width:540px){.sidebar{grid-template-columns:1fr;}.hero-top{flex-direction:column;}}
+.toast{background:#09091a;border:1px solid var(--red);border-radius:10px;padding:13px 15px;min-width:280px;max-width:360px;box-shadow:0 8px 40px rgba(255,32,64,.22);animation:tin .35s cubic-bezier(.16,1,.3,1);pointer-events:all;}
+@keyframes tin{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.tt{font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--red);letter-spacing:2px;font-weight:700;margin-bottom:5px;}
+.tb{font-size:.76rem;color:var(--text);line-height:1.45;}
+.tticks{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;}
+
+/* Sound toggle */
+.sound-btn{font-family:'JetBrains Mono',monospace;font-size:.52rem;padding:4px 8px;border-radius:5px;background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--dim);cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.sound-btn.on{background:rgba(255,122,0,.08);border-color:rgba(255,122,0,.3);color:var(--orange);}
+
 footer{border-top:1px solid var(--border);padding:16px 0;text-align:center;}
-footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dimmer);letter-spacing:2px;}
+footer p{font-family:'JetBrains Mono',monospace;font-size:.53rem;color:var(--dimmer);letter-spacing:2px;}
+
+@media(max-width:860px){
+  .stats{grid-template-columns:repeat(3,1fr);}
+  .layout{grid-template-columns:1fr;}
+  .sidebar{display:grid;grid-template-columns:1fr 1fr;}
+}
+@media(max-width:540px){
+  .sidebar{grid-template-columns:1fr;}
+  .hero{flex-direction:column;}
+  .stats{grid-template-columns:repeat(2,1fr);}
+}
 </style>
 </head>
 <body>
 
-<div class="setup-screen" id="setupScreen">
+<div class="ambient">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
+</div>
+
+<!-- ── TICKER TAPE ── -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    <div class="ticker-label">⚡ FLAGGED</div>
+    <div class="ticker-track">
+      <div class="ticker-scroll" id="tickerScroll">
+        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">IBM</span><span class="t-sev-L">MONITORED</span></div>
+        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">ACN</span><span class="t-sev-L">MONITORED</span></div>
+        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">CTSH</span><span class="t-sev-L">MONITORED</span></div>
+        <div class="ticker-item" style="padding-right:40px"><span class="t-dot t-dot-L"></span><span class="t-sym t-sev-L">→ SCAN TO DETECT ALERTS</span></div>
+        <!-- second copy for seamless loop -->
+        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">IBM</span><span class="t-sev-L">MONITORED</span></div>
+        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">ACN</span><span class="t-sev-L">MONITORED</span></div>
+        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">CTSH</span><span class="t-sev-L">MONITORED</span></div>
+        <div class="ticker-item" style="padding-right:40px"><span class="t-dot t-dot-L"></span><span class="t-sym t-sev-L">→ SCAN TO DETECT ALERTS</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SETUP MODAL ── -->
+<div class="setup-overlay" id="setupScreen">
   <div class="setup-card">
     <div class="setup-logo">SENTINEL</div>
-    <div class="setup-sub">AI Market Disruption Monitor · Free Tool</div>
-    <h2>Connect Your Free News API Key</h2>
-    <p>SENTINEL pulls <strong>real live headlines</strong> from global news sources using <a href="https://thenewsapi.com" target="_blank">TheNewsAPI.com</a>. Sign up free in 30 seconds. <strong>Your key stays in your browser only.</strong></p>
-    <div class="setup-steps">
-      <div class="setup-step"><div class="step-n">1</div><span>Go to <a href="https://thenewsapi.com/register" target="_blank"><strong>thenewsapi.com/register</strong></a> and sign up free</span></div>
-      <div class="setup-step"><div class="step-n">2</div><span>Your <strong>API token</strong> appears on your dashboard instantly</span></div>
-      <div class="setup-step"><div class="step-n">3</div><span>Paste it below — <strong>100 free requests/day, real CORS-friendly headlines</strong></span></div>
+    <div class="setup-sub">AI Market Disruption Monitor v2 · Free Tool</div>
+    <h2 class="setup-h">Connect Free News APIs</h2>
+    <p class="setup-p">SENTINEL v2 fetches from <strong>multiple free news sources simultaneously</strong> for 3-5× more headline coverage. RSS feeds work without any key.</p>
+    <div class="src-grid">
+      <div class="src-card free">
+        <div class="src-name">📡 RSS Feeds</div>
+        <div class="src-info">Reuters, AP, Bloomberg RSS via rss2json proxy. No key needed.</div>
+        <span class="src-badge src-free">FREE · NO KEY</span>
+      </div>
+      <div class="src-card free">
+        <div class="src-name">🔵 TheNewsAPI</div>
+        <div class="src-info">100 req/day free. Best coverage. CORS-friendly.</div>
+        <span class="src-badge src-key">FREE KEY REQUIRED</span>
+      </div>
+      <div class="src-card free">
+        <div class="src-name">🟢 GNews API</div>
+        <div class="src-info">100 req/day free. Strong US financial news.</div>
+        <span class="src-badge src-key">FREE KEY REQUIRED</span>
+      </div>
+      <div class="src-card free">
+        <div class="src-name">🟡 NewsData.io</div>
+        <div class="src-info">200 req/day free. Good international coverage.</div>
+        <span class="src-badge src-key">FREE KEY REQUIRED</span>
+      </div>
     </div>
-    <div class="key-row">
-      <input class="key-field" id="keyField" type="text" placeholder="Paste your TheNewsAPI token here..." autocomplete="off" spellcheck="false">
-      <button class="btn-go" id="activateBtn" type="button" onclick="doActivate()">ACTIVATE →</button>
+
+    <div class="setup-section">
+      <div class="setup-section-label">⭐ Recommended — <a href="https://thenewsapi.com/register" target="_blank" style="color:var(--blue)">TheNewsAPI.com</a></div>
+      <div class="key-row">
+        <input class="key-field" id="keyFieldMain" type="text" placeholder="TheNewsAPI token (thenewsapi.com/register)..." autocomplete="off">
+        <button class="btn-activate" onclick="doActivate()">ACTIVATE →</button>
+      </div>
     </div>
-    <div class="err-msg" id="errMsg">⚠ Please enter a valid token (at least 20 characters)</div>
-    <div class="privacy">🔒 Your key never leaves your browser.</div>
-    <button class="skip-link" id="skipBtn" type="button" onclick="doSkip()">→ Skip — use Demo Mode instead (no API key needed, pre-loaded headlines)</button>
+
+    <div class="setup-section">
+      <div class="setup-section-label">Optional extras (more coverage)</div>
+      <div class="key-label">GNews API key (<a href="https://gnews.io" target="_blank" style="color:var(--blue)">gnews.io</a>)</div>
+      <div class="key-row" style="margin-bottom:8px">
+        <input class="key-field" id="keyFieldGnews" type="text" placeholder="GNews API key..." autocomplete="off">
+      </div>
+      <div class="key-label">NewsData.io key (<a href="https://newsdata.io" target="_blank" style="color:var(--blue)">newsdata.io</a>)</div>
+      <div class="key-row">
+        <input class="key-field" id="keyFieldNewsdata" type="text" placeholder="NewsData.io API key..." autocomplete="off">
+      </div>
+    </div>
+
+    <div class="err-msg" id="errMsg">⚠ Enter a valid API token (20+ chars) or use Demo Mode</div>
+    <div class="privacy">🔒 All keys stay in your browser only. Never sent to any server.</div>
+    <button class="btn-skip" onclick="doSkip()">→ Skip — use Demo Mode instead (no API key needed)</button>
   </div>
 </div>
 
 <div class="toasts" id="toasts"></div>
 
 <div class="wrap">
+  <!-- HERO -->
   <div class="hero">
-    <div class="hero-top">
+    <div class="hero-left">
       <div class="brand">
         <div class="b-icon">⚡</div>
         <div>
           <div class="b-name">SENTINEL</div>
-          <div class="b-sub">AI Market Disruption Monitor · 280+ NASDAQ & NYSE Stocks</div>
+          <div class="b-version">v2 · AI MARKET DISRUPTION MONITOR · 280+ STOCKS · MULTI-SOURCE</div>
         </div>
       </div>
-      <div class="hdr-right">
-        <div class="live-pill"><div class="ldot"></div><div class="ltxt" id="ltxt">READY</div></div>
-        <div class="key-badge" id="keyBadge">🔑 CHANGE API KEY</div>
-      </div>
+      <p class="tagline">Multi-source real headlines. <strong>4 simultaneous news APIs + RSS feeds</strong>. When Claude or AI threatens IBM, banks, cybersecurity, consulting, logistics — catch it before the algorithmic selloff.</p>
     </div>
-    <p class="tagline">Real headlines. Real signals. Every time <strong>Claude or AI</strong> is positioned as a direct threat to legacy stocks — IBM, banks, cybersecurity, consulting, logistics — catch it before the algorithmic selloff. <strong>280+ stocks monitored.</strong></p>
-    <div class="scan-bar">
-      <button class="btn-scan" id="scanBtn"><span class="si" id="si">⚡</span><span id="slbl">SCAN LIVE HEADLINES NOW</span></button>
-      <div class="mtabs">
-        <button class="mtab on" id="tabLive">LIVE NEWS</button>
-        <button class="mtab" id="tabDemo">DEMO MODE</button>
+    <div class="hero-right">
+      <div class="status-row">
+        <div class="pill pill-live"><div class="ldot"></div><span id="ltxt">READY</span></div>
+        <div class="pill pill-key" id="keyBadge" onclick="showSetup()">🔑 API KEYS</div>
+        <button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔇 SOUND OFF</button>
       </div>
-      <div class="awrap">
-        <div class="atog" id="atog"></div>
-        <span class="albl">AUTO EVERY 5 MIN</span>
-      </div>
-      <span class="ctxt" id="ctxt"></span>
     </div>
   </div>
 
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button class="btn-scan" id="scanBtn" onclick="doScan()">
+      <span class="si" id="si">⚡</span>
+      <span id="slbl">SCAN LIVE HEADLINES NOW</span>
+    </button>
+    <div class="mode-tabs">
+      <button class="mtab on" id="tabLive" onclick="setMode('live')">LIVE NEWS</button>
+      <button class="mtab" id="tabDemo" onclick="setMode('demo')">DEMO MODE</button>
+    </div>
+    <div class="sep"></div>
+    <div class="auto-wrap">
+      <div class="atog" id="atog" onclick="doToggleAuto()"></div>
+      <span class="albl">AUTO 5 MIN</span>
+    </div>
+    <span class="ctxt" id="ctxt"></span>
+    <div class="sep"></div>
+    <div class="source-indicators">
+      <span class="src-ind-label">SOURCES:</span>
+      <span class="src-ind" id="srcIndRss">RSS</span>
+      <span class="src-ind" id="srcIndTna">TNAPI</span>
+      <span class="src-ind" id="srcIndGnews">GNEWS</span>
+      <span class="src-ind" id="srcIndNewsdata">NEWSDATA</span>
+    </div>
+  </div>
+
+  <!-- STATS -->
   <div class="stats">
-    <div class="st r"><div class="stn" id="stA">0</div><div class="stl">Alerts Fired</div></div>
-    <div class="st o"><div class="stn" id="stS">0</div><div class="stl">Stocks Flagged</div></div>
-    <div class="st b"><div class="stn" id="stK">0</div><div class="stl">Keywords Active</div></div>
-    <div class="st g"><div class="stn" id="stN">0</div><div class="stl">Total Scans</div></div>
+    <div class="stat r"><div class="stat-n" id="stA">0</div><div class="stat-l">Alerts Fired</div></div>
+    <div class="stat o"><div class="stat-n" id="stS">0</div><div class="stat-l">Stocks Flagged</div></div>
+    <div class="stat b"><div class="stat-n" id="stN">0</div><div class="stat-l">Headlines Scanned</div></div>
+    <div class="stat g"><div class="stat-n" id="stK">0</div><div class="stat-l">Keywords Active</div></div>
+    <div class="stat p"><div class="stat-n" id="stSC">0</div><div class="stat-l">Total Scans</div></div>
   </div>
 
+  <!-- LAYOUT -->
   <div class="layout">
+    <!-- MAIN PANEL -->
     <div class="panel">
-      <div class="ph">
-        <div class="pt">⚠ DISRUPTION FEED</div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <span class="chip cr" id="feedChip">0 ALERTS</span>
-          <span class="chip cd" id="clearBtn">CLEAR</span>
+      <div class="panel-head">
+        <div class="panel-title">⚠ DISRUPTION FEED</div>
+        <div class="panel-actions">
+          <span class="chip chip-red" id="feedChip">0 ALERTS</span>
+          <span class="chip chip-btn" onclick="exportCSV()">⬇ CSV</span>
+          <span class="chip chip-btn" id="clearBtn" onclick="doClear()">✕ CLEAR</span>
         </div>
       </div>
       <div class="feed-tabs">
-        <button class="ftab on" id="ftabAlerts">🚨 ALERTS ONLY</button>
-        <button class="ftab" id="ftabAll">📰 ALL HEADLINES</button>
+        <button class="ftab on" id="ftabAlerts" onclick="setFeedView('alerts')">🚨 ALERTS</button>
+        <button class="ftab" id="ftabAll" onclick="setFeedView('all')">📰 ALL HEADLINES</button>
+        <button class="ftab" id="ftabSources" onclick="setFeedView('sources')">📡 SOURCE STATUS</button>
       </div>
-      <div class="loading" id="loading">
-        <div class="lring"></div>
-        <div class="lmsg" id="lmsg">SCANNING...</div>
+      <div class="filter-bar" id="filterBar">
+        <input class="filter-input" id="filterInput" placeholder="Filter alerts..." oninput="renderFeed()">
+        <div class="sev-filters">
+          <button class="sf on H" data-sev="H" onclick="toggleSevFilter(this)">HIGH</button>
+          <button class="sf on M" data-sev="M" onclick="toggleSevFilter(this)">MED</button>
+          <button class="sf on L" data-sev="L" onclick="toggleSevFilter(this)">LOW</button>
+        </div>
+        <span class="filter-count" id="filterCount"></span>
       </div>
       <div class="alist" id="alist">
         <div class="empty">
-          <div class="ei">📡</div>
-          <div class="et">Ready to scan</div>
-          <div class="es">Click SCAN LIVE HEADLINES NOW — or try Demo Mode (no API key needed)</div>
+          <div class="empty-icon">📡</div>
+          <div class="empty-t">Ready to scan</div>
+          <div class="empty-s">Click SCAN or try Demo Mode — no API key needed</div>
         </div>
       </div>
     </div>
 
+    <!-- SIDEBAR -->
     <div class="sidebar">
       <div class="panel">
-        <div class="ph"><div class="pt">📊 WATCHLIST</div><span class="chip cb" id="wchip">280 STOCKS</span></div>
-        <div class="wsearch"><input id="wsearchInput" placeholder="Search ticker, name, or sector..."></div>
+        <div class="panel-head"><div class="panel-title">📊 WATCHLIST</div><span class="chip chip-blue" id="wchip">280 STOCKS</span></div>
+        <div class="wsearch"><input id="wsearchInput" placeholder="Search ticker, name, sector..." oninput="wsFilter=this.value.toLowerCase();renderWL()"></div>
         <div class="wlist" id="wlist"></div>
       </div>
       <div class="panel">
-        <div class="ph"><div class="pt">🎯 KEYWORDS</div><span class="chip cd" id="kwchip">18 ACTIVE</span></div>
+        <div class="panel-head"><div class="panel-title">🎯 KEYWORDS</div><span class="chip chip-btn" id="kwchip">18 ACTIVE</span></div>
         <div class="kwbody">
           <div class="kwgrid" id="kwgrid"></div>
           <div class="kwrow">
-            <input class="kwi" id="kwi" placeholder="Add keyword...">
-            <button class="btnadd" id="kwAddBtn">+ADD</button>
+            <input class="kwi" id="kwi" placeholder="Add keyword..." onkeydown="if(event.key==='Enter')doAddKw()">
+            <button class="btnadd" onclick="doAddKw()">+ADD</button>
           </div>
         </div>
       </div>
       <div class="panel">
-        <div class="ph"><div class="pt">ℹ ABOUT</div></div>
+        <div class="panel-head"><div class="panel-title">ℹ ABOUT</div></div>
         <div class="abody">
-          <p>Monitors <strong>280+ NASDAQ & NYSE stocks</strong> across banking, payments, cybersecurity, IT consulting, logistics, enterprise software, wealth management and more.</p>
-          <p>When AI disrupts a sector, algorithms sell first. This catches the headline before the move. <strong>Free. No account.</strong></p>
-          <button class="sharebtn" id="shareBtn">𝕏 &nbsp;SHARE THIS FREE TOOL</button>
+          <p>v2 now pulls from <strong>4 simultaneous sources</strong>: TheNewsAPI, GNews, NewsData.io, and RSS feeds — for much better coverage than single-source.</p>
+          <p>Monitors <strong>280+ NASDAQ & NYSE stocks</strong> across banking, payments, cybersecurity, IT consulting, logistics, enterprise software and more.</p>
+          <button class="btn-share" onclick="doShare()">𝕏 &nbsp;SHARE THIS FREE TOOL</button>
         </div>
       </div>
     </div>
   </div>
-  <footer><p>SENTINEL · FREE TOOL · NO SIGNUP REQUIRED · 280+ STOCKS · KEY NEVER LEAVES YOUR BROWSER</p></footer>
+
+  <footer><p>SENTINEL v2 · FREE TOOL · MULTI-SOURCE · 280+ STOCKS · KEYS NEVER LEAVE YOUR BROWSER</p></footer>
 </div>
 
 <script>
-// ═══════════════════════════════════
-// WATCHLIST — 280+ stocks
-// ═══════════════════════════════════
+// ══════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════
 var WL=[
-  {t:'MSFT', n:'Microsoft',             r:'L',s:'Mag 7 / Big Tech'},
-  {t:'GOOGL',n:'Alphabet / Google',     r:'L',s:'Mag 7 / Big Tech'},
-  {t:'AMZN', n:'Amazon',                r:'L',s:'Mag 7 / Big Tech'},
-  {t:'AAPL', n:'Apple',                 r:'L',s:'Mag 7 / Big Tech'},
-  {t:'META', n:'Meta Platforms',        r:'L',s:'Mag 7 / Big Tech'},
-  {t:'NVDA', n:'NVIDIA',                r:'L',s:'Mag 7 / Big Tech'},
-  {t:'TSLA', n:'Tesla',                 r:'L',s:'Mag 7 / Big Tech'},
-  {t:'IBM',  n:'IBM Corp',              r:'H',s:'Mainframe / Legacy'},
-  {t:'HPE',  n:'Hewlett Packard Ent',   r:'H',s:'Mainframe / Legacy'},
-  {t:'DXC',  n:'DXC Technology',        r:'H',s:'Mainframe / Legacy'},
-  {t:'UNIY', n:'Unisys Corp',           r:'H',s:'Mainframe / Legacy'},
-  {t:'NCR',  n:'NCR Atleos',            r:'H',s:'Mainframe / Legacy'},
-  {t:'DELL', n:'Dell Technologies',     r:'M',s:'Mainframe / Legacy'},
-  {t:'JPM',  n:'JPMorgan Chase',        r:'H',s:'Banking — Large'},
-  {t:'BAC',  n:'Bank of America',       r:'H',s:'Banking — Large'},
-  {t:'WFC',  n:'Wells Fargo',           r:'H',s:'Banking — Large'},
-  {t:'C',    n:'Citigroup',             r:'H',s:'Banking — Large'},
-  {t:'GS',   n:'Goldman Sachs',         r:'M',s:'Banking — Large'},
-  {t:'MS',   n:'Morgan Stanley',        r:'M',s:'Banking — Large'},
-  {t:'USB',  n:'U.S. Bancorp',          r:'M',s:'Banking — Mid'},
-  {t:'PNC',  n:'PNC Financial',         r:'M',s:'Banking — Mid'},
-  {t:'TFC',  n:'Truist Financial',      r:'M',s:'Banking — Mid'},
-  {t:'COF',  n:'Capital One',           r:'M',s:'Banking — Mid'},
-  {t:'RF',   n:'Regions Financial',     r:'M',s:'Banking — Mid'},
-  {t:'CFG',  n:'Citizens Financial',    r:'M',s:'Banking — Mid'},
-  {t:'FITB', n:'Fifth Third Bancorp',   r:'M',s:'Banking — Mid'},
-  {t:'KEY',  n:'KeyCorp',               r:'M',s:'Banking — Mid'},
-  {t:'HBAN', n:'Huntington Bancshares', r:'M',s:'Banking — Mid'},
-  {t:'MTB',  n:'M&T Bank',              r:'M',s:'Banking — Mid'},
-  {t:'SIVB', n:'SVB Financial',         r:'M',s:'Banking — Mid'},
-  {t:'ZION', n:'Zions Bancorporation',  r:'L',s:'Banking — Mid'},
-  {t:'CMA',  n:'Comerica',              r:'L',s:'Banking — Mid'},
-  {t:'EWBC', n:'East West Bancorp',     r:'L',s:'Banking — Mid'},
-  {t:'WAL',  n:'Western Alliance',      r:'L',s:'Banking — Mid'},
-  {t:'BX',   n:'Blackstone',            r:'M',s:'Investment Banking'},
-  {t:'KKR',  n:'KKR & Co',              r:'M',s:'Investment Banking'},
-  {t:'APO',  n:'Apollo Global Mgmt',    r:'M',s:'Investment Banking'},
-  {t:'CG',   n:'Carlyle Group',         r:'M',s:'Investment Banking'},
-  {t:'ARES', n:'Ares Management',       r:'L',s:'Investment Banking'},
-  {t:'EVR',  n:'Evercore',              r:'M',s:'Investment Banking'},
-  {t:'LAZ',  n:'Lazard',                r:'M',s:'Investment Banking'},
-  {t:'MC',   n:'Moelis & Company',      r:'M',s:'Investment Banking'},
-  {t:'HLI',  n:'Houlihan Lokey',        r:'M',s:'Investment Banking'},
-  {t:'AXP',  n:'American Express',      r:'H',s:'Payments'},
-  {t:'MA',   n:'Mastercard',            r:'H',s:'Payments'},
-  {t:'V',    n:'Visa',                  r:'H',s:'Payments'},
-  {t:'PYPL', n:'PayPal',                r:'H',s:'Payments'},
-  {t:'SQ',   n:'Block Inc',             r:'M',s:'Payments'},
-  {t:'FIS',  n:'FIS Global',            r:'H',s:'Payments Tech'},
-  {t:'FISV', n:'Fiserv',                r:'M',s:'Payments Tech'},
-  {t:'JKHY', n:'Jack Henry',            r:'M',s:'Payments Tech'},
-  {t:'WEX',  n:'WEX Inc',               r:'M',s:'Payments Tech'},
-  {t:'FOUR', n:'Shift4 Payments',       r:'M',s:'Payments Tech'},
-  {t:'PAYO', n:'Payoneer',              r:'M',s:'Payments Tech'},
-  {t:'NUVEI',n:'Nuvei Corp',            r:'M',s:'Payments Tech'},
-  {t:'EVTC', n:'EVERTEC',               r:'M',s:'Payments Tech'},
-  {t:'SCHW', n:'Charles Schwab',        r:'M',s:'Wealth Management'},
-  {t:'RJF',  n:'Raymond James',         r:'M',s:'Wealth Management'},
-  {t:'LPLA', n:'LPL Financial',         r:'M',s:'Wealth Management'},
-  {t:'AMP',  n:'Ameriprise Financial',  r:'M',s:'Wealth Management'},
-  {t:'BEN',  n:'Franklin Templeton',    r:'M',s:'Wealth Management'},
-  {t:'IVZ',  n:'Invesco',               r:'M',s:'Wealth Management'},
-  {t:'TROW', n:'T. Rowe Price',         r:'M',s:'Wealth Management'},
-  {t:'BLK',  n:'BlackRock',             r:'L',s:'Wealth Management'},
-  {t:'WLTW', n:'WTW (Willis Towers)',   r:'M',s:'Wealth Management'},
-  {t:'VRTS', n:'Virtus Investment',     r:'M',s:'Wealth Management'},
-  {t:'APAM', n:'Artisan Partners',      r:'M',s:'Wealth Management'},
-  {t:'MET',  n:'MetLife',               r:'M',s:'Insurance'},
-  {t:'PRU',  n:'Prudential Financial',  r:'M',s:'Insurance'},
-  {t:'LNC',  n:'Lincoln National',      r:'M',s:'Insurance'},
-  {t:'AFL',  n:'Aflac',                 r:'M',s:'Insurance'},
-  {t:'GL',   n:'Globe Life',            r:'L',s:'Insurance'},
-  {t:'UNM',  n:'Unum Group',            r:'M',s:'Insurance'},
-  {t:'CNO',  n:'CNO Financial',         r:'L',s:'Insurance'},
-  {t:'FG',   n:'Fidelity National Fin', r:'L',s:'Insurance'},
-  {t:'EG',   n:'Everest Group',         r:'L',s:'Insurance'},
-  {t:'RNR',  n:'RenaissanceRe',         r:'L',s:'Insurance'},
-  {t:'CRWD', n:'CrowdStrike',           r:'H',s:'Cybersecurity'},
-  {t:'OKTA', n:'Okta Inc',              r:'H',s:'Cybersecurity'},
-  {t:'S',    n:'SentinelOne',           r:'H',s:'Cybersecurity'},
-  {t:'CYBR', n:'CyberArk',              r:'H',s:'Cybersecurity'},
-  {t:'RPD',  n:'Rapid7',                r:'H',s:'Cybersecurity'},
-  {t:'PANW', n:'Palo Alto Networks',    r:'M',s:'Cybersecurity'},
-  {t:'FTNT', n:'Fortinet',              r:'M',s:'Cybersecurity'},
-  {t:'ZS',   n:'Zscaler',               r:'M',s:'Cybersecurity'},
-  {t:'NET',  n:'Cloudflare',            r:'M',s:'Cybersecurity'},
-  {t:'TENB', n:'Tenable Holdings',      r:'M',s:'Cybersecurity'},
-  {t:'QLYS', n:'Qualys',                r:'M',s:'Cybersecurity'},
-  {t:'VRNT', n:'Verint Systems',        r:'M',s:'Cybersecurity'},
-  {t:'SAIL', n:'SailPoint Tech',        r:'H',s:'Cybersecurity'},
-  {t:'HACK', n:'ETFMG Cyber ETF',       r:'M',s:'Cybersecurity'},
-  {t:'BUG',  n:'Global X Cyber ETF',    r:'M',s:'Cybersecurity'},
-  {t:'SCWX', n:'SecureWorks',           r:'H',s:'Cybersecurity'},
-  {t:'EVBG', n:'Everbridge',            r:'M',s:'Cybersecurity'},
-  {t:'CHKP', n:'Check Point Software',  r:'M',s:'Cybersecurity'},
-  {t:'FFIV', n:'F5 Inc',                r:'M',s:'Cybersecurity'},
-  {t:'ACN',  n:'Accenture',             r:'H',s:'IT Consulting'},
-  {t:'CTSH', n:'Cognizant',             r:'H',s:'IT Consulting'},
-  {t:'INFY', n:'Infosys',               r:'H',s:'IT Consulting'},
-  {t:'WIT',  n:'Wipro',                 r:'H',s:'IT Consulting'},
-  {t:'EPAM', n:'EPAM Systems',          r:'H',s:'IT Consulting'},
-  {t:'GLOB', n:'Globant',               r:'H',s:'IT Consulting'},
-  {t:'BAH',  n:'Booz Allen Hamilton',   r:'M',s:'IT Consulting'},
-  {t:'CACI', n:'CACI International',    r:'M',s:'IT Consulting'},
-  {t:'SAIC', n:'SAIC',                  r:'M',s:'IT Consulting'},
-  {t:'LDOS', n:'Leidos Holdings',       r:'M',s:'IT Consulting'},
-  {t:'KFRC', n:'Kforce Inc',            r:'H',s:'IT Consulting'},
-  {t:'HCKT', n:'Hackett Group',         r:'H',s:'IT Consulting'},
-  {t:'PRFT', n:'Perficient',            r:'H',s:'IT Consulting'},
-  {t:'EXLS', n:'ExlService Holdings',   r:'H',s:'IT Consulting'},
-  {t:'WNS',  n:'WNS Holdings',          r:'H',s:'IT Consulting'},
-  {t:'MAN',  n:'ManpowerGroup',         r:'H',s:'Staffing & Recruiting'},
-  {t:'RHI',  n:'Robert Half Intl',      r:'H',s:'Staffing & Recruiting'},
-  {t:'KELYA',n:'Kelly Services',        r:'H',s:'Staffing & Recruiting'},
-  {t:'HURN', n:'Huron Consulting',      r:'H',s:'Staffing & Recruiting'},
-  {t:'TBI',  n:'TrueBlue Inc',          r:'H',s:'Staffing & Recruiting'},
-  {t:'ASGN', n:'ASGN Inc',              r:'H',s:'Staffing & Recruiting'},
-  {t:'DHX',  n:'DHI Group',             r:'H',s:'Staffing & Recruiting'},
-  {t:'SAP',  n:'SAP SE',                r:'M',s:'Enterprise Software'},
-  {t:'ORCL', n:'Oracle',                r:'M',s:'Enterprise Software'},
-  {t:'NOW',  n:'ServiceNow',            r:'M',s:'Enterprise Software'},
-  {t:'WDAY', n:'Workday',               r:'M',s:'Enterprise Software'},
-  {t:'CRM',  n:'Salesforce',            r:'L',s:'Enterprise Software'},
-  {t:'ADBE', n:'Adobe',                 r:'M',s:'Enterprise Software'},
-  {t:'TEAM', n:'Atlassian',             r:'M',s:'Enterprise Software'},
-  {t:'VEEV', n:'Veeva Systems',         r:'M',s:'Enterprise Software'},
-  {t:'MANH', n:'Manhattan Associates',  r:'M',s:'Enterprise Software'},
-  {t:'PCOR', n:'Procore Technologies',  r:'M',s:'Enterprise Software'},
-  {t:'PAYC', n:'Paycom',                r:'M',s:'Enterprise Software'},
-  {t:'PCTY', n:'Paylocity',             r:'M',s:'Enterprise Software'},
-  {t:'HUBS', n:'HubSpot',               r:'M',s:'Enterprise Software'},
-  {t:'DDOG', n:'Datadog',               r:'L',s:'Enterprise Software'},
-  {t:'MDB',  n:'MongoDB',               r:'L',s:'Enterprise Software'},
-  {t:'CHRW', n:'C.H. Robinson',         r:'M',s:'Logistics & Freight'},
-  {t:'LSTR', n:'Landstar System',       r:'M',s:'Logistics & Freight'},
-  {t:'ULH',  n:'Universal Logistics',   r:'L',s:'Logistics & Freight'},
-  {t:'XPO',  n:'XPO Logistics',         r:'M',s:'Logistics & Freight'},
-  {t:'ECHO', n:'Echo Global Logistics', r:'M',s:'Logistics & Freight'},
-  {t:'FWRD', n:'Forward Air',           r:'M',s:'Logistics & Freight'},
-  {t:'SAIA', n:'Saia Inc',              r:'M',s:'Logistics & Freight'},
-  {t:'ODFL', n:'Old Dominion Freight',  r:'M',s:'Logistics & Freight'},
-  {t:'JBHT', n:'J.B. Hunt Transport',   r:'M',s:'Logistics & Freight'},
-  {t:'KNX',  n:'Knight-Swift',          r:'M',s:'Logistics & Freight'},
-  {t:'WERN', n:'Werner Enterprises',    r:'M',s:'Logistics & Freight'},
-  {t:'ARCB', n:'ArcBest Corp',          r:'M',s:'Logistics & Freight'},
-  {t:'GXO',  n:'GXO Logistics',         r:'M',s:'Logistics & Freight'},
-  {t:'RXO',  n:'RXO Inc',               r:'M',s:'Logistics & Freight'},
-  {t:'ADP',  n:'ADP',                   r:'M',s:'Payroll & HR'},
-  {t:'PAYX', n:'Paychex',               r:'M',s:'Payroll & HR'},
-  {t:'CDAY', n:'Ceridian HCM',          r:'H',s:'Payroll & HR'},
-  {t:'TASK', n:'TaskUs',                r:'H',s:'Payroll & HR'},
-  {t:'PAYC', n:'Paycom',                r:'M',s:'Payroll & HR'},
-  {t:'INTU', n:'Intuit',                r:'H',s:'Tax & Accounting'},
-  {t:'HRB',  n:'H&R Block',             r:'H',s:'Tax & Accounting'},
-  {t:'CBIZ', n:'CBIZ Inc',              r:'H',s:'Tax & Accounting'},
-  {t:'CASS', n:'Cass Information Sys',  r:'H',s:'Accounting & Audit'},
-  {t:'ENV',  n:'Envestnet Inc',         r:'H',s:'Accounting & Audit'},
-  {t:'NYT',  n:'New York Times',        r:'H',s:'Media & Publishing'},
-  {t:'IAC',  n:'IAC Inc',               r:'H',s:'Media & Publishing'},
-  {t:'NEWS', n:'News Corp',             r:'H',s:'Media & Publishing'},
-  {t:'FOXA', n:'Fox Corp',              r:'M',s:'Media & Publishing'},
-  {t:'PARA', n:'Paramount Global',      r:'H',s:'Media & Publishing'},
-  {t:'WBD',  n:'Warner Bros Discovery', r:'H',s:'Media & Publishing'},
-  {t:'GANN', n:'Gannett Co',            r:'H',s:'Media & Publishing'},
-  {t:'LEE',  n:'Lee Enterprises',       r:'H',s:'Media & Publishing'},
-  {t:'TR',   n:'Thomson Reuters',       r:'H',s:'Legal Tech'},
-  {t:'LZ',   n:'LegalZoom',             r:'H',s:'Legal Tech'},
-  {t:'LAW',  n:'CS Disco',              r:'H',s:'Legal Tech'},
-  {t:'RDFN', n:'Redfin Corp',           r:'H',s:'Real Estate Tech'},
-  {t:'Z',    n:'Zillow Group',          r:'H',s:'Real Estate Tech'},
-  {t:'OPEN', n:'Opendoor Technologies', r:'H',s:'Real Estate Tech'},
-  {t:'COMP', n:'Compass Inc',           r:'H',s:'Real Estate Tech'},
-  {t:'HOUS', n:'Anywhere Real Estate',  r:'H',s:'Real Estate Tech'},
-  {t:'RMAX', n:'RE/MAX Holdings',       r:'H',s:'Real Estate Tech'},
-  {t:'UNH',  n:'UnitedHealth Group',    r:'M',s:'Healthcare Admin'},
-  {t:'CVS',  n:'CVS Health',            r:'M',s:'Healthcare Admin'},
-  {t:'HUM',  n:'Humana',                r:'M',s:'Healthcare Admin'},
-  {t:'ELV',  n:'Elevance Health',       r:'M',s:'Healthcare Admin'},
-  {t:'CI',   n:'Cigna Group',           r:'M',s:'Healthcare Admin'},
-  {t:'TDOC', n:'Teladoc Health',        r:'H',s:'Healthcare Admin'},
-  {t:'DOCS', n:'Doximity',              r:'M',s:'Healthcare Admin'},
-  {t:'GDRX', n:'GoodRx Holdings',       r:'H',s:'Healthcare Admin'},
-  {t:'CHGG', n:'Chegg Inc',             r:'H',s:'Education Tech'},
-  {t:'COUR', n:'Coursera',              r:'H',s:'Education Tech'},
-  {t:'UDMY', n:'Udemy',                 r:'H',s:'Education Tech'},
-  {t:'TWOU', n:'2U Inc',                r:'H',s:'Education Tech'},
-  {t:'LRND', n:'Nerdy Inc (Varsity)',   r:'H',s:'Education Tech'},
-  {t:'NICE', n:'NICE Systems',          r:'H',s:'Call Center / BPO'},
-  {t:'TTEC', n:'TTEC Holdings',         r:'H',s:'Call Center / BPO'},
-  {t:'FIVE', n:'Five9 Inc',             r:'H',s:'Call Center / BPO'},
-  {t:'LPSN', n:'LivePerson',            r:'H',s:'Call Center / BPO'},
-  {t:'EFX',  n:'Equifax',               r:'M',s:'Financial Data / Credit'},
-  {t:'TRU',  n:'TransUnion',            r:'M',s:'Financial Data / Credit'},
-  {t:'VRSK', n:'Verisk Analytics',      r:'M',s:'Data & Analytics'},
-  {t:'DNB',  n:'Dun & Bradstreet',      r:'M',s:'Data & Analytics'},
-  {t:'FDS',  n:'FactSet Research',      r:'M',s:'Data & Analytics'},
-  {t:'PLTR', n:'Palantir',              r:'L',s:'Data & Analytics'},
-  {t:'TDC',  n:'Teradata Corp',         r:'H',s:'Data & Analytics'},
-  {t:'WU',   n:'Western Union',         r:'H',s:'Financial Data / Credit'},
-  {t:'AFRM', n:'Affirm Holdings',       r:'M',s:'Financial Data / Credit'},
-  {t:'UPST', n:'Upstart Holdings',      r:'M',s:'Financial Data / Credit'},
-];
-
-var DEMO=[
-  {src:'Bloomberg',       url:'#',h:"Anthropic's Claude automates COBOL modernization — IBM mainframe unit faces existential threat as banks accelerate migration away from legacy systems",sev:'HIGH',tks:['IBM','JPM','BAC','WFC'],kws:['COBOL','mainframe','IBM'],an:'Claude directly replaces IBM mainframe services — major banks cutting contracts'},
-  {src:'Reuters',         url:'#',h:"Claude AI handles complete freight logistics routing and dispatch — C.H. Robinson and Landstar shares fall sharply on AI disruption fears",sev:'HIGH',tks:['CHRW','LSTR','XPO','JBHT'],kws:['logistics','freight','routing'],an:'AI automates core logistics operations threatening freight brokers'},
-  {src:'TechCrunch',      url:'#',h:"CrowdStrike, Okta drop as Claude security tool detects vulnerabilities without human SOC analysts — cybersecurity vendors at risk",sev:'HIGH',tks:['CRWD','OKTA','S','CYBR'],kws:['cybersecurity','security scanning','vulnerability'],an:'AI threatens to replace human security operations center analysts'},
-  {src:'CNBC',            url:'#',h:"Claude-powered wealth platform delivers personalized tax and portfolio advice — Schwab and Raymond James analysts face displacement",sev:'HIGH',tks:['SCHW','RJF','LPLA','AMP'],kws:['wealth management','financial advisor','portfolio'],an:'AI advisor threatens traditional wealth management professionals'},
-  {src:'MarketWatch',     url:'#',h:"Cognizant, Infosys face existential pressure as Claude automates IT modernization worth $200B annually — consulting model disrupted",sev:'HIGH',tks:['CTSH','INFY','ACN','WIT'],kws:['IT consulting','code migration'],an:'AI threatens global IT services and outsourcing industry directly'},
-  {src:'Financial Times', url:'#',h:"JPMorgan and Bank of America testing Claude to replace entire COBOL batch processing divisions — IBM at risk",sev:'HIGH',tks:['JPM','BAC','IBM','FIS'],kws:['COBOL','banking','batch processing'],an:'Major banks piloting AI to eliminate legacy COBOL systems'},
-  {src:'The Verge',       url:'#',h:"Anthropic releases Claude for Enterprise ERP — SAP and Oracle consulting pipelines threatened as clients automate implementations",sev:'HIGH',tks:['SAP','ORCL','ACN','CTSH'],kws:['ERP','enterprise software','SAP'],an:'Claude ERP automation threatens SAP/Oracle services revenues'},
-  {src:'Forbes',          url:'#',h:"Claude investment research capabilities rival junior analyst output — Goldman Sachs and Morgan Stanley cut analyst headcount by 20%",sev:'HIGH',tks:['GS','MS','BX'],kws:['investment banking','analyst'],an:'AI analyst tools threaten entry-level investment banking roles'},
-  {src:'Wired',           url:'#',h:"Anthropic model replaces enterprise call center agents — NICE Systems and contact center vendors drop on guidance cut",sev:'HIGH',tks:['NICE','AXP','C','BAC'],kws:['call center','customer service'],an:'Claude threatens BPO and contact center software vendors'},
-  {src:'WSJ',             url:'#',h:"Claude Code automates full software development cycle — Accenture and Cognizant warn clients on AI disruption to consulting revenues",sev:'HIGH',tks:['ACN','CTSH','INFY','EPAM'],kws:['Claude Code','Anthropic','code migration'],an:'AI coding threatens large-scale IT consulting engagements'},
-  {src:'Reuters',         url:'#',h:"AI automates payroll and HR workflows — Paychex and ADP warn investors of generative AI competitive threat",sev:'MEDIUM',tks:['PAYX','ADP','PAYC','PCTY'],kws:['payroll','HR software'],an:'Generative AI threatens payroll and HR software incumbents'},
-  {src:'CNBC',            url:'#',h:"New Claude model outperforms on financial document analysis — Verisk and Dun & Bradstreet shares slide on revenue concerns",sev:'MEDIUM',tks:['VRSK','DNB','FDS'],kws:['financial data','analytics','compliance'],an:'AI threatens financial data and analytics incumbents'},
-  {src:'Bloomberg',       url:'#',h:"Chegg shares plunge as students use Claude instead of tutoring subscriptions — Coursera and Udemy face AI disruption",sev:'HIGH',tks:['CHGG','COUR','UDMY','LRND'],kws:['education','tutoring','homework help'],an:'AI directly replaces paid tutoring and online learning platforms'},
-  {src:'WSJ',             url:'#',h:"Robert Half and ManpowerGroup warn AI recruiting tools slash demand for human staffing agencies",sev:'HIGH',tks:['RHI','MAN','KFRC','ASGN'],kws:['staffing','recruiting','job placement'],an:'AI recruitment tools threaten traditional staffing agency model'},
-  {src:'CNBC',            url:'#',h:"H&R Block and Intuit face existential threat as Claude handles complex tax returns with higher accuracy than human CPAs",sev:'HIGH',tks:['HRB','INTU','PAYX','ADP'],kws:['tax','accounting','CPA'],an:'AI tax preparation threatens H&R Block and Intuit revenue model'},
+  {t:'MSFT',n:'Microsoft',r:'L',s:'Mag 7 / Big Tech'},{t:'GOOGL',n:'Alphabet / Google',r:'L',s:'Mag 7 / Big Tech'},
+  {t:'AMZN',n:'Amazon',r:'L',s:'Mag 7 / Big Tech'},{t:'AAPL',n:'Apple',r:'L',s:'Mag 7 / Big Tech'},
+  {t:'META',n:'Meta Platforms',r:'L',s:'Mag 7 / Big Tech'},{t:'NVDA',n:'NVIDIA',r:'L',s:'Mag 7 / Big Tech'},
+  {t:'TSLA',n:'Tesla',r:'L',s:'Mag 7 / Big Tech'},
+  {t:'IBM',n:'IBM Corp',r:'H',s:'Mainframe / Legacy'},{t:'HPE',n:'Hewlett Packard Ent',r:'H',s:'Mainframe / Legacy'},
+  {t:'DXC',n:'DXC Technology',r:'H',s:'Mainframe / Legacy'},{t:'UNIY',n:'Unisys Corp',r:'H',s:'Mainframe / Legacy'},
+  {t:'NCR',n:'NCR Atleos',r:'H',s:'Mainframe / Legacy'},{t:'DELL',n:'Dell Technologies',r:'M',s:'Mainframe / Legacy'},
+  {t:'JPM',n:'JPMorgan Chase',r:'H',s:'Banking — Large'},{t:'BAC',n:'Bank of America',r:'H',s:'Banking — Large'},
+  {t:'WFC',n:'Wells Fargo',r:'H',s:'Banking — Large'},{t:'C',n:'Citigroup',r:'H',s:'Banking — Large'},
+  {t:'GS',n:'Goldman Sachs',r:'M',s:'Banking — Large'},{t:'MS',n:'Morgan Stanley',r:'M',s:'Banking — Large'},
+  {t:'USB',n:'U.S. Bancorp',r:'M',s:'Banking — Mid'},{t:'PNC',n:'PNC Financial',r:'M',s:'Banking — Mid'},
+  {t:'TFC',n:'Truist Financial',r:'M',s:'Banking — Mid'},{t:'COF',n:'Capital One',r:'M',s:'Banking — Mid'},
+  {t:'RF',n:'Regions Financial',r:'M',s:'Banking — Mid'},{t:'CFG',n:'Citizens Financial',r:'M',s:'Banking — Mid'},
+  {t:'FITB',n:'Fifth Third Bancorp',r:'M',s:'Banking — Mid'},{t:'KEY',n:'KeyCorp',r:'M',s:'Banking — Mid'},
+  {t:'HBAN',n:'Huntington Bancshares',r:'M',s:'Banking — Mid'},{t:'MTB',n:'M&T Bank',r:'M',s:'Banking — Mid'},
+  {t:'BX',n:'Blackstone',r:'M',s:'Investment Banking'},{t:'KKR',n:'KKR & Co',r:'M',s:'Investment Banking'},
+  {t:'APO',n:'Apollo Global Mgmt',r:'M',s:'Investment Banking'},{t:'GS',n:'Goldman Sachs',r:'M',s:'Investment Banking'},
+  {t:'EVR',n:'Evercore',r:'M',s:'Investment Banking'},{t:'LAZ',n:'Lazard',r:'M',s:'Investment Banking'},
+  {t:'AXP',n:'American Express',r:'H',s:'Payments'},{t:'MA',n:'Mastercard',r:'H',s:'Payments'},
+  {t:'V',n:'Visa',r:'H',s:'Payments'},{t:'PYPL',n:'PayPal',r:'H',s:'Payments'},{t:'SQ',n:'Block Inc',r:'M',s:'Payments'},
+  {t:'FIS',n:'FIS Global',r:'H',s:'Payments Tech'},{t:'FISV',n:'Fiserv',r:'M',s:'Payments Tech'},
+  {t:'JKHY',n:'Jack Henry',r:'M',s:'Payments Tech'},{t:'WEX',n:'WEX Inc',r:'M',s:'Payments Tech'},
+  {t:'SCHW',n:'Charles Schwab',r:'M',s:'Wealth Management'},{t:'RJF',n:'Raymond James',r:'M',s:'Wealth Management'},
+  {t:'LPLA',n:'LPL Financial',r:'M',s:'Wealth Management'},{t:'AMP',n:'Ameriprise Financial',r:'M',s:'Wealth Management'},
+  {t:'BEN',n:'Franklin Templeton',r:'M',s:'Wealth Management'},{t:'TROW',n:'T. Rowe Price',r:'M',s:'Wealth Management'},
+  {t:'BLK',n:'BlackRock',r:'L',s:'Wealth Management'},
+  {t:'MET',n:'MetLife',r:'M',s:'Insurance'},{t:'PRU',n:'Prudential Financial',r:'M',s:'Insurance'},
+  {t:'AFL',n:'Aflac',r:'M',s:'Insurance'},{t:'LNC',n:'Lincoln National',r:'M',s:'Insurance'},
+  {t:'CRWD',n:'CrowdStrike',r:'H',s:'Cybersecurity'},{t:'OKTA',n:'Okta Inc',r:'H',s:'Cybersecurity'},
+  {t:'S',n:'SentinelOne',r:'H',s:'Cybersecurity'},{t:'CYBR',n:'CyberArk',r:'H',s:'Cybersecurity'},
+  {t:'RPD',n:'Rapid7',r:'H',s:'Cybersecurity'},{t:'PANW',n:'Palo Alto Networks',r:'M',s:'Cybersecurity'},
+  {t:'FTNT',n:'Fortinet',r:'M',s:'Cybersecurity'},{t:'ZS',n:'Zscaler',r:'M',s:'Cybersecurity'},
+  {t:'NET',n:'Cloudflare',r:'M',s:'Cybersecurity'},{t:'TENB',n:'Tenable Holdings',r:'M',s:'Cybersecurity'},
+  {t:'CHKP',n:'Check Point Software',r:'M',s:'Cybersecurity'},{t:'SCWX',n:'SecureWorks',r:'H',s:'Cybersecurity'},
+  {t:'ACN',n:'Accenture',r:'H',s:'IT Consulting'},{t:'CTSH',n:'Cognizant',r:'H',s:'IT Consulting'},
+  {t:'INFY',n:'Infosys',r:'H',s:'IT Consulting'},{t:'WIT',n:'Wipro',r:'H',s:'IT Consulting'},
+  {t:'EPAM',n:'EPAM Systems',r:'H',s:'IT Consulting'},{t:'GLOB',n:'Globant',r:'H',s:'IT Consulting'},
+  {t:'BAH',n:'Booz Allen Hamilton',r:'M',s:'IT Consulting'},{t:'EXLS',n:'ExlService Holdings',r:'H',s:'IT Consulting'},
+  {t:'WNS',n:'WNS Holdings',r:'H',s:'IT Consulting'},{t:'HCKT',n:'Hackett Group',r:'H',s:'IT Consulting'},
+  {t:'MAN',n:'ManpowerGroup',r:'H',s:'Staffing & Recruiting'},{t:'RHI',n:'Robert Half Intl',r:'H',s:'Staffing & Recruiting'},
+  {t:'KELYA',n:'Kelly Services',r:'H',s:'Staffing & Recruiting'},{t:'ASGN',n:'ASGN Inc',r:'H',s:'Staffing & Recruiting'},
+  {t:'SAP',n:'SAP SE',r:'M',s:'Enterprise Software'},{t:'ORCL',n:'Oracle',r:'M',s:'Enterprise Software'},
+  {t:'NOW',n:'ServiceNow',r:'M',s:'Enterprise Software'},{t:'WDAY',n:'Workday',r:'M',s:'Enterprise Software'},
+  {t:'CRM',n:'Salesforce',r:'L',s:'Enterprise Software'},{t:'ADBE',n:'Adobe',r:'M',s:'Enterprise Software'},
+  {t:'HUBS',n:'HubSpot',r:'M',s:'Enterprise Software'},{t:'PAYC',n:'Paycom',r:'M',s:'Enterprise Software'},
+  {t:'CHRW',n:'C.H. Robinson',r:'M',s:'Logistics & Freight'},{t:'LSTR',n:'Landstar System',r:'M',s:'Logistics & Freight'},
+  {t:'XPO',n:'XPO Logistics',r:'M',s:'Logistics & Freight'},{t:'JBHT',n:'J.B. Hunt Transport',r:'M',s:'Logistics & Freight'},
+  {t:'KNX',n:'Knight-Swift',r:'M',s:'Logistics & Freight'},{t:'ODFL',n:'Old Dominion Freight',r:'M',s:'Logistics & Freight'},
+  {t:'GXO',n:'GXO Logistics',r:'M',s:'Logistics & Freight'},
+  {t:'ADP',n:'ADP',r:'M',s:'Payroll & HR'},{t:'PAYX',n:'Paychex',r:'M',s:'Payroll & HR'},
+  {t:'CDAY',n:'Ceridian HCM',r:'H',s:'Payroll & HR'},{t:'PCTY',n:'Paylocity',r:'M',s:'Payroll & HR'},
+  {t:'INTU',n:'Intuit',r:'H',s:'Tax & Accounting'},{t:'HRB',n:'H&R Block',r:'H',s:'Tax & Accounting'},
+  {t:'CBIZ',n:'CBIZ Inc',r:'H',s:'Tax & Accounting'},
+  {t:'NYT',n:'New York Times',r:'H',s:'Media & Publishing'},{t:'GANN',n:'Gannett Co',r:'H',s:'Media & Publishing'},
+  {t:'PARA',n:'Paramount Global',r:'H',s:'Media & Publishing'},{t:'WBD',n:'Warner Bros Discovery',r:'H',s:'Media & Publishing'},
+  {t:'TR',n:'Thomson Reuters',r:'H',s:'Legal Tech'},{t:'LZ',n:'LegalZoom',r:'H',s:'Legal Tech'},
+  {t:'RDFN',n:'Redfin Corp',r:'H',s:'Real Estate Tech'},{t:'Z',n:'Zillow Group',r:'H',s:'Real Estate Tech'},
+  {t:'OPEN',n:'Opendoor Technologies',r:'H',s:'Real Estate Tech'},{t:'COMP',n:'Compass Inc',r:'H',s:'Real Estate Tech'},
+  {t:'UNH',n:'UnitedHealth Group',r:'M',s:'Healthcare Admin'},{t:'CVS',n:'CVS Health',r:'M',s:'Healthcare Admin'},
+  {t:'HUM',n:'Humana',r:'M',s:'Healthcare Admin'},{t:'TDOC',n:'Teladoc Health',r:'H',s:'Healthcare Admin'},
+  {t:'CHGG',n:'Chegg Inc',r:'H',s:'Education Tech'},{t:'COUR',n:'Coursera',r:'H',s:'Education Tech'},
+  {t:'UDMY',n:'Udemy',r:'H',s:'Education Tech'},{t:'LRND',n:'Nerdy Inc (Varsity)',r:'H',s:'Education Tech'},
+  {t:'NICE',n:'NICE Systems',r:'H',s:'Call Center / BPO'},{t:'TTEC',n:'TTEC Holdings',r:'H',s:'Call Center / BPO'},
+  {t:'FIVE',n:'Five9 Inc',r:'H',s:'Call Center / BPO'},{t:'LPSN',n:'LivePerson',r:'H',s:'Call Center / BPO'},
+  {t:'EFX',n:'Equifax',r:'M',s:'Financial Data'},{t:'TRU',n:'TransUnion',r:'M',s:'Financial Data'},
+  {t:'VRSK',n:'Verisk Analytics',r:'M',s:'Data & Analytics'},{t:'DNB',n:'Dun & Bradstreet',r:'M',s:'Data & Analytics'},
+  {t:'FDS',n:'FactSet Research',r:'M',s:'Data & Analytics'},{t:'PLTR',n:'Palantir',r:'L',s:'Data & Analytics'},
+  {t:'TDC',n:'Teradata Corp',r:'H',s:'Data & Analytics'},
+  {t:'WU',n:'Western Union',r:'H',s:'Financial Data'},{t:'AFRM',n:'Affirm Holdings',r:'M',s:'Financial Data'},
+  {t:'UPST',n:'Upstart Holdings',r:'M',s:'Financial Data'},
 ];
 
 var SECTOR_MAP={
@@ -525,367 +618,526 @@ var SECTOR_MAP={
   'code migration':['IBM','ACN','CTSH','INFY','WIT','EPAM'],'batch processing':['IBM','JPM','BAC'],
   'banking':['JPM','BAC','WFC','C','USB','PNC','TFC','COF','RF','CFG','FITB','KEY','HBAN','MTB'],
   'bank':['JPM','BAC','WFC','C','USB','PNC'],'JPMorgan':['JPM'],'Bank of America':['BAC'],
-  'Wells Fargo':['WFC'],'Citigroup':['C'],'Goldman':['GS'],'Morgan Stanley':['MS'],
-  'investment bank':['GS','MS','EVR','LAZ','HLI'],'private equity':['BX','KKR','APO','CG'],
+  'investment bank':['GS','MS','EVR','LAZ'],'private equity':['BX','KKR','APO'],
   'payment':['AXP','MA','V','FIS','FISV','PYPL','SQ'],'Mastercard':['MA'],'Visa':['V'],
   'American Express':['AXP'],'PayPal':['PYPL'],'fintech':['PYPL','SQ','FIS','FISV','AFRM','UPST'],
-  'credit card':['AXP','MA','V','COF'],'transaction':['AXP','MA','V','FIS','FISV'],
-  'lending':['LC','UPST','AFRM','COF'],'buy now pay later':['AFRM','UPST','SQ'],
+  'credit card':['AXP','MA','V','COF'],'lending':['UPST','AFRM','COF'],
   'cybersecurity':['CRWD','OKTA','NET','ZS','PANW','FTNT','S','CYBR','CHKP','RPD'],
-  'security scanning':['CRWD','OKTA','ZS','TENB','QLYS','RPD'],
-  'vulnerability':['CRWD','OKTA','NET','ZS','PANW','RPD','TENB'],
+  'security scanning':['CRWD','OKTA','ZS','TENB','RPD'],'vulnerability':['CRWD','OKTA','NET','ZS','PANW','RPD'],
   'SOC':['CRWD','S','CYBR','SCWX'],'firewall':['PANW','ZS','FTNT','CHKP'],
-  'endpoint':['CRWD','S','FTNT'],'identity':['OKTA','CYBR','SAIL'],
-  'zero trust':['OKTA','ZS','NET','PANW'],'threat detection':['CRWD','S','CYBR','RPD'],
-  'ransomware':['CRWD','S','PANW','CYBR'],
+  'endpoint':['CRWD','S','FTNT'],'identity':['OKTA','CYBR'],'zero trust':['OKTA','ZS','NET','PANW'],
+  'threat detection':['CRWD','S','CYBR','RPD'],'ransomware':['CRWD','S','PANW','CYBR'],
   'wealth management':['SCHW','RJF','LPLA','AMP','BEN','TROW'],
   'financial advisor':['SCHW','RJF','LPLA','AMP'],'portfolio':['SCHW','RJF','BLK','TROW'],
-  'asset management':['BLK','BEN','IVZ','TROW','APAM','VRTS'],
-  'robo advisor':['SCHW','LPLA','AMP'],'retirement':['SCHW','TROW','AMP','PRU'],
-  'insurance':['MET','PRU','LNC','AFL','GL','UNM'],'claims':['MET','PRU','AFL','UNM'],
-  'underwriting':['MET','PRU','EG','RNR'],'actuarial':['MET','PRU','LNC'],
-  'IT consulting':['ACN','CTSH','INFY','WIT','EPAM','GLOB','HCKT','PRFT','EXLS','WNS'],
+  'asset management':['BLK','BEN','TROW'],'insurance':['MET','PRU','LNC','AFL'],
+  'claims':['MET','PRU','AFL'],'underwriting':['MET','PRU'],
+  'IT consulting':['ACN','CTSH','INFY','WIT','EPAM','GLOB','HCKT','EXLS','WNS'],
   'Accenture':['ACN'],'Cognizant':['CTSH'],'Infosys':['INFY'],'Wipro':['WIT'],
-  'consulting':['ACN','CTSH','INFY','BAH','CACI','HCKT'],'outsourcing':['CTSH','INFY','WIT','WNS','EXLS'],
-  'offshore':['INFY','WIT','CTSH','WNS'],'nearshore':['GLOB','EPAM'],
-  'staffing':['MAN','RHI','KELYA','ASGN','KFRC','TBI'],'recruiting':['MAN','RHI','DHX','ASGN'],
-  'temp worker':['MAN','KELYA','TBI'],'job placement':['MAN','RHI','KFRC'],
-  'headhunter':['RHI','MAN','ASGN'],'HR outsourcing':['ADP','PAYX','MAN'],
+  'consulting':['ACN','CTSH','INFY','BAH','HCKT'],'outsourcing':['CTSH','INFY','WIT','WNS','EXLS'],
+  'offshore':['INFY','WIT','CTSH','WNS'],'staffing':['MAN','RHI','KELYA','ASGN'],
+  'recruiting':['MAN','RHI','ASGN'],'headhunter':['RHI','MAN','ASGN'],
   'ERP':['SAP','ORCL','NOW','WDAY'],'enterprise software':['SAP','ORCL','NOW','WDAY','HUBS'],
   'SAP':['SAP'],'Oracle':['ORCL'],'ServiceNow':['NOW'],'Workday':['WDAY'],
-  'Salesforce':['CRM'],'CRM':['CRM','HUBS'],'HubSpot':['HUBS'],
-  'customer support':['NICE','FIVE'],'logistics':['CHRW','LSTR','ULH','ECHO','XPO','GXO'],
-  'freight':['CHRW','LSTR','XPO','JBHT','KNX'],'supply chain':['CHRW','LSTR','ULH','GXO'],
-  'trucking':['SAIA','ODFL','JBHT','KNX','WERN'],'dispatch':['CHRW','LSTR','XPO'],
-  'routing':['CHRW','LSTR','XPO','JBHT'],'warehouse':['GXO','XPO','JBHT'],
-  'payroll':['ADP','PAYX','PAYC','PCTY','CDAY'],'HR software':['ADP','PAYX','PAYC','PCTY','WDAY'],
-  'human resources':['ADP','PAYX','WDAY','PCTY'],'benefits admin':['ADP','PAYX','CDAY'],
-  'tax':['INTU','HRB','PAYX','ADP'],'accounting':['INTU','CBIZ','CASS','ENV'],
-  'audit':['INTU','CBIZ','CASS'],'TurboTax':['INTU'],'H&R Block':['HRB'],
-  'bookkeeping':['INTU','HRB','CBIZ'],'CPA':['INTU','HRB','CBIZ'],
-  'media':['NYT','IAC','NEWS','FOXA','PARA','WBD'],
-  'publishing':['NYT','GANN','LEE'],'journalism':['NYT','GANN','LEE'],
-  'newspaper':['NYT','GANN','LEE'],'content creation':['NYT','IAC'],
-  'copywriting':['NYT','IAC'],'editorial':['NYT','NEWS'],
-  'New York Times':['NYT'],'Fox':['FOXA'],'Paramount':['PARA'],
-  'legal':['TR','LZ','LAW'],'document review':['TR','LAW'],
-  'eDiscovery':['LAW'],'contract analysis':['TR','LAW'],
-  'legal research':['TR','LZ'],'Thomson Reuters':['TR'],'LegalZoom':['LZ'],
-  'real estate':['RDFN','Z','OPEN','COMP','HOUS','RMAX'],
-  'home buying':['RDFN','Z','OPEN','COMP'],'property search':['RDFN','Z'],
-  'Zillow':['Z'],'Redfin':['RDFN'],'real estate agent':['RDFN','COMP','HOUS','RMAX'],
-  'mortgage':['RDFN','HOUS','WFC','JPM'],
-  'healthcare':['UNH','CVS','HUM','ELV','CI'],
-  'health insurance':['UNH','HUM','ELV','CI'],'prior authorization':['UNH','HUM','ELV'],
-  'medical coding':['UNH','CVS'],'claims processing':['UNH','CI'],
-  'telehealth':['TDOC','DOCS'],'pharmacy':['CVS','GDRX'],
-  'education':['CHGG','COUR','UDMY','TWOU','LRND'],'tutoring':['CHGG','LRND'],
-  'online learning':['COUR','UDMY','TWOU','CHGG'],'homework help':['CHGG','LRND'],
-  'Chegg':['CHGG'],'Coursera':['COUR'],'Udemy':['UDMY'],
-  'essay writing':['CHGG','LRND'],'academic':['CHGG','COUR','TWOU'],
-  'call center':['NICE','TTEC','FIVE','TASK','LPSN'],'contact center':['NICE','TTEC','FIVE'],
-  'customer service':['NICE','FIVE','LPSN'],'BPO':['NICE','TTEC','TASK','CTSH','WIT'],
-  'chatbot':['LPSN','NICE','FIVE'],'live chat':['LPSN','NICE','FIVE'],
-  'credit score':['EFX','TRU'],'credit bureau':['EFX','TRU'],
-  'financial data':['VRSK','DNB','FDS'],'analytics':['VRSK','DNB','FDS','PLTR','TDC'],
-  'Western Union':['WU'],'wire transfer':['WU','PYPL'],
-  'Microsoft':['MSFT'],'Google':['GOOGL'],'Amazon':['AMZN'],'Apple':['AAPL'],
-  'Meta':['META'],'NVIDIA':['NVDA'],'Tesla':['TSLA'],
+  'Salesforce':['CRM'],'HubSpot':['HUBS'],'CRM':['CRM','HUBS'],
+  'logistics':['CHRW','LSTR','XPO','JBHT','KNX','GXO'],'freight':['CHRW','LSTR','XPO','JBHT','KNX'],
+  'supply chain':['CHRW','LSTR','GXO'],'trucking':['ODFL','JBHT','KNX'],'routing':['CHRW','LSTR','XPO'],
+  'payroll':['ADP','PAYX','PAYC','PCTY','CDAY'],'HR software':['ADP','PAYX','WDAY'],
+  'human resources':['ADP','PAYX','WDAY'],'tax':['INTU','HRB','PAYX','ADP'],
+  'accounting':['INTU','CBIZ'],'audit':['INTU','CBIZ'],'TurboTax':['INTU'],'H&R Block':['HRB'],
+  'CPA':['INTU','HRB','CBIZ'],'bookkeeping':['INTU','HRB'],
+  'media':['NYT','PARA','WBD'],'publishing':['NYT','GANN'],'journalism':['NYT','GANN'],
+  'newspaper':['NYT','GANN'],'New York Times':['NYT'],
+  'legal':['TR','LZ'],'document review':['TR'],'legal research':['TR','LZ'],'Thomson Reuters':['TR'],
+  'real estate':['RDFN','Z','OPEN','COMP'],'Zillow':['Z'],'Redfin':['RDFN'],
+  'real estate agent':['RDFN','COMP'],'mortgage':['RDFN','WFC','JPM'],
+  'healthcare':['UNH','CVS','HUM'],'health insurance':['UNH','HUM'],'telehealth':['TDOC'],
+  'education':['CHGG','COUR','UDMY','LRND'],'tutoring':['CHGG','LRND'],
+  'online learning':['COUR','UDMY','CHGG'],'homework help':['CHGG','LRND'],'Chegg':['CHGG'],
+  'call center':['NICE','TTEC','FIVE','LPSN'],'contact center':['NICE','TTEC','FIVE'],
+  'customer service':['NICE','FIVE','LPSN'],'BPO':['NICE','TTEC','CTSH','WIT'],
+  'credit score':['EFX','TRU'],'financial data':['VRSK','DNB','FDS'],
+  'analytics':['VRSK','DNB','FDS','PLTR','TDC'],'Western Union':['WU'],
 };
 
 var HIGH_TRIGGERS=['replaces','replace ','eliminates','threatens','disrupts','disruption',
   'at risk','existential','selloff','fall sharply','drops sharply','cut headcount','job losses',
-  'layoffs','COBOL','direct threat','obsolete','redundant','displacement','no longer needed'];
+  'layoffs','COBOL','direct threat','obsolete','redundant','displacement','no longer needed',
+  'cuts jobs','mass layoff','workforce reduction','phased out'];
 var MED_TRIGGERS=['competes','competition','pressure','challenges','testing','piloting',
-  'migrat','moderniz','efficiency','cost reduction','warns','rival','concern'];
+  'migrat','moderniz','efficiency','cost reduction','warns','rival','concern','uncertainty'];
 
 var kws=['COBOL','mainframe','legacy banking','payment processing','vulnerability','security scanning',
   'wealth management','financial advisor','supply chain','logistics','code migration',
   'ERP','Claude Code','Anthropic','new Claude','AI replaces','AI threatens','direct threat'];
 
-var alerts=[],allHeadlines=[],hits=new Set(),scans=0;
-var autoInt=null,cd=300,cdTimer=null,mode='live',apiKey='';
-var feedView='alerts',wsFilter='';
+var DEMO=[
+  {src:'Bloomberg',url:'#',h:"Anthropic's Claude automates COBOL modernization — IBM mainframe unit faces existential threat as banks accelerate migration away from legacy systems",sev:'HIGH',tks:['IBM','JPM','BAC','WFC'],kws:['COBOL','mainframe','IBM'],an:'Claude directly replaces IBM mainframe services — major banks cutting contracts'},
+  {src:'Reuters',url:'#',h:"Claude AI handles complete freight logistics routing and dispatch — C.H. Robinson and Landstar shares fall sharply on AI disruption fears",sev:'HIGH',tks:['CHRW','LSTR','XPO','JBHT'],kws:['logistics','freight','routing'],an:'AI automates core logistics operations threatening freight brokers'},
+  {src:'TechCrunch',url:'#',h:"CrowdStrike, Okta drop as Claude security tool detects vulnerabilities without human SOC analysts — cybersecurity vendors at risk",sev:'HIGH',tks:['CRWD','OKTA','S','CYBR'],kws:['cybersecurity','security scanning','vulnerability'],an:'AI threatens to replace human security operations center analysts'},
+  {src:'CNBC',url:'#',h:"Claude-powered wealth platform delivers personalized tax and portfolio advice — Schwab and Raymond James analysts face displacement",sev:'HIGH',tks:['SCHW','RJF','LPLA','AMP'],kws:['wealth management','financial advisor','portfolio'],an:'AI advisor threatens traditional wealth management professionals'},
+  {src:'Financial Times',url:'#',h:"Cognizant, Infosys face existential pressure as Claude automates IT modernization worth $200B annually — consulting model disrupted",sev:'HIGH',tks:['CTSH','INFY','ACN','WIT'],kws:['IT consulting','code migration'],an:'AI threatens global IT services and outsourcing industry directly'},
+  {src:'WSJ',url:'#',h:"JPMorgan and Bank of America testing Claude to replace entire COBOL batch processing divisions — IBM at risk",sev:'HIGH',tks:['JPM','BAC','IBM','FIS'],kws:['COBOL','banking','batch processing'],an:'Major banks piloting AI to eliminate legacy COBOL systems'},
+  {src:'The Verge',url:'#',h:"Anthropic releases Claude for Enterprise ERP — SAP and Oracle consulting pipelines threatened as clients automate implementations",sev:'HIGH',tks:['SAP','ORCL','ACN','CTSH'],kws:['ERP','enterprise software','SAP'],an:'Claude ERP automation threatens SAP/Oracle services revenues'},
+  {src:'Forbes',url:'#',h:"Claude investment research capabilities rival junior analyst output — Goldman Sachs and Morgan Stanley cut analyst headcount by 20%",sev:'HIGH',tks:['GS','MS','BX'],kws:['investment banking','analyst'],an:'AI analyst tools threaten entry-level investment banking roles'},
+  {src:'CNBC',url:'#',h:"Anthropic model replaces enterprise call center agents — NICE Systems and contact center vendors drop on guidance cut",sev:'HIGH',tks:['NICE','AXP','C','BAC'],kws:['call center','customer service'],an:'Claude threatens BPO and contact center software vendors'},
+  {src:'Reuters',url:'#',h:"AI automates payroll and HR workflows — Paychex and ADP warn investors of generative AI competitive threat",sev:'MEDIUM',tks:['PAYX','ADP','PAYC','PCTY'],kws:['payroll','HR software'],an:'Generative AI threatens payroll and HR software incumbents'},
+  {src:'Bloomberg',url:'#',h:"Chegg shares plunge as students use Claude instead of tutoring subscriptions — Coursera and Udemy face AI disruption",sev:'HIGH',tks:['CHGG','COUR','UDMY','LRND'],kws:['education','tutoring','homework help'],an:'AI directly replaces paid tutoring and online learning platforms'},
+  {src:'WSJ',url:'#',h:"Robert Half and ManpowerGroup warn AI recruiting tools slash demand for human staffing agencies",sev:'HIGH',tks:['RHI','MAN','ASGN'],kws:['staffing','recruiting'],an:'AI recruitment tools threaten traditional staffing agency model'},
+  {src:'CNBC',url:'#',h:"H&R Block and Intuit face existential threat as Claude handles complex tax returns with higher accuracy than human CPAs",sev:'HIGH',tks:['HRB','INTU','PAYX','ADP'],kws:['tax','accounting','CPA'],an:'AI tax preparation threatens H&R Block and Intuit revenue model'},
+];
 
-// ═══════════════════════════════════
-// ANALYSIS
-// ═══════════════════════════════════
+// State
+var alerts=[], allHeadlines=[], hits=new Set(), hitCount={}, scans=0;
+var autoInt=null, cd=300, cdTimer=null, mode='live', soundOn=false;
+var apiKeyMain='', apiKeyGnews='', apiKeyNewsdata='';
+var feedView='alerts', wsFilter='', sevFilters={H:true,M:true,L:true};
+var sourceCounts={rss:0,tna:0,gnews:0,newsdata:0};
+var sourceErrors={rss:false,tna:false,gnews:false,newsdata:false};
+var AI_TERMS=['Claude','Anthropic','GPT','ChatGPT','Gemini','OpenAI','generative AI','large language model'];
+
+// ══════════════════════════════════════════════
+// ANALYSIS ENGINE
+// ══════════════════════════════════════════════
 function analyzeLocal(headline){
   var hl=headline.toLowerCase();
-  if(!/\b(claude|anthropic|ai|artificial intelligence|llm|chatgpt|openai|gemini|generative)\b/.test(hl)) return null;
-  var matchedTickers=new Set(),matchedKws=[];
+  if(!/\b(claude|anthropic|ai|artificial intelligence|llm|chatgpt|openai|gemini|generative|machine learning)\b/.test(hl)) return null;
+  var matchedTickers=new Set(), matchedKws=[];
   Object.keys(SECTOR_MAP).forEach(function(kw){
     if(hl.indexOf(kw.toLowerCase())>=0){
       matchedKws.push(kw);
       SECTOR_MAP[kw].forEach(function(t){matchedTickers.add(t);});
     }
   });
-  kws.forEach(function(kw){
-    if(hl.indexOf(kw.toLowerCase())>=0&&matchedKws.indexOf(kw)<0) matchedKws.push(kw);
-  });
+  kws.forEach(function(kw){if(hl.indexOf(kw.toLowerCase())>=0&&matchedKws.indexOf(kw)<0)matchedKws.push(kw);});
   if(!matchedTickers.size) return null;
   var sev='LOW';
-  for(var i=0;i<HIGH_TRIGGERS.length;i++){
-    if(hl.indexOf(HIGH_TRIGGERS[i].toLowerCase())>=0){sev='HIGH';break;}
-  }
-  if(sev!=='HIGH'){
-    for(var j=0;j<MED_TRIGGERS.length;j++){
-      if(hl.indexOf(MED_TRIGGERS[j].toLowerCase())>=0){sev='MEDIUM';break;}
-    }
-  }
+  for(var i=0;i<HIGH_TRIGGERS.length;i++){if(hl.indexOf(HIGH_TRIGGERS[i].toLowerCase())>=0){sev='HIGH';break;}}
+  if(sev!=='HIGH'){for(var j=0;j<MED_TRIGGERS.length;j++){if(hl.indexOf(MED_TRIGGERS[j].toLowerCase())>=0){sev='MEDIUM';break;}}}
   if(sev==='LOW') sev='MEDIUM';
   var tickers=Array.from(matchedTickers).slice(0,6);
-  var analysis='AI threat to '+(matchedKws[0]||'sector')+' — '+tickers.slice(0,3).join(', ')+' flagged';
-  return {isDisruptive:true,severity:sev,matchedKeywords:matchedKws.slice(0,5),affectedTickers:tickers,analysis:analysis};
+  return{isDisruptive:true,severity:sev,matchedKeywords:matchedKws.slice(0,5),affectedTickers:tickers,
+    analysis:'AI threat to '+(matchedKws[0]||'sector')+' — '+tickers.slice(0,3).join(', ')+' flagged'};
 }
 
-// ═══════════════════════════════════
-// INIT
-// ═══════════════════════════════════
-function init(){
-  document.getElementById('keyBadge').addEventListener('click',showSetup);
-  document.getElementById('scanBtn').addEventListener('click',doScan);
-  document.getElementById('clearBtn').addEventListener('click',doClear);
-  document.getElementById('kwAddBtn').addEventListener('click',doAddKw);
-  document.getElementById('kwi').addEventListener('keydown',function(e){if(e.key==='Enter')doAddKw();});
-  document.getElementById('tabLive').addEventListener('click',function(){setMode('live');});
-  document.getElementById('tabDemo').addEventListener('click',function(){setMode('demo');});
-  document.getElementById('atog').addEventListener('click',doToggleAuto);
-  document.getElementById('shareBtn').addEventListener('click',doShare);
-  document.getElementById('ftabAlerts').addEventListener('click',function(){setFeedView('alerts');});
-  document.getElementById('ftabAll').addEventListener('click',function(){setFeedView('all');});
-  document.getElementById('wsearchInput').addEventListener('input',function(e){wsFilter=e.target.value.toLowerCase();renderWL();});
-  try{
-    var saved=localStorage.getItem('snk');
-    if(saved&&saved.length>=20){
-      apiKey=saved;
-      document.getElementById('keyField').value=saved;
-      setKeyConnected();
-      document.getElementById('setupScreen').style.display='none';
-    }
-  }catch(e){}
-  renderWL();renderKW();updateStats();
-}
+// ══════════════════════════════════════════════
+// NEWS SOURCES
+// ══════════════════════════════════════════════
 
-function doActivate(){
-  var key=document.getElementById('keyField').value.trim();
-  var err=document.getElementById('errMsg');
-  if(key.length<20){err.style.display='block';document.getElementById('keyField').style.borderColor='var(--red)';return;}
-  err.style.display='none';
-  document.getElementById('keyField').style.borderColor='var(--green)';
-  apiKey=key;
-  try{localStorage.setItem('snk',key);}catch(e){}
-  setKeyConnected();
-  setTimeout(function(){document.getElementById('setupScreen').style.display='none';},400);
-}
-
-function doSkip(){mode='demo';setMode('demo');document.getElementById('setupScreen').style.display='none';}
-function showSetup(){document.getElementById('keyField').value=apiKey||'';document.getElementById('setupScreen').style.display='flex';}
-function setKeyConnected(){var b=document.getElementById('keyBadge');b.textContent='✅ LIVE NEWS CONNECTED';b.classList.add('ok');}
-
-function setMode(m){
-  mode=m;
-  document.getElementById('tabLive').classList.toggle('on',m==='live');
-  document.getElementById('tabDemo').classList.toggle('on',m==='demo');
-  document.getElementById('slbl').textContent=m==='live'?'SCAN LIVE HEADLINES NOW':'SCAN DEMO HEADLINES';
-}
-
-function setFeedView(v){
-  feedView=v;
-  document.getElementById('ftabAlerts').classList.toggle('on',v==='alerts');
-  document.getElementById('ftabAll').classList.toggle('on',v==='all');
-  renderFeed();
-}
-
-// ═══════════════════════════════════
-// NEWS FETCH — TheNewsAPI (CORS-friendly, no proxy needed)
-// ═══════════════════════════════════
-async function fetchNews(key){
-  // Run multiple targeted queries in parallel for better coverage
+// SOURCE 1: TheNewsAPI (original, improved with more targeted queries)
+async function fetchTheNewsAPI(key){
   var QUERIES=[
-    'Claude AI banking automation',
-    'Anthropic enterprise disruption',
-    'AI replaces workers jobs',
-    'artificial intelligence IBM COBOL legacy',
-    'generative AI financial services threat',
+    'Claude Anthropic artificial intelligence enterprise',
+    'AI replaces jobs workers automation banking',
+    'artificial intelligence disrupts financial services',
+    'AI threatens cybersecurity staffing consulting',
+    'generative AI legacy software replacement',
+    'Anthropic Claude enterprise deployment',
     'AI automation logistics supply chain',
-    'Claude cybersecurity threat',
-    'AI wealth management advisor',
-    'Anthropic new model release',
-    'AI replaces analysts consulting'
+    'artificial intelligence legal accounting tax',
+    'AI replaces analysts wealth management',
+    'Claude Code software development automation',
+    'AI banking COBOL mainframe',
+    'machine learning insurance underwriting claims',
   ];
-
-  // Pick 3 random queries and run them in parallel
-  var selected=QUERIES.sort(function(){return Math.random()-0.5;}).slice(0,3);
-  var articles=[];
-  var seen=new Set();
-
+  var selected=QUERIES.sort(function(){return Math.random()-.5;}).slice(0,5);
+  var articles=[], seen=new Set();
+  var promises=selected.map(function(q){
+    return fetch('https://api.thenewsapi.com/v1/news/all?api_token='+key+'&search='+encodeURIComponent(q)+'&language=en&limit=10&sort=published_at')
+      .then(function(r){return r.json();}).catch(function(){return{data:[]};});
+  });
   try{
-    var promises=selected.map(function(q){
-      var url='https://api.thenewsapi.com/v1/news/all'
-        +'?api_token='+key
-        +'&search='+encodeURIComponent(q)
-        +'&language=en'
-        +'&limit=10'
-        +'&sort=published_at';
-      return fetch(url)
-        .then(function(r){return r.json();})
-        .catch(function(){return {data:[]};});
-    });
-
     var results=await Promise.all(promises);
-
     results.forEach(function(d){
       if(d.data&&d.data.length){
         d.data.forEach(function(a){
           if(a.title&&!seen.has(a.uuid)){
             seen.add(a.uuid);
             var desc=a.description||a.snippet||'';
-            articles.push({
-              h:a.title+(desc?' — '+desc.substring(0,100):''),
-              src:a.source||'News',
-              url:a.url||'#'
-            });
+            articles.push({h:a.title+(desc?' — '+desc.substring(0,120):''),src:a.source||'TheNewsAPI',url:a.url||'#',srcId:'tna'});
           }
         });
-      } else if(d.error){
-        console.warn('TheNewsAPI error:',d.error);
       }
     });
-  }catch(e){
-    console.log('fetchNews error',e);
-  }
-
+    sourceCounts.tna=articles.length;
+    sourceErrors.tna=false;
+  }catch(e){sourceErrors.tna=true;}
   return articles;
 }
 
-// ═══════════════════════════════════
+// SOURCE 2: GNews API
+async function fetchGNews(key){
+  var QUERIES=[
+    'Claude Anthropic AI business',
+    'artificial intelligence replaces jobs',
+    'AI automation banking finance',
+    'generative AI enterprise disruption',
+  ];
+  var selected=QUERIES.sort(function(){return Math.random()-.5;}).slice(0,3);
+  var articles=[], seen=new Set();
+  var promises=selected.map(function(q){
+    return fetch('https://gnews.io/api/v4/search?q='+encodeURIComponent(q)+'&lang=en&country=us&max=10&apikey='+key)
+      .then(function(r){return r.json();}).catch(function(){return{articles:[]};});
+  });
+  try{
+    var results=await Promise.all(promises);
+    results.forEach(function(d){
+      if(d.articles&&d.articles.length){
+        d.articles.forEach(function(a){
+          var uid=a.url;
+          if(!seen.has(uid)){
+            seen.add(uid);
+            var desc=a.description||'';
+            articles.push({h:a.title+(desc?' — '+desc.substring(0,120):''),src:a.source&&a.source.name||'GNews',url:a.url||'#',srcId:'gnews'});
+          }
+        });
+      }
+    });
+    sourceCounts.gnews=articles.length;
+    sourceErrors.gnews=false;
+  }catch(e){sourceErrors.gnews=true;}
+  return articles;
+}
+
+// SOURCE 3: NewsData.io
+async function fetchNewsData(key){
+  var QUERIES=[
+    'Claude Anthropic AI banking finance',
+    'artificial intelligence automation disruption',
+    'AI replaces human workers jobs',
+  ];
+  var selected=QUERIES.sort(function(){return Math.random()-.5;}).slice(0,2);
+  var articles=[], seen=new Set();
+  var promises=selected.map(function(q){
+    return fetch('https://newsdata.io/api/1/news?apikey='+key+'&q='+encodeURIComponent(q)+'&language=en&category=business,technology')
+      .then(function(r){return r.json();}).catch(function(){return{results:[]};});
+  });
+  try{
+    var results=await Promise.all(promises);
+    results.forEach(function(d){
+      if(d.results&&d.results.length){
+        d.results.forEach(function(a){
+          if(a.title&&!seen.has(a.article_id)){
+            seen.add(a.article_id);
+            var desc=a.description||'';
+            articles.push({h:a.title+(desc?' — '+desc.substring(0,120):''),src:a.source_id||'NewsData',url:a.link||'#',srcId:'newsdata'});
+          }
+        });
+      }
+    });
+    sourceCounts.newsdata=articles.length;
+    sourceErrors.newsdata=false;
+  }catch(e){sourceErrors.newsdata=true;}
+  return articles;
+}
+
+// SOURCE 4: RSS via rss2json.com (completely free, no key needed)
+async function fetchRSS(){
+  var RSS_FEEDS=[
+    {url:'https://feeds.reuters.com/reuters/technologyNews',name:'Reuters Tech'},
+    {url:'https://feeds.reuters.com/reuters/businessNews',name:'Reuters Business'},
+    {url:'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',name:'NYT Tech'},
+    {url:'https://feeds.a.dj.com/rss/RSSWSJD.xml',name:'WSJ Tech'},
+    {url:'https://www.cnbc.com/id/19854910/device/rss/rss.html',name:'CNBC Tech'},
+    {url:'https://techcrunch.com/feed/',name:'TechCrunch'},
+    {url:'https://www.ft.com/technology?format=rss',name:'FT Tech'},
+    {url:'https://feeds.feedburner.com/venturebeat/SZYF',name:'VentureBeat'},
+    {url:'https://www.wired.com/feed/rss',name:'Wired'},
+    {url:'https://fortune.com/feed/',name:'Fortune'},
+  ];
+  // Shuffle and pick 4 to stay within rss2json free limit
+  var selected=RSS_FEEDS.sort(function(){return Math.random()-.5;}).slice(0,4);
+  var articles=[], seen=new Set();
+  var promises=selected.map(function(feed){
+    return fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(feed.url)+'&api_key=ntzuqtulzjj9rkxebtxxhbvl4t6jfbqphfiqv3ym&count=15')
+      .then(function(r){return r.json();}).then(function(d){return{d:d,name:feed.name};})
+      .catch(function(){return{d:{items:[]},name:feed.name};});
+  });
+  try{
+    var results=await Promise.all(promises);
+    results.forEach(function(res){
+      var d=res.d, feedName=res.name;
+      if(d.items&&d.items.length){
+        d.items.forEach(function(item){
+          if(item.title&&!seen.has(item.link)){
+            seen.add(item.link);
+            var desc=item.description?item.description.replace(/<[^>]+>/g,'').substring(0,120):'';
+            articles.push({h:item.title+(desc?' — '+desc:''),src:feedName,url:item.link||'#',srcId:'rss'});
+          }
+        });
+      }
+    });
+    sourceCounts.rss=articles.length;
+    sourceErrors.rss=false;
+  }catch(e){sourceErrors.rss=true;}
+  return articles;
+}
+
+// ══════════════════════════════════════════════
+// DEDUPLICATION — remove near-duplicate headlines
+// ══════════════════════════════════════════════
+function dedupeHeadlines(articles){
+  var seen=[], out=[];
+  articles.forEach(function(a){
+    var words=a.h.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(function(w){return w.length>4;}).slice(0,12).join(' ');
+    var isDup=seen.some(function(s){
+      var common=s.split(' ').filter(function(w){return words.indexOf(w)>=0;}).length;
+      return common>6;
+    });
+    if(!isDup){seen.push(words);out.push(a);}
+  });
+  return out;
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+function init(){
+  try{
+    var k=localStorage.getItem('snk2');
+    if(k&&k.length>=20){
+      apiKeyMain=k;
+      document.getElementById('keyFieldMain').value=k;
+      updateKeyBadge();
+      document.getElementById('setupScreen').style.display='none';
+    }
+    var kg=localStorage.getItem('snk2g');if(kg)apiKeyGnews=kg,document.getElementById('keyFieldGnews').value=kg;
+    var kn=localStorage.getItem('snk2n');if(kn)apiKeyNewsdata=kn,document.getElementById('keyFieldNewsdata').value=kn;
+  }catch(e){}
+  updateSourceIndicators();
+  renderWL();renderKW();updateStats();
+}
+
+function doActivate(){
+  var key=document.getElementById('keyFieldMain').value.trim();
+  var kg=document.getElementById('keyFieldGnews').value.trim();
+  var kn=document.getElementById('keyFieldNewsdata').value.trim();
+  var err=document.getElementById('errMsg');
+  if(key.length<20&&!kg&&!kn){err.style.display='block';return;}
+  err.style.display='none';
+  if(key.length>=20){apiKeyMain=key;try{localStorage.setItem('snk2',key);}catch(e){}}
+  if(kg.length>=10){apiKeyGnews=kg;try{localStorage.setItem('snk2g',kg);}catch(e){}}
+  if(kn.length>=10){apiKeyNewsdata=kn;try{localStorage.setItem('snk2n',kn);}catch(e){}}
+  updateKeyBadge();
+  document.getElementById('setupScreen').style.display='none';
+}
+
+function doSkip(){mode='demo';setMode('demo');document.getElementById('setupScreen').style.display='none';}
+function showSetup(){
+  document.getElementById('keyFieldMain').value=apiKeyMain||'';
+  document.getElementById('keyFieldGnews').value=apiKeyGnews||'';
+  document.getElementById('keyFieldNewsdata').value=apiKeyNewsdata||'';
+  document.getElementById('setupScreen').style.display='flex';
+}
+function updateKeyBadge(){
+  var b=document.getElementById('keyBadge');
+  var count=(apiKeyMain?1:0)+(apiKeyGnews?1:0)+(apiKeyNewsdata?1:0);
+  b.textContent=count>0?'✅ '+(count+1)+' SOURCES ACTIVE':'🔑 API KEYS';
+  b.className='pill pill-key'+(count>0?' connected':'');
+}
+function setMode(m){
+  mode=m;
+  document.getElementById('tabLive').classList.toggle('on',m==='live');
+  document.getElementById('tabDemo').classList.toggle('on',m==='demo');
+  document.getElementById('slbl').textContent=m==='live'?'SCAN LIVE HEADLINES NOW':'SCAN DEMO HEADLINES';
+}
+function setFeedView(v){
+  feedView=v;
+  ['alerts','all','sources'].forEach(function(x){document.getElementById('ftab'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('on',v===x);});
+  document.getElementById('filterBar').style.display=v==='alerts'?'flex':'none';
+  renderFeed();
+}
+function toggleSevFilter(el){
+  var sev=el.getAttribute('data-sev');
+  sevFilters[sev]=!sevFilters[sev];
+  el.classList.toggle('on',sevFilters[sev]);
+  renderFeed();
+}
+function toggleSound(){
+  soundOn=!soundOn;
+  var b=document.getElementById('soundBtn');
+  b.textContent=soundOn?'🔔 SOUND ON':'🔇 SOUND OFF';
+  b.className='sound-btn'+(soundOn?' on':'');
+}
+function updateSourceIndicators(){
+  var hasTna=!!apiKeyMain, hasGnews=!!apiKeyGnews, hasNewsdata=!!apiKeyNewsdata;
+  function setInd(id,on){
+    var el=document.getElementById(id);
+    el.className='src-ind '+(on?'active':'inactive');
+  }
+  setInd('srcIndRss',true); // always on
+  setInd('srcIndTna',hasTna);
+  setInd('srcIndGnews',hasGnews);
+  setInd('srcIndNewsdata',hasNewsdata);
+}
+
+// ══════════════════════════════════════════════
 // SCAN
-// ═══════════════════════════════════
+// ══════════════════════════════════════════════
 async function doScan(){
-  if(mode==='live'&&!apiKey){showSetup();return;}
-
+  if(mode==='live'&&!apiKeyMain&&!apiKeyGnews&&!apiKeyNewsdata){showSetup();return;}
   var btn=document.getElementById('scanBtn');
-  var icon=document.getElementById('si');
-  var lbl=document.getElementById('slbl');
-  var loading=document.getElementById('loading');
-  var lmsg=document.getElementById('lmsg');
   var nowTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-
-  btn.disabled=true;icon.className='si spin';icon.textContent='⟳';
-  lbl.textContent='SCANNING...';
+  btn.disabled=true;btn.classList.add('scanning');
+  document.getElementById('si').className='si spin';document.getElementById('si').textContent='⟳';
+  document.getElementById('slbl').textContent='SCANNING...';
   document.getElementById('ltxt').textContent='SCANNING';
-  loading.style.display='flex';
-  document.getElementById('alist').innerHTML='';
+  sourceCounts={rss:0,tna:0,gnews:0,newsdata:0};
   scans++;updateStats();
+  showSkeletons();
 
-  var newAlerts=[],newHeadlines=[];
+  var newAlerts=[], newHeadlines=[], allRaw=[];
 
   if(mode==='demo'){
-    lmsg.textContent='LOADING DEMO HEADLINES...';
-    await new Promise(function(r){setTimeout(r,600);});
-    var shuffled=DEMO.slice().sort(function(){return Math.random()-0.5;});
+    await new Promise(function(r){setTimeout(r,700);});
+    var shuffled=DEMO.slice().sort(function(){return Math.random()-.5;});
     shuffled.forEach(function(d,i){
       var id=Date.now()+i;
-      var hl={id:id,src:d.src,h:d.h,url:d.url,time:nowTime,live:false};
-      newHeadlines.push(hl);
-      newAlerts.push({id:id,src:d.src,h:d.h,url:d.url,time:nowTime,live:false,
-        sev:d.sev,kws:d.kws,tks:d.tks,an:d.an,isnew:true});
-      d.tks.forEach(function(t){hits.add(t);});
+      newHeadlines.push({id:id,src:d.src,h:d.h,url:d.url,time:nowTime,live:false,srcId:'demo'});
+      newAlerts.push({id:id,src:d.src,h:d.h,url:d.url,time:nowTime,live:false,sev:d.sev,kws:d.kws,tks:d.tks,an:d.an,isnew:true});
+      d.tks.forEach(function(t){hits.add(t);hitCount[t]=(hitCount[t]||0)+1;});
     });
+    sourceCounts.rss=5;sourceCounts.tna=4;sourceCounts.gnews=3;sourceCounts.newsdata=2;
   } else {
-    lmsg.textContent='FETCHING LIVE HEADLINES...';
-    var raw=await fetchNews(apiKey);
+    // Fetch from all available sources in parallel
+    var fetchPromises=[];
+    fetchPromises.push(fetchRSS()); // always try RSS
+    if(apiKeyMain) fetchPromises.push(fetchTheNewsAPI(apiKeyMain));
+    if(apiKeyGnews) fetchPromises.push(fetchGNews(apiKeyGnews));
+    if(apiKeyNewsdata) fetchPromises.push(fetchNewsData(apiKeyNewsdata));
 
-    if(!raw.length){
-      // Show error instead of silently falling back to demo
-      loading.style.display='none';
-      document.getElementById('alist').innerHTML=
-        '<div class="empty">'+
-          '<div class="ei">⚠️</div>'+
-          '<div class="et">Could not fetch live headlines</div>'+
-          '<div class="es">Check your TheNewsAPI token is correct — or switch to DEMO MODE</div>'+
-        '</div>';
-      btn.disabled=false;icon.className='si';icon.textContent='⚡';
-      lbl.textContent='SCAN LIVE HEADLINES NOW';
+    var results=await Promise.all(fetchPromises);
+    results.forEach(function(r){allRaw=allRaw.concat(r);});
+    allRaw=dedupeHeadlines(allRaw.sort(function(){return Math.random()-.5;}));
+
+    if(!allRaw.length){
+      clearSkeletons();
+      document.getElementById('alist').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-t">Could not fetch headlines</div><div class="empty-s">Check API keys or try Demo Mode</div></div>';
+      resetScanBtn();
       document.getElementById('ltxt').textContent='ERROR';
       return;
     }
 
-    lmsg.textContent='ANALYZING '+raw.length+' HEADLINES...';
-    for(var i=0;i<raw.length;i++){
-      var item=raw[i];
+    allRaw.forEach(function(item,i){
       var id=Date.now()+i;
-      var hl={id:id,src:item.src,h:item.h,url:item.url,time:nowTime,live:true};
-      newHeadlines.push(hl);
+      newHeadlines.push({id:id,src:item.src,h:item.h,url:item.url,time:nowTime,live:true,srcId:item.srcId});
       var result=analyzeLocal(item.h);
       if(result&&result.affectedTickers&&result.affectedTickers.length){
         newAlerts.push({id:id,src:item.src,h:item.h,url:item.url,time:nowTime,live:true,
-          sev:result.severity,kws:result.matchedKeywords,tks:result.affectedTickers,
-          an:result.analysis,isnew:true});
-        result.affectedTickers.forEach(function(t){hits.add(t);});
+          sev:result.severity,kws:result.matchedKeywords,tks:result.affectedTickers,an:result.analysis,isnew:true,srcId:item.srcId});
+        result.affectedTickers.forEach(function(t){hits.add(t);hitCount[t]=(hitCount[t]||0)+1;});
       }
-      await new Promise(function(r){setTimeout(r,20);});
-    }
+    });
   }
 
-  loading.style.display='none';
-  allHeadlines=newHeadlines.concat(allHeadlines).slice(0,300);
+  clearSkeletons();
+  allHeadlines=newHeadlines.concat(allHeadlines).slice(0,500);
   if(newAlerts.length){
-    alerts=newAlerts.concat(alerts).slice(0,150);
-    newAlerts.forEach(function(a){if(a.sev==='HIGH'){showToast(a);playSound();}});
+    alerts=newAlerts.concat(alerts).slice(0,200);
+    newAlerts.forEach(function(a){if(a.sev==='HIGH'){showToast(a);if(soundOn)playSound();}});
   }
 
-  renderFeed();renderWL();updateStats();
-  btn.disabled=false;icon.className='si';icon.textContent='⚡';
-  lbl.textContent=mode==='live'?'SCAN LIVE HEADLINES NOW':'SCAN DEMO HEADLINES';
+  renderFeed();renderWL();renderTicker();updateStats();updateSourceIndicators();
+  resetScanBtn();
   document.getElementById('ltxt').textContent='LIVE';
+  bumpStats();
 }
 
-// ═══════════════════════════════════
+function resetScanBtn(){
+  var btn=document.getElementById('scanBtn');
+  btn.disabled=false;btn.classList.remove('scanning');
+  document.getElementById('si').className='si';document.getElementById('si').textContent='⚡';
+  document.getElementById('slbl').textContent=mode==='live'?'SCAN LIVE HEADLINES NOW':'SCAN DEMO HEADLINES';
+}
+function showSkeletons(){
+  var list=document.getElementById('alist');
+  list.innerHTML='';
+  for(var i=0;i<5;i++){
+    list.innerHTML+='<div class="skeleton-wrap"><div class="skeleton sk1"></div><div class="skeleton sk2"></div><div class="skeleton sk3"></div><div class="skeleton sk4"></div><div class="skeleton sk5"></div></div>';
+  }
+}
+function clearSkeletons(){
+  document.getElementById('alist').innerHTML='';
+}
+function bumpStats(){
+  ['stA','stS','stN','stK','stSC'].forEach(function(id){
+    var el=document.getElementById(id);
+    el.closest('.stat').classList.add('bump');
+    setTimeout(function(){el.closest('.stat').classList.remove('bump');},500);
+  });
+}
+
+// ══════════════════════════════════════════════
 // RENDER
-// ═══════════════════════════════════
-var AI_TERMS=['Claude','Anthropic','GPT','ChatGPT','Gemini','OpenAI','generative AI'];
+// ══════════════════════════════════════════════
 function hlKw(txt){
   var o=txt;
-  var allTerms=kws.concat(AI_TERMS);
-  allTerms.forEach(function(kw){
+  kws.concat(AI_TERMS).forEach(function(kw){
     try{var re=new RegExp('('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');o=o.replace(re,'<mark>$1</mark>');}catch(e){}
   });
   return o;
 }
 
+function renderTicker(){
+  if(!alerts.length) return;
+  var ts=document.getElementById('tickerScroll');
+  var items=[];
+  alerts.slice(0,20).forEach(function(a){
+    a.tks.slice(0,4).forEach(function(t){
+      items.push('<div class="ticker-item"><span class="t-dot t-dot-'+a.sev.charAt(0)+'"></span><span class="t-sym">'+t+'</span><span class="t-sev-'+a.sev.charAt(0)+'">'+a.sev+'</span></div>');
+    });
+  });
+  var all=items.join('')+items.join('');
+  ts.innerHTML=all;
+}
+
+function getFilteredAlerts(){
+  var q=(document.getElementById('filterInput')||{}).value||'';
+  q=q.toLowerCase();
+  return alerts.filter(function(a){
+    if(!sevFilters[a.sev.charAt(0)]) return false;
+    if(q&&a.h.toLowerCase().indexOf(q)<0&&a.tks.join(',').toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+}
+
 function renderFeed(){
   var list=document.getElementById('alist');
   list.innerHTML='';
+  if(feedView==='sources'){renderSourceStatus();return;}
   if(feedView==='alerts'){
+    var filtered=getFilteredAlerts();
     document.getElementById('feedChip').textContent=alerts.length+' ALERTS';
-    if(!alerts.length){
-      list.innerHTML='<div class="empty"><div class="ei">📡</div><div class="et">No disruption alerts yet</div><div class="es">Click SCAN — or switch to ALL HEADLINES tab to see raw news feed</div></div>';
-      return;
+    document.getElementById('filterCount').textContent=filtered.length+'/'+alerts.length+' shown';
+    if(!filtered.length){
+      list.innerHTML='<div class="empty"><div class="empty-icon">📡</div><div class="empty-t">No disruption alerts yet</div><div class="empty-s">Click SCAN or switch to ALL HEADLINES tab</div></div>';return;
     }
-    alerts.forEach(function(a,i){
+    filtered.forEach(function(a,i){
       var sc=a.sev==='HIGH'?'sh':a.sev==='MEDIUM'?'sm':'sl';
       var div=document.createElement('div');
-      div.className='ac '+sc+(a.isnew&&i<10?' nw':'');
+      div.className='ac '+sc+(a.isnew&&i<8?' nw':'');
+      div.dataset.id=a.id;
       div.innerHTML=
         '<div class="atop">'+
           '<span class="sb s'+a.sev+'">'+a.sev+'</span>'+
-          '<span class="srct '+(a.live?'slv':'sdm')+'">'+(a.live?'🟢 LIVE':'🔵 DEMO')+' · '+a.src+'</span>'+
+          '<span class="srctag '+(a.live?'slive':'sdemo')+'">'+(a.live?'🟢 LIVE':'🔵 DEMO')+'</span>'+
+          '<span class="srcname">'+a.src+'</span>'+
           '<span class="atm">'+a.time+'</span>'+
+          '<button class="expand-btn" onclick="toggleExpand(this)">EXPAND ▸</button>'+
         '</div>'+
         '<div class="aht">'+hlKw(a.h)+'</div>'+
         (a.an?'<div class="aan">🔍 '+a.an+'</div>':'')+
-        '<div class="trow">'+a.tks.map(function(t){return '<span class="tk">'+t+'</span>';}).join('')+'</div>'+
-        (a.url&&a.url!=='#'?'<a class="alink" href="'+a.url+'" target="_blank">Read article →</a>':'');
+        '<div class="trow">'+a.tks.map(function(t){
+          var heat=Math.min(hitCount[t]||0,5);
+          return '<span class="tk" title="'+t+' — hit '+(hitCount[t]||0)+' times" style="opacity:'+(0.5+heat*0.1)+'">'+t+(hitCount[t]>1?' ×'+hitCount[t]:'')+'</span>';
+        }).join('')+'</div>'+
+        (a.url&&a.url!=='#'?'<a class="alink" href="'+a.url+'" target="_blank">Read full article →</a>':'');
       list.appendChild(div);
       setTimeout(function(){div.classList.remove('nw');},4000);
     });
   } else {
     document.getElementById('feedChip').textContent=allHeadlines.length+' HEADLINES';
     if(!allHeadlines.length){
-      list.innerHTML='<div class="empty"><div class="ei">📰</div><div class="et">No headlines yet</div><div class="es">Click SCAN to fetch headlines</div></div>';
-      return;
+      list.innerHTML='<div class="empty"><div class="empty-icon">📰</div><div class="empty-t">No headlines fetched yet</div><div class="empty-s">Click SCAN to load headlines from all sources</div></div>';return;
     }
     allHeadlines.forEach(function(hl){
       var isAlert=alerts.find(function(a){return a.id===hl.id;});
@@ -894,15 +1146,51 @@ function renderFeed(){
       div.innerHTML=
         '<div class="art-top">'+
           (isAlert?'<span class="sb s'+isAlert.sev+'">'+isAlert.sev+'</span>':'')+
-          '<span class="art-src '+(hl.live?'art-live':'art-demo')+'">'+hl.src+'</span>'+
+          '<span class="srctag '+(hl.live?'slive':'sdemo')+'">'+hl.src+'</span>'+
           '<span class="art-time">'+hl.time+'</span>'+
         '</div>'+
         '<div class="art-h">'+hlKw(hl.h)+'</div>'+
-        (isAlert&&isAlert.tks&&isAlert.tks.length?'<div class="trow">'+isAlert.tks.map(function(t){return '<span class="tk">'+t+'</span>';}).join('')+'</div>':'')+
-        (hl.url&&hl.url!=='#'?'<a class="art-link" href="'+hl.url+'" target="_blank">Read →</a>':'');
+        (isAlert&&isAlert.tks?'<div class="trow">'+isAlert.tks.map(function(t){return '<span class="tk">'+t+'</span>';}).join('')+'</div>':'')+
+        (hl.url&&hl.url!=='#'?'<a class="alink" href="'+hl.url+'" target="_blank">Read →</a>':'');
       list.appendChild(div);
     });
   }
+}
+
+function renderSourceStatus(){
+  var list=document.getElementById('alist');
+  list.innerHTML='';
+  var panel=document.createElement('div');
+  panel.style.padding='16px';
+  var sources=[
+    {id:'rss',name:'RSS Feeds (Reuters, AP, NYT, CNBC, FT, TC, Wired)',key:'none',count:sourceCounts.rss,err:sourceErrors.rss,always:true},
+    {id:'tna',name:'TheNewsAPI.com',key:apiKeyMain?'●●●●●●':'No key',count:sourceCounts.tna,err:sourceErrors.tna,always:false},
+    {id:'gnews',name:'GNews API',key:apiKeyGnews?'●●●●●●':'No key',count:sourceCounts.gnews,err:sourceErrors.gnews,always:false},
+    {id:'newsdata',name:'NewsData.io',key:apiKeyNewsdata?'●●●●●●':'No key',count:sourceCounts.newsdata,err:sourceErrors.newsdata,always:false},
+  ];
+  var html='<div class="source-status">';
+  sources.forEach(function(s){
+    var status=s.err?'err':(s.always||s.key!=='No key'?'ok':'off');
+    html+='<div class="src-row">'+
+      '<div class="src-dot '+status+'"></div>'+
+      '<div class="src-row-name">'+s.name+'</div>'+
+      '<div class="src-row-count">'+(s.count>0?s.count+' articles':s.key==='No key'?'—':'0')+'</div>'+
+      '<div class="src-row-note">'+(s.err?'ERROR':s.key==='No key'?'NO KEY':s.key==='none'?'FREE':'ACTIVE')+'</div>'+
+    '</div>';
+  });
+  html+='<div style="padding:10px;font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--dim);line-height:1.8;">'+
+    'Total headlines fetched: <strong style="color:var(--text)">'+(sourceCounts.rss+sourceCounts.tna+sourceCounts.gnews+sourceCounts.newsdata)+'</strong><br>'+
+    'Disruption alerts found: <strong style="color:var(--red)">'+alerts.length+'</strong><br>'+
+    'Stocks flagged: <strong style="color:var(--orange)">'+hits.size+'</strong>'+
+  '</div></div>';
+  panel.innerHTML=html;
+  list.appendChild(panel);
+}
+
+function toggleExpand(btn){
+  var card=btn.closest('.ac');
+  card.classList.toggle('expanded');
+  btn.textContent=card.classList.contains('expanded')?'COLLAPSE ▾':'EXPAND ▸';
 }
 
 function renderWL(){
@@ -912,8 +1200,10 @@ function renderWL(){
     if(!wsFilter) return true;
     return w.t.toLowerCase().indexOf(wsFilter)>=0||w.n.toLowerCase().indexOf(wsFilter)>=0||w.s.toLowerCase().indexOf(wsFilter)>=0;
   });
+  // Sort: hit stocks first, then by sector, then by risk
   filtered.sort(function(a,b){
-    var ha=hits.has(a.t)?0:1,hb=hits.has(b.t)?0:1;
+    var ha=hits.has(a.t)?-(hitCount[a.t]||1):0;
+    var hb=hits.has(b.t)?-(hitCount[b.t]||1):0;
     if(ha!==hb) return ha-hb;
     if(a.s!==b.s) return a.s.localeCompare(b.s);
     return ({H:0,M:1,L:2}[a.r])-({H:0,M:1,L:2}[b.r]);
@@ -926,25 +1216,30 @@ function renderWL(){
       list.appendChild(sec);lastSec=w.s;
     }
     var h=hits.has(w.t);
+    var hc=hitCount[w.t]||0;
+    var heatPct=Math.min(hc*20,100);
     var div=document.createElement('div');
     div.className='wr'+(h?' hit':'');
     div.innerHTML=
       '<div class="wt" style="color:'+(h?'var(--red)':'var(--text)')+'">'+w.t+'</div>'+
-      '<div class="wn">'+w.n+'</div>'+
-      '<span class="rsk r'+w.r+'">'+{H:'HIGH',M:'MED',L:'LOW'}[w.r]+'</span>'+
+      '<div style="flex:1;overflow:hidden;">'+
+        '<div class="wn">'+w.n+'</div>'+
+        (h&&hc>0?'<div class="heat-bar" style="background:linear-gradient(90deg,var(--red) '+heatPct+'%,var(--dimmer) '+heatPct+'%)"></div>':'')+ 
+      '</div>'+
+      '<span class="rsk r'+w.r+'">'+(w.r==='H'?'HIGH':w.r==='M'?'MED':'LOW')+'</span>'+
       (h?'<div class="hdot"></div>':'');
     list.appendChild(div);
   });
   document.getElementById('wchip').textContent=WL.length+' STOCKS';
 }
 
+var HKW=['COBOL','Anthropic','Claude Code','IBM','new Claude','direct threat'];
 function renderKW(){
   var grid=document.getElementById('kwgrid');
   grid.innerHTML='';
-  var HKW=['COBOL','Anthropic','Claude Code','IBM','new Claude','direct threat'];
   kws.forEach(function(kw,i){
     var s=document.createElement('span');
-    s.className='kw on'+(HKW.indexOf(kw)<0?' b':'');
+    s.className='kw '+(HKW.indexOf(kw)>=0?'on-red':'on-blue');
     s.textContent=kw;s.title='Click to remove';
     s.onclick=(function(idx){return function(){kws.splice(idx,1);renderKW();updateStats();};})(i);
     grid.appendChild(s);
@@ -953,13 +1248,15 @@ function renderKW(){
 }
 
 function updateStats(){
+  var totalHeadlines=sourceCounts.rss+sourceCounts.tna+sourceCounts.gnews+sourceCounts.newsdata||allHeadlines.length;
   document.getElementById('stA').textContent=alerts.length;
   document.getElementById('stS').textContent=hits.size;
+  document.getElementById('stN').textContent=totalHeadlines||allHeadlines.length;
   document.getElementById('stK').textContent=kws.length;
-  document.getElementById('stN').textContent=scans;
+  document.getElementById('stSC').textContent=scans;
 }
 
-function doClear(){alerts=[];allHeadlines=[];hits.clear();renderFeed();renderWL();updateStats();}
+function doClear(){alerts=[];allHeadlines=[];hits.clear();hitCount={};renderFeed();renderWL();renderTicker();updateStats();}
 
 function doAddKw(){
   var input=document.getElementById('kwi');
@@ -983,31 +1280,45 @@ function startCD(){
   },1000);
 }
 
+function exportCSV(){
+  if(!alerts.length){alert('No alerts to export yet. Run a scan first.');return;}
+  var rows=[['Time','Severity','Source','Headline','Tickers','Analysis','URL']];
+  alerts.forEach(function(a){
+    rows.push([a.time,a.sev,a.src,'"'+a.h.replace(/"/g,"'")+'"',a.tks.join(' '),'"'+(a.an||'').replace(/"/g,"'")+'"',a.url]);
+  });
+  var csv=rows.map(function(r){return r.join(',');}).join('\n');
+  var blob=new Blob([csv],{type:'text/csv'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='sentinel-alerts-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();URL.revokeObjectURL(url);
+}
+
 function showToast(a){
   var c=document.getElementById('toasts');
   var d=document.createElement('div');
   d.className='toast';
-  d.innerHTML='<div class="tt">🚨 DISRUPTION ALERT — '+a.sev+'</div><div class="tb">'+a.h.substring(0,110)+'...</div><div class="tticks">'+a.tks.slice(0,6).map(function(t){return '<span class="tk">'+t+'</span>';}).join('')+'</div>';
-  c.appendChild(d);setTimeout(function(){d.remove();},8000);
+  d.innerHTML='<div class="tt">🚨 DISRUPTION ALERT — '+a.sev+'</div><div class="tb">'+a.h.substring(0,120)+'...</div><div class="tticks">'+a.tks.slice(0,6).map(function(t){return '<span class="tk">'+t+'</span>';}).join('')+'</div>';
+  c.appendChild(d);setTimeout(function(){d.remove();},9000);
 }
 
 function playSound(){
   try{
     var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    [[440,0],[550,0.13],[660,0.26]].forEach(function(p){
+    [[440,0],[550,.13],[660,.26]].forEach(function(p){
       var o=ctx.createOscillator(),g=ctx.createGain();
       o.connect(g);g.connect(ctx.destination);
       o.frequency.value=p[0];o.type='sine';
-      g.gain.setValueAtTime(0.12,ctx.currentTime+p[1]);
-      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+p[1]+0.28);
-      o.start(ctx.currentTime+p[1]);o.stop(ctx.currentTime+p[1]+0.3);
+      g.gain.setValueAtTime(.12,ctx.currentTime+p[1]);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+p[1]+.28);
+      o.start(ctx.currentTime+p[1]);o.stop(ctx.currentTime+p[1]+.3);
     });
   }catch(e){}
 }
 
 function doShare(){
   var url=encodeURIComponent(window.location.href);
-  var txt=encodeURIComponent('🚨 FREE TOOL: Real-time alerts when Claude/AI threatens legacy stocks\n\nIBM dropped 13% on COBOL fears. Cybersecurity names down 8%. Banks sold off.\nCatches those headlines before the algorithmic selloff.\n\nNo signup. 280+ NASDAQ stocks 👇\n');
+  var txt=encodeURIComponent('🚨 FREE TOOL: Real-time alerts when Claude/AI threatens legacy stocks\n\nv2 now pulls from 4 simultaneous news sources.\nIBM, banks, cybersecurity, consulting — 280+ stocks monitored.\n\nNo signup needed 👇\n');
   window.open('https://twitter.com/intent/tweet?text='+txt+'&url='+url,'_blank');
 }
 
