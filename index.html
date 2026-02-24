@@ -191,11 +191,11 @@ footer p{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:var(--dim
     </div>
     <div class="key-row">
       <input class="key-field" id="keyField" type="text" placeholder="Paste your NewsAPI key here..." autocomplete="off" spellcheck="false">
-      <button class="btn-go" id="activateBtn" type="button">ACTIVATE →</button>
+      <button class="btn-go" id="activateBtn" type="button" onclick="doActivate()">ACTIVATE →</button>
     </div>
     <div class="err-msg" id="errMsg">⚠ Please enter a valid key (32 characters)</div>
     <div class="privacy">🔒 Your key never leaves your browser.</div>
-    <button class="skip-link" id="skipBtn" type="button">→ Skip — use Demo Mode instead (no API key needed, pre-loaded headlines)</button>
+    <button class="skip-link" id="skipBtn" type="button" onclick="doSkip()">→ Skip — use Demo Mode instead (no API key needed, pre-loaded headlines)</button>
   </div>
 </div>
 
@@ -565,7 +565,7 @@ var WL=[
   {t:'TRI',  n:'Thomson Reuters Intl',  r:'M',s:'Data & Analytics'},
   {t:'ICE',  n:'Intercontinental Exch', r:'L',s:'Data & Analytics'},
   {t:'SPGI', n:'S&P Global',            r:'L',s:'Data & Analytics'},
-  {t:'MCO',  n:'Moody's Corp',          r:'L',s:'Data & Analytics'},
+  {t:'MCO',  n:"Moody's Corp",          r:'L',s:'Data & Analytics'},
   {t:'CSGP', n:'CoStar Group',          r:'M',s:'Data & Analytics'},
   {t:'TDC',  n:'Teradata Corp',         r:'H',s:'Data & Analytics'},
   {t:'PLTR', n:'Palantir',              r:'L',s:'Data & Analytics'},
