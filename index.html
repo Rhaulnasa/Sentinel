@@ -1507,7 +1507,7 @@ function renderEarnings(){
           '<div class="earn-sym" style="color:'+(e.beat?'var(--green2)':e.miss?'var(--red2)':'var(--text)')+'">'+e.sym+'</div>'+
           (e.beat?'<span class="earn-badge eb-beat">BEAT</span>':e.miss?'<span class="earn-badge eb-miss">MISS</span>':'<span class="earn-badge" style="background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--b2);">INLINE</span>')+
           '<div class="earn-co">'+(wl?wl.n:'')+'</div>'+
-          (p?'<span style="font-size:11px;color:'+(p.chg>=0?'var(--green2)':'var(--red2)');return'">'+( p.chg>=0?'▲':'▼')+Math.abs(p.chg).toFixed(2)+'%</span>':'')+'<div class="earn-date">'+new Date().toLocaleDateString()+'</div>'+
+          (p?'<span style="font-size:11px;color:'+(p.chg>=0?'var(--green2)':'var(--red2)')+'">'+( p.chg>=0?'▲':'▼')+Math.abs(p.chg).toFixed(2)+'%</span>':'')+'<div class="earn-date">'+new Date().toLocaleDateString()+'</div>'+
         '</div>'+
         '<div class="earn-data">'+
           '<div class="earn-cell"><div class="earn-lbl">EPS ACTUAL</div><div class="earn-val '+(e.beat?'earn-beat':e.miss?'earn-miss':'earn-neutral')+'">'+(e.epsActual||'—')+'</div></div>'+
@@ -2794,7 +2794,7 @@ function showToast(a){
   d.className='toast'+(isEarn?' earn-toast':isVol?' vol-toast':'');
   d.innerHTML=
     '<button class="tc" onclick="this.parentNode.remove()">✕</button>'+
-    '<div class="tt '+(isEarn?'earn':isVol?'vol')+'">'+(isVol?'⚡ VOLUME SPIKE':'🚨 '+(a.type==='ma'?'M&A SIGNAL':a.type==='earn'?'EARNINGS ALERT':'AI THREAT'))+' · SCORE '+(a.score||0)+'</div>'+
+    '<div class="tt '+(isEarn?'earn':isVol?'vol':'')+'">'+(isVol?'⚡ VOLUME SPIKE':'🚨 '+(a.type==='ma'?'M&A SIGNAL':a.type==='earn'?'EARNINGS ALERT':'AI THREAT'))+' · SCORE '+(a.score||0)+'</div>'+
     '<div class="tb">'+a.h.substring(0,110)+'…</div>'+
     '<div class="ttks">'+a.tks.slice(0,5).map(function(t){return'<span style="font-size:10px;padding:1px 5px;border-radius:2px;background:rgba(255,59,59,.08);color:var(--red2);border:1px solid rgba(255,59,59,.14);">'+t+'</span>';}).join('')+'</div>';
   c.appendChild(d);
