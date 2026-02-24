@@ -3,702 +3,785 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SENTINEL v2 — AI Market Disruption Monitor</title>
+<title>SENTINEL v3 — AI Market Disruption Scanner</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 :root{
-  --bg:#020208;--surface:#07070f;--surface2:#0d0d1a;--border:#141425;--border2:#1c1c35;
-  --red:#ff2040;--red2:#ff4d64;--orange:#ff7a00;--orange2:#ffaa44;
-  --green:#00e87a;--green2:#00ff88;--blue:#38b2ff;--blue2:#7dd3fc;
-  --purple:#a78bfa;--text:#e2e8f0;--dim:#4a5568;--dimmer:#1e2235;
-  --glow-red:rgba(255,32,64,0.15);--glow-blue:rgba(56,178,255,0.1);
-  --ticker-h:38px;
+  --bg:#010108;--s1:#06060f;--s2:#0b0b1a;--s3:#111125;
+  --b1:#141430;--b2:#1e1e3c;--b3:#282850;
+  --red:#ff1a3c;--red2:#ff4d6a;--red3:rgba(255,26,60,.12);
+  --orange:#ff6b00;--orange2:#ff9500;
+  --green:#00d966;--green2:#00ff77;--green3:rgba(0,217,102,.1);
+  --blue:#0ea5e9;--blue2:#38bdf8;
+  --gold:#f5c842;--gold2:#ffd94d;
+  --text:#dde4f0;--dim:#3d4466;--dim2:#5a6080;--dimmer:#1a1a35;
+  --font-display:'Bebas Neue',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --font-body:'DM Sans',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden;cursor:default;}
 
-/* Grid overlay */
-body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,178,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(56,178,255,.018) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+/* ── SCANLINES ── */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,26,60,.012) 2px,rgba(255,26,60,.012) 4px);pointer-events:none;z-index:1000;}
 
-/* Ambient blobs */
-.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
-.blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:0.5;}
-.blob1{width:600px;height:400px;background:radial-gradient(circle,rgba(255,32,64,.12),transparent 70%);top:-100px;left:-100px;}
-.blob2{width:500px;height:500px;background:radial-gradient(circle,rgba(56,178,255,.07),transparent 70%);bottom:-100px;right:-50px;}
-.blob3{width:300px;height:300px;background:radial-gradient(circle,rgba(167,139,250,.06),transparent 70%);top:40%;left:40%;}
+/* ── GRID ── */
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(14,165,233,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,.02) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
 
-/* ── TICKER TAPE ── */
-.ticker-wrap{position:fixed;top:0;left:0;right:0;height:var(--ticker-h);background:rgba(2,2,8,0.95);border-bottom:1px solid var(--border2);z-index:100;overflow:hidden;backdrop-filter:blur(12px);}
-.ticker-inner{display:flex;align-items:center;height:100%;gap:0;}
-.ticker-label{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:3px;color:var(--red);background:rgba(255,32,64,.12);border-right:1px solid rgba(255,32,64,.3);padding:0 14px;height:100%;display:flex;align-items:center;}
-.ticker-track{flex:1;overflow:hidden;position:relative;}
-.ticker-scroll{display:flex;gap:0;white-space:nowrap;animation:ticker 35s linear infinite;}
-.ticker-scroll:hover{animation-play-state:paused;}
-.ticker-item{display:inline-flex;align-items:center;gap:7px;padding:0 20px;border-right:1px solid var(--border2);font-family:'JetBrains Mono',monospace;font-size:.62rem;}
-.t-sym{font-weight:700;color:var(--text);}
-.t-sev-H{color:var(--red);}
-.t-sev-M{color:var(--orange);}
-.t-sev-L{color:var(--blue);}
+/* ── AMBIENT ── */
+.amb{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.amb::before{content:'';position:absolute;width:80vw;height:60vh;background:radial-gradient(circle,rgba(255,26,60,.07),transparent 65%);top:-20vh;left:-20vw;}
+.amb::after{content:'';position:absolute;width:60vw;height:60vh;background:radial-gradient(circle,rgba(14,165,233,.05),transparent 65%);bottom:-10vh;right:-10vw;}
+
+/* ── TICKER ── */
+.ticker{position:fixed;top:0;left:0;right:0;height:36px;background:rgba(1,1,8,.96);border-bottom:1px solid var(--b2);z-index:500;display:flex;align-items:center;backdrop-filter:blur(20px);}
+.t-label{font-family:var(--font-display);font-size:.9rem;letter-spacing:4px;color:var(--red);background:var(--red3);border-right:1px solid rgba(255,26,60,.25);padding:0 14px;height:100%;display:flex;align-items:center;flex-shrink:0;white-space:nowrap;}
+.t-track{flex:1;overflow:hidden;}
+.t-inner{display:flex;white-space:nowrap;animation:tick 40s linear infinite;}
+.t-inner:hover{animation-play-state:paused;}
+.t-item{display:inline-flex;align-items:center;gap:6px;padding:0 18px;border-right:1px solid var(--b1);font-family:var(--font-mono);font-size:.6rem;}
+.t-sym{font-weight:500;color:var(--text);}
+.t-price{color:var(--green2);}
+.t-chg.up{color:var(--green);}
+.t-chg.dn{color:var(--red);}
 .t-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-.t-dot-H{background:var(--red);box-shadow:0 0 6px var(--red);animation:pulse 1.5s infinite;}
-.t-dot-M{background:var(--orange);}
-.t-dot-L{background:var(--blue);}
-@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+.t-dot.H{background:var(--red);box-shadow:0 0 6px var(--red);animation:blinkdot 1.2s infinite;}
+.t-dot.M{background:var(--orange);}
+.t-dot.L{background:var(--blue);}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes blinkdot{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* ── SETUP MODAL ── */
-.setup-overlay{position:fixed;inset:0;background:rgba(2,2,8,.97);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
-.setup-card{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:40px;max-width:560px;width:100%;position:relative;}
-.setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,var(--red),var(--orange),var(--blue),var(--purple));}
-.setup-logo{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:700;background:linear-gradient(135deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:6px;}
-.setup-sub{font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:3px;color:var(--dim);margin-bottom:24px;margin-top:2px;}
-.setup-h{font-size:1.1rem;font-weight:600;margin-bottom:8px;}
-.setup-p{font-size:.8rem;color:var(--dim);line-height:1.8;margin-bottom:18px;}
+/* ── SETUP ── */
+.setup-overlay{position:fixed;inset:0;background:rgba(1,1,8,.97);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);}
+.setup-card{background:var(--s1);border:1px solid var(--b2);border-radius:16px;padding:38px 42px;max-width:600px;width:100%;position:relative;}
+.setup-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0;background:linear-gradient(90deg,var(--red),var(--orange),var(--blue),var(--green));}
+.setup-logo{font-family:var(--font-display);font-size:2.2rem;letter-spacing:8px;background:linear-gradient(135deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.setup-ver{font-family:var(--font-mono);font-size:.5rem;letter-spacing:4px;color:var(--dim2);margin-bottom:20px;}
+.setup-h{font-size:1.05rem;font-weight:600;margin-bottom:8px;}
+.setup-p{font-size:.8rem;color:var(--dim2);line-height:1.8;margin-bottom:20px;}
 .setup-p a{color:var(--blue);text-decoration:none;}
 .setup-p strong{color:var(--text);}
-.src-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px;}
-.src-card{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:13px 14px;}
-.src-card.free{border-color:rgba(0,232,122,.2);}
-.src-name{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;color:var(--text);margin-bottom:3px;}
-.src-info{font-size:.71rem;color:var(--dim);line-height:1.5;}
-.src-badge{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:2px 6px;border-radius:3px;letter-spacing:1px;display:inline-block;margin-top:4px;}
-.src-free{background:rgba(0,232,122,.1);color:var(--green);border:1px solid rgba(0,232,122,.2);}
-.src-key{background:rgba(56,178,255,.1);color:var(--blue);border:1px solid rgba(56,178,255,.2);}
-.setup-section{margin-bottom:14px;}
-.setup-section-label{font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
-.key-row{display:flex;gap:8px;margin-bottom:8px;}
-.key-field{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.72rem;outline:none;transition:border-color .2s;}
+.src-row-setup{display:flex;gap:10px;margin-bottom:10px;align-items:center;}
+.src-ico{font-size:1rem;width:28px;text-align:center;flex-shrink:0;}
+.src-meta{flex:1;}
+.src-name-s{font-family:var(--font-mono);font-size:.65rem;font-weight:500;color:var(--text);}
+.src-desc-s{font-size:.7rem;color:var(--dim2);}
+.key-field{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--b2);border-radius:7px;padding:9px 12px;color:var(--text);font-family:var(--font-mono);font-size:.68rem;outline:none;transition:border-color .2s;}
 .key-field:focus{border-color:var(--blue);}
-.key-field::placeholder{color:var(--dimmer);font-size:.65rem;}
-.key-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--dim);margin-bottom:5px;}
-.btn-activate{background:linear-gradient(135deg,rgba(255,32,64,.2),rgba(255,122,0,.15));border:1px solid rgba(255,32,64,.45);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;letter-spacing:2px;padding:11px 18px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:all .2s;}
-.btn-activate:hover{background:linear-gradient(135deg,rgba(255,32,64,.32),rgba(255,122,0,.24));}
-.btn-skip{width:100%;margin-top:14px;background:none;border:1px solid var(--border2);color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:2px;padding:10px;border-radius:8px;cursor:pointer;transition:all .2s;}
-.btn-skip:hover{border-color:var(--blue);color:var(--blue);}
-.err-msg{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--red);display:none;margin-bottom:8px;padding:8px 10px;background:rgba(255,32,64,.07);border-radius:6px;border:1px solid rgba(255,32,64,.2);}
-.privacy{font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--dimmer);letter-spacing:1px;margin-top:10px;}
+.key-field::placeholder{color:var(--dim);font-size:.62rem;}
+.btn-go{background:linear-gradient(135deg,rgba(255,26,60,.22),rgba(255,107,0,.15));border:1px solid rgba(255,26,60,.45);color:#fff;font-family:var(--font-display);font-size:1rem;letter-spacing:3px;padding:9px 20px;border-radius:7px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.btn-go:hover{background:linear-gradient(135deg,rgba(255,26,60,.35),rgba(255,107,0,.25));}
+.err{font-family:var(--font-mono);font-size:.6rem;color:var(--red);display:none;margin-bottom:8px;padding:7px 10px;background:rgba(255,26,60,.07);border-radius:5px;border:1px solid rgba(255,26,60,.2);}
+.privacy{font-family:var(--font-mono);font-size:.52rem;color:var(--dim);letter-spacing:1px;margin-top:8px;}
+.btn-skip{width:100%;margin-top:12px;background:none;border:1px solid var(--b2);color:var(--dim2);font-family:var(--font-mono);font-size:.58rem;letter-spacing:2px;padding:9px;border-radius:7px;cursor:pointer;transition:all .2s;}
+.btn-skip:hover{border-color:var(--blue2);color:var(--blue2);}
+.setup-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--dim);font-family:var(--font-mono);font-size:.55rem;}
+.setup-divider::before,.setup-divider::after{content:'';flex:1;height:1px;background:var(--b2);}
 
-/* ── MAIN LAYOUT ── */
-.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 22px;padding-top:calc(var(--ticker-h) + 16px);}
+/* ── WRAP ── */
+.wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 20px;padding-top:52px;}
 
-/* ── HERO ── */
-.hero{padding:22px 0 18px;border-bottom:1px solid var(--border2);display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;}
-.hero-left{}
-.brand{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
-.b-icon{width:44px;height:44px;background:linear-gradient(135deg,rgba(255,32,64,.2),rgba(255,122,0,.12));border:1px solid rgba(255,32,64,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0;}
-.b-name{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;letter-spacing:7px;background:linear-gradient(135deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.b-version{font-family:'JetBrains Mono',monospace;font-size:.48rem;letter-spacing:3px;color:var(--dim);margin-top:3px;}
-.tagline{font-size:.85rem;color:var(--dim);max-width:680px;line-height:1.8;}
+/* ── HEADER ── */
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 0 14px;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--b2);}
+.brand-block{display:flex;align-items:center;gap:14px;}
+.brand-icon{width:48px;height:48px;background:linear-gradient(135deg,rgba(255,26,60,.2),rgba(255,107,0,.12));border:1px solid rgba(255,26,60,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;position:relative;}
+.brand-icon::after{content:'';position:absolute;inset:-1px;border-radius:10px;background:linear-gradient(135deg,rgba(255,26,60,.15),transparent);pointer-events:none;}
+.brand-name{font-family:var(--font-display);font-size:2rem;letter-spacing:8px;background:linear-gradient(135deg,var(--red),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;}
+.brand-sub{font-family:var(--font-mono);font-size:.48rem;letter-spacing:3px;color:var(--dim2);margin-top:4px;}
+.tagline{font-size:.83rem;color:var(--dim2);max-width:640px;line-height:1.8;margin-top:8px;}
 .tagline strong{color:var(--text);}
-.hero-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
-.status-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
-.pill{display:flex;align-items:center;gap:6px;border-radius:6px;padding:6px 11px;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:1px;}
-.pill-live{background:rgba(0,232,122,.07);border:1px solid rgba(0,232,122,.2);color:var(--green);}
-.pill-key{background:var(--surface2);border:1px solid var(--border2);color:var(--dim);cursor:pointer;transition:all .2s;}
-.pill-key:hover{border-color:var(--blue);color:var(--blue);}
-.pill-key.connected{background:rgba(0,232,122,.07);border-color:rgba(0,232,122,.25);color:var(--green);}
-.ldot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:7px;}
+.status-pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:6px;padding:5px 11px;font-family:var(--font-mono);font-size:.56rem;letter-spacing:1px;white-space:nowrap;}
+.pill-live{background:var(--green3);border:1px solid rgba(0,217,102,.25);color:var(--green2);}
+.pill-key{background:var(--s2);border:1px solid var(--b2);color:var(--dim2);cursor:pointer;transition:all .2s;}
+.pill-key:hover{border-color:var(--blue);color:var(--blue2);}
+.pill-key.ok{background:var(--green3);border-color:rgba(0,217,102,.3);color:var(--green);}
+.ldot{width:6px;height:6px;background:var(--green2);border-radius:50%;animation:blinkdot 2s infinite;}
 
 /* ── CONTROLS ── */
-.controls{padding:14px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--border);}
-.btn-scan{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,32,64,.18),rgba(255,122,0,.12));border:1px solid rgba(255,32,64,.4);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;letter-spacing:2px;padding:11px 22px;border-radius:7px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
-.btn-scan::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,32,64,.15),transparent);opacity:0;transition:opacity .2s;}
-.btn-scan:hover::after{opacity:1;}
-.btn-scan:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(255,32,64,.25);}
-.btn-scan:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
-.btn-scan.scanning{border-color:rgba(56,178,255,.4);background:linear-gradient(135deg,rgba(56,178,255,.15),rgba(167,139,250,.1));}
-.si{font-size:.95rem;}
-.spin{animation:spin .8s linear infinite;display:inline-block;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.mode-tabs{display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:3px;}
-.mtab{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:1px;padding:5px 12px;border-radius:5px;cursor:pointer;color:var(--dim);border:none;background:none;transition:all .2s;}
-.mtab.on{background:rgba(255,32,64,.15);color:var(--red);}
-.auto-wrap{display:flex;align-items:center;gap:7px;}
-.atog{width:34px;height:18px;background:var(--dimmer);border-radius:9px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
-.atog.on{background:rgba(56,178,255,.35);}
-.atog::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#555;border-radius:50%;transition:transform .2s,background .2s;}
-.atog.on::after{transform:translateX(16px);background:var(--blue);}
-.albl{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--dim);letter-spacing:1px;cursor:pointer;}
-.ctxt{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--dimmer);}
-.sep{width:1px;height:24px;background:var(--border2);}
-.source-indicators{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
-.src-ind{font-family:'JetBrains Mono',monospace;font-size:.48rem;padding:3px 7px;border-radius:4px;letter-spacing:1px;}
-.src-ind.active{background:rgba(0,232,122,.08);color:var(--green);border:1px solid rgba(0,232,122,.2);}
-.src-ind.inactive{background:rgba(255,255,255,.04);color:var(--dimmer);border:1px solid var(--border);}
-.src-ind-label{font-family:'JetBrains Mono',monospace;font-size:.48rem;color:var(--dimmer);letter-spacing:2px;}
+.ctrl{padding:12px 0;display:flex;gap:9px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--b1);}
+.btn-scan{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(255,26,60,.18),rgba(255,107,0,.1));border:1px solid rgba(255,26,60,.4);color:#fff;font-family:var(--font-display);font-size:1.1rem;letter-spacing:3px;padding:10px 24px;border-radius:7px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.btn-scan::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,26,60,.12),transparent);opacity:0;transition:opacity .2s;}
+.btn-scan:hover::before{opacity:1;}
+.btn-scan:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(255,26,60,.2);}
+.btn-scan:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-scan.scanning{border-color:rgba(14,165,233,.4);background:linear-gradient(135deg,rgba(14,165,233,.12),transparent);}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin .75s linear infinite;display:inline-block;}
+.mode-tabs{display:flex;gap:2px;background:var(--s2);border:1px solid var(--b2);border-radius:7px;padding:3px;}
+.mtab{font-family:var(--font-mono);font-size:.54rem;letter-spacing:1px;padding:5px 12px;border-radius:5px;cursor:pointer;color:var(--dim2);border:none;background:none;transition:all .2s;}
+.mtab.on{background:rgba(255,26,60,.15);color:var(--red2);}
+.auto-row{display:flex;align-items:center;gap:7px;}
+.tog{width:34px;height:18px;background:var(--dimmer);border-radius:9px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.tog.on{background:rgba(14,165,233,.35);}
+.tog::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#444;border-radius:50%;transition:transform .2s,background .2s;}
+.tog.on::after{transform:translateX(16px);background:var(--blue2);}
+.ctrl-lbl{font-family:var(--font-mono);font-size:.53rem;color:var(--dim2);letter-spacing:1px;}
+.sep{width:1px;height:22px;background:var(--b2);}
+.src-pills{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+.src-p{font-family:var(--font-mono);font-size:.48rem;padding:3px 7px;border-radius:4px;letter-spacing:1px;transition:all .2s;}
+.src-p.on{background:var(--green3);color:var(--green2);border:1px solid rgba(0,217,102,.25);}
+.src-p.off{background:rgba(255,255,255,.03);color:var(--dim);border:1px solid var(--b1);}
+.sound-tog{font-family:var(--font-mono);font-size:.52rem;padding:4px 9px;border-radius:5px;background:rgba(255,255,255,.04);border:1px solid var(--b2);color:var(--dim2);cursor:pointer;transition:all .2s;}
+.sound-tog.on{background:rgba(255,107,0,.08);border-color:rgba(255,107,0,.3);color:var(--orange2);}
 
-/* ── STATS ── */
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:14px 0;}
-.stat{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;cursor:default;}
+/* ── STATS ROW ── */
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;padding:12px 0;}
+.stat{background:var(--s1);border:1px solid var(--b2);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;transition:border-color .3s;}
 .stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
 .stat.r::before{background:linear-gradient(90deg,var(--red),transparent);}
 .stat.o::before{background:linear-gradient(90deg,var(--orange),transparent);}
 .stat.b::before{background:linear-gradient(90deg,var(--blue),transparent);}
 .stat.g::before{background:linear-gradient(90deg,var(--green),transparent);}
-.stat.p::before{background:linear-gradient(90deg,var(--purple),transparent);}
-.stat-n{font-family:'JetBrains Mono',monospace;font-size:1.9rem;font-weight:700;line-height:1;transition:all .3s;}
+.stat.go::before{background:linear-gradient(90deg,var(--gold),transparent);}
+.stat.p::before{background:linear-gradient(90deg,#a78bfa,transparent);}
+.stat-n{font-family:var(--font-display);font-size:2rem;line-height:1;}
 .stat.r .stat-n{color:var(--red);}
-.stat.o .stat-n{color:var(--orange);}
-.stat.b .stat-n{color:var(--blue);}
+.stat.o .stat-n{color:var(--orange2);}
+.stat.b .stat-n{color:var(--blue2);}
 .stat.g .stat-n{color:var(--green);}
-.stat.p .stat-n{color:var(--purple);}
-.stat-l{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--dim);letter-spacing:2px;margin-top:5px;text-transform:uppercase;}
+.stat.go .stat-n{color:var(--gold);}
+.stat.p .stat-n{color:#a78bfa;}
+.stat-l{font-family:var(--font-mono);font-size:.47rem;color:var(--dim2);letter-spacing:2px;margin-top:4px;}
 .stat.bump .stat-n{animation:bump .4s ease;}
-@keyframes bump{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+@keyframes bump{50%{transform:scale(1.18);}}
 
-/* ── LAYOUT ── */
-.layout{display:grid;grid-template-columns:1fr 330px;gap:14px;padding-bottom:40px;}
+/* ── MAIN GRID ── */
+.grid{display:grid;grid-template-columns:1fr 340px;gap:13px;padding-bottom:40px;}
 
-/* ── MAIN FEED PANEL ── */
-.panel{background:var(--surface);border:1px solid var(--border2);border-radius:12px;overflow:hidden;}
-.panel-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;}
-.panel-title{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:3px;text-transform:uppercase;color:var(--dim);}
-.panel-actions{display:flex;gap:6px;align-items:center;}
-.chip{font-family:'JetBrains Mono',monospace;font-size:.52rem;padding:3px 8px;border-radius:4px;letter-spacing:1px;}
-.chip-red{background:rgba(255,32,64,.15);color:var(--red);border:1px solid rgba(255,32,64,.25);}
-.chip-blue{background:rgba(56,178,255,.12);color:var(--blue);border:1px solid rgba(56,178,255,.2);}
-.chip-btn{background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--border2);cursor:pointer;transition:all .2s;}
-.chip-btn:hover{border-color:var(--blue);color:var(--blue);}
+/* ── PANEL ── */
+.panel{background:var(--s1);border:1px solid var(--b2);border-radius:12px;overflow:hidden;}
+.ph{padding:11px 16px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.pt{font-family:var(--font-display);font-size:1rem;letter-spacing:4px;color:var(--dim2);}
+.pact{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.chip{font-family:var(--font-mono);font-size:.5rem;padding:3px 8px;border-radius:4px;letter-spacing:1px;}
+.cr{background:rgba(255,26,60,.15);color:var(--red2);border:1px solid rgba(255,26,60,.25);}
+.cb{background:rgba(14,165,233,.1);color:var(--blue2);border:1px solid rgba(14,165,233,.2);}
+.cg{background:var(--green3);color:var(--green);border:1px solid rgba(0,217,102,.2);}
+.co{background:rgba(255,107,0,.1);color:var(--orange2);border:1px solid rgba(255,107,0,.2);}
+.cbtn{background:rgba(255,255,255,.05);color:var(--dim2);border:1px solid var(--b2);cursor:pointer;transition:all .2s;}
+.cbtn:hover{border-color:var(--blue);color:var(--blue2);}
 
 /* Feed tabs */
-.feed-tabs{display:flex;background:rgba(0,0,0,.25);border-bottom:1px solid var(--border);}
-.ftab{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:2px;padding:10px 16px;cursor:pointer;color:var(--dim);border:none;background:none;border-bottom:2px solid transparent;transition:all .2s;}
-.ftab.on{color:var(--red);border-bottom-color:var(--red);}
+.ftabs{display:flex;background:rgba(0,0,0,.3);border-bottom:1px solid var(--b1);}
+.ftab{font-family:var(--font-mono);font-size:.54rem;letter-spacing:2px;padding:9px 15px;cursor:pointer;color:var(--dim2);border:none;background:none;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.ftab.on{color:var(--red2);border-bottom-color:var(--red);}
 
 /* Filter bar */
-.filter-bar{padding:8px 12px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.filter-input{background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.6rem;outline:none;width:160px;}
-.filter-input:focus{border-color:var(--blue);}
-.filter-input::placeholder{color:var(--dimmer);}
-.sev-filters{display:flex;gap:4px;}
-.sf{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:3px 7px;border-radius:4px;cursor:pointer;border:1px solid var(--border2);color:var(--dim);letter-spacing:1px;transition:all .2s;}
-.sf.on.H{background:rgba(255,32,64,.15);color:var(--red);border-color:rgba(255,32,64,.3);}
-.sf.on.M{background:rgba(255,122,0,.14);color:var(--orange);border-color:rgba(255,122,0,.3);}
-.sf.on.L{background:rgba(56,178,255,.1);color:var(--blue);border-color:rgba(56,178,255,.2);}
-.filter-count{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--dimmer);margin-left:auto;}
-.csv-btn{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:3px 8px;border-radius:4px;background:rgba(0,232,122,.07);color:var(--green);border:1px solid rgba(0,232,122,.2);cursor:pointer;letter-spacing:1px;transition:all .2s;margin-left:4px;}
-.csv-btn:hover{background:rgba(0,232,122,.15);}
+.fbar{padding:7px 12px;border-bottom:1px solid var(--b1);display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.finput{background:rgba(255,255,255,.04);border:1px solid var(--b2);border-radius:5px;padding:5px 9px;color:var(--text);font-family:var(--font-mono);font-size:.58rem;outline:none;width:150px;transition:border-color .2s;}
+.finput:focus{border-color:var(--blue);}
+.finput::placeholder{color:var(--dim);}
+.sev-btns{display:flex;gap:3px;}
+.sf{font-family:var(--font-mono);font-size:.48rem;padding:3px 7px;border-radius:4px;cursor:pointer;border:1px solid var(--b2);color:var(--dim2);transition:all .2s;}
+.sf.on.H{background:rgba(255,26,60,.15);color:var(--red2);border-color:rgba(255,26,60,.3);}
+.sf.on.M{background:rgba(255,107,0,.12);color:var(--orange2);border-color:rgba(255,107,0,.25);}
+.sf.on.L{background:rgba(14,165,233,.1);color:var(--blue2);border-color:rgba(14,165,233,.2);}
+.fcount{font-family:var(--font-mono);font-size:.48rem;color:var(--dim);margin-left:auto;}
+.sort-sel{background:rgba(255,255,255,.04);border:1px solid var(--b2);border-radius:4px;padding:4px 7px;color:var(--text);font-family:var(--font-mono);font-size:.54rem;outline:none;cursor:pointer;}
+.sort-sel option{background:var(--s2);}
 
-/* ── ALERTS ── */
-.alist{max-height:640px;overflow-y:auto;}
+/* ── ALERT CARDS ── */
+.alist{max-height:700px;overflow-y:auto;}
 .alist::-webkit-scrollbar{width:3px;}
-.alist::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.alist::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+.ac{padding:14px 16px;border-bottom:1px solid var(--b1);transition:background .15s;cursor:default;}
+.ac:hover{background:rgba(255,255,255,.01);}
+.ac.sH{border-left:3px solid var(--red);background:rgba(255,26,60,.03);}
+.ac.sM{border-left:3px solid var(--orange);background:rgba(255,107,0,.02);}
+.ac.sL{border-left:3px solid var(--blue);}
+.ac.fresh{animation:freshin 2.5s ease-out;}
+@keyframes freshin{0%{background:rgba(255,26,60,.18);}100%{background:rgba(255,26,60,.03);}}
+.ac-head{display:flex;align-items:center;gap:6px;margin-bottom:7px;flex-wrap:wrap;}
+.sev-badge{font-family:var(--font-mono);font-size:.49rem;padding:2px 6px;border-radius:3px;font-weight:500;letter-spacing:1px;}
+.bH{background:rgba(255,26,60,.2);color:var(--red2);border:1px solid rgba(255,26,60,.3);}
+.bM{background:rgba(255,107,0,.18);color:var(--orange2);border:1px solid rgba(255,107,0,.25);}
+.bL{background:rgba(14,165,233,.12);color:var(--blue2);border:1px solid rgba(14,165,233,.2);}
+.score-badge{font-family:var(--font-mono);font-size:.49rem;padding:2px 7px;border-radius:3px;letter-spacing:1px;}
+.score-hi{background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.25);}
+.score-mid{background:rgba(255,107,0,.1);color:var(--orange2);border:1px solid rgba(255,107,0,.2);}
+.score-lo{background:rgba(255,255,255,.05);color:var(--dim2);border:1px solid var(--b2);}
+.src-tag{font-family:var(--font-mono);font-size:.5rem;padding:2px 6px;border-radius:3px;letter-spacing:1px;}
+.live-tag{background:var(--green3);color:var(--green);border:1px solid rgba(0,217,102,.2);}
+.demo-tag{background:rgba(14,165,233,.07);color:var(--blue2);border:1px solid rgba(14,165,233,.15);}
+.cluster-badge{font-family:var(--font-mono);font-size:.49rem;padding:2px 7px;border-radius:3px;background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2);}
+.ac-time{font-family:var(--font-mono);font-size:.5rem;color:#fff;margin-left:auto;}
+.ac-title{font-size:.85rem;font-weight:500;color:var(--text);line-height:1.55;margin-bottom:8px;}
+.ac-title mark{background:rgba(255,26,60,.18);color:#ff7070;padding:0 2px;border-radius:2px;}
+.ac-analysis{font-size:.69rem;color:var(--dim2);line-height:1.65;margin-bottom:8px;padding:8px 11px;background:rgba(255,255,255,.022);border-radius:6px;border-left:2px solid rgba(255,26,60,.3);}
 
-.ac{padding:15px 16px;border-bottom:1px solid var(--border);position:relative;transition:background .15s;cursor:default;}
-.ac:hover{background:rgba(255,255,255,.012);}
-.ac.sh{border-left:3px solid var(--red);background:rgba(255,32,64,.035);}
-.ac.sm{border-left:3px solid var(--orange);background:rgba(255,122,0,.025);}
-.ac.sl{border-left:3px solid var(--blue);}
-.ac.nw{animation:nf 3s ease-out;}
-@keyframes nf{0%{background:rgba(255,32,64,.22);}100%{background:rgba(255,32,64,.035);}}
-.ac.expanded .ac-preview{display:none;}
-.ac.expanded .ac-full{display:block;}
-.ac-preview{}
-.ac-full{display:none;}
+/* Ticker row with live prices */
+.trow{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;}
+.tk{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:.56rem;padding:3px 8px;border-radius:4px;background:rgba(255,26,60,.08);border:1px solid rgba(255,26,60,.18);letter-spacing:.5px;cursor:default;transition:background .15s;}
+.tk:hover{background:rgba(255,26,60,.16);}
+.tk-sym{color:var(--red2);font-weight:500;}
+.tk-price{color:var(--text);}
+.tk-chg{font-size:.5rem;}
+.tk-chg.up{color:var(--green);}
+.tk-chg.dn{color:var(--red);}
+.tk-chg.neutral{color:var(--dim2);}
+.tk-load{color:var(--dim);font-size:.48rem;}
 
-.atop{display:flex;align-items:center;gap:7px;margin-bottom:8px;flex-wrap:wrap;}
-.sb{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:2px 6px;border-radius:3px;letter-spacing:1px;font-weight:700;}
-.sH{background:rgba(255,32,64,.2);color:var(--red);border:1px solid rgba(255,32,64,.3);}
-.sM{background:rgba(255,122,0,.18);color:var(--orange);border:1px solid rgba(255,122,0,.28);}
-.sL{background:rgba(56,178,255,.12);color:var(--blue);border:1px solid rgba(56,178,255,.2);}
-.srctag{font-family:'JetBrains Mono',monospace;font-size:.52rem;padding:2px 7px;border-radius:3px;letter-spacing:1px;}
-.slive{background:rgba(0,232,122,.07);color:var(--green);border:1px solid rgba(0,232,122,.2);}
-.sdemo{background:rgba(56,178,255,.07);color:var(--blue);border:1px solid rgba(56,178,255,.2);}
-.srcname{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:var(--dim);padding:2px 6px;}
-.atm{font-family:'JetBrains Mono',monospace;font-size:.52rem;color:#fff;margin-left:auto;}
-.expand-btn{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:2px 6px;border-radius:3px;background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--dim);cursor:pointer;letter-spacing:1px;flex-shrink:0;}
-.expand-btn:hover{border-color:var(--blue);color:var(--blue);}
+/* Mini sparkline */
+.sparkline-wrap{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.sparkline-canvas{border-radius:3px;}
+.spark-info{font-family:var(--font-mono);font-size:.52rem;}
 
-.aht{font-size:.86rem;font-weight:500;color:var(--text);line-height:1.55;margin-bottom:8px;}
-.aht mark{background:rgba(255,32,64,.18);color:#ff7070;padding:0 2px;border-radius:2px;}
-.aan{font-size:.7rem;color:var(--dim);line-height:1.65;margin-bottom:8px;padding:9px 12px;background:rgba(255,255,255,.025);border-radius:7px;border-left:2px solid rgba(255,32,64,.3);}
-.trow{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;}
-.tk{font-family:'JetBrains Mono',monospace;font-size:.57rem;padding:3px 7px;border-radius:4px;background:rgba(255,32,64,.1);color:#ff6060;border:1px solid rgba(255,32,64,.2);letter-spacing:1px;cursor:default;}
-.tk:hover{background:rgba(255,32,64,.2);}
-.alink{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--blue);text-decoration:none;opacity:.7;display:inline-block;margin-top:4px;transition:opacity .15s;}
+/* Cluster siblings */
+.cluster-toggle{font-family:var(--font-mono);font-size:.5rem;padding:3px 8px;border-radius:4px;background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);color:#a78bfa;cursor:pointer;transition:all .2s;}
+.cluster-toggle:hover{background:rgba(167,139,250,.15);}
+.cluster-children{display:none;margin-top:8px;border-top:1px solid var(--b1);padding-top:8px;}
+.cluster-children.open{display:block;}
+.c-child{font-size:.72rem;color:var(--dim2);padding:4px 0;border-bottom:1px solid var(--b1);display:flex;gap:8px;align-items:flex-start;}
+.c-child:last-child{border:none;}
+.c-child-src{font-family:var(--font-mono);font-size:.48rem;color:var(--dim);flex-shrink:0;padding-top:1px;}
+.alink{font-family:var(--font-mono);font-size:.53rem;color:var(--blue2);text-decoration:none;opacity:.65;display:inline-flex;align-items:center;gap:4px;margin-top:4px;}
 .alink:hover{opacity:1;}
 
-/* Skeleton loader */
-.skeleton-wrap{padding:14px 16px;border-bottom:1px solid var(--border);}
-.skeleton{background:linear-gradient(90deg,var(--dimmer) 25%,rgba(30,34,53,.8) 50%,var(--dimmer) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:4px;}
+/* Score bar */
+.score-bar-wrap{margin-top:5px;display:flex;align-items:center;gap:8px;}
+.score-bar-bg{flex:1;height:3px;background:var(--b2);border-radius:2px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:2px;transition:width .5s ease;}
+.score-val{font-family:var(--font-mono);font-size:.5rem;color:var(--dim2);width:30px;text-align:right;}
+
+/* ── EMPTY / LOADING ── */
+.empty{padding:52px 20px;text-align:center;}
+.empty-icon{font-size:2rem;margin-bottom:12px;opacity:.25;}
+.empty-t{font-size:.9rem;color:var(--dim2);margin-bottom:6px;font-weight:500;}
+.empty-s{font-family:var(--font-mono);font-size:.56rem;color:var(--dim);letter-spacing:1px;}
+.sk-wrap{padding:14px 16px;border-bottom:1px solid var(--b1);}
+.sk{background:linear-gradient(90deg,var(--dimmer) 25%,rgba(20,20,48,.6) 50%,var(--dimmer) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;}
 @keyframes shimmer{to{background-position:-200% 0;}}
-.sk1{height:10px;width:60%;margin-bottom:9px;}
-.sk2{height:16px;width:95%;margin-bottom:6px;}
-.sk3{height:16px;width:80%;margin-bottom:9px;}
-.sk4{height:10px;width:40%;margin-bottom:9px;}
-.sk5{height:24px;width:70%;border-radius:6px;}
+.sk1{height:9px;width:55%;margin-bottom:8px;}
+.sk2{height:15px;width:92%;margin-bottom:5px;}
+.sk3{height:15px;width:78%;margin-bottom:9px;}
+.sk4{height:9px;width:38%;}
 
-.empty{padding:50px 20px;text-align:center;}
-.empty-icon{font-size:2.2rem;margin-bottom:12px;opacity:.3;}
-.empty-t{font-size:.9rem;color:var(--dim);margin-bottom:6px;font-weight:500;}
-.empty-s{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--dimmer);letter-spacing:1px;}
+/* ── SECTOR HEATMAP ── */
+.heatmap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:12px 14px;}
+.hm-cell{border-radius:8px;padding:10px 11px;border:1px solid var(--b2);position:relative;overflow:hidden;transition:all .25s;cursor:default;}
+.hm-cell::after{content:'';position:absolute;inset:0;opacity:.08;transition:opacity .25s;}
+.hm-cell:hover::after{opacity:.15;}
+.hm-cell.heat0{background:var(--s2);}
+.hm-cell.heat1{background:rgba(14,165,233,.08);border-color:rgba(14,165,233,.2);}
+.hm-cell.heat1::after{background:var(--blue);}
+.hm-cell.heat2{background:rgba(255,107,0,.09);border-color:rgba(255,107,0,.22);}
+.hm-cell.heat2::after{background:var(--orange);}
+.hm-cell.heat3{background:rgba(255,26,60,.1);border-color:rgba(255,26,60,.28);}
+.hm-cell.heat3::after{background:var(--red);}
+.hm-cell.heat4{background:rgba(255,26,60,.16);border-color:rgba(255,26,60,.38);box-shadow:0 0 12px rgba(255,26,60,.12);}
+.hm-cell.heat4::after{background:var(--red);}
+.hm-name{font-family:var(--font-mono);font-size:.6rem;color:var(--text);font-weight:500;margin-bottom:3px;}
+.hm-count{font-family:var(--font-display);font-size:1.4rem;line-height:1;}
+.hm-cell.heat0 .hm-count{color:var(--dim2);}
+.hm-cell.heat1 .hm-count{color:var(--blue2);}
+.hm-cell.heat2 .hm-count{color:var(--orange2);}
+.hm-cell.heat3 .hm-count,.hm-cell.heat4 .hm-count{color:var(--red2);}
+.hm-bar{width:100%;height:2px;border-radius:1px;margin-top:4px;background:var(--b2);}
+.hm-fill{height:100%;border-radius:1px;transition:width .6s ease;}
 
-/* Article feed */
-.art{padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;}
-.art:hover{background:rgba(255,255,255,.01);}
-.art-top{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap;}
-.art-time{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:#fff;margin-left:auto;}
-.art-h{font-size:.82rem;font-weight:500;color:var(--text);line-height:1.5;margin-bottom:5px;}
-
-/* ── SIDEBAR ── */
-.sidebar{display:flex;flex-direction:column;gap:12px;}
-
-/* Watchlist */
-.wlist{max-height:400px;overflow-y:auto;}
+/* ── WATCHLIST ── */
+.wlist{max-height:360px;overflow-y:auto;}
 .wlist::-webkit-scrollbar{width:3px;}
-.wlist::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.wsearch{padding:8px 12px;border-bottom:1px solid var(--border);}
-.wsearch input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.6rem;outline:none;transition:border-color .2s;}
+.wlist::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+.wsearch{padding:7px 12px;border-bottom:1px solid var(--b1);}
+.wsearch input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--b2);border-radius:5px;padding:6px 9px;color:var(--text);font-family:var(--font-mono);font-size:.58rem;outline:none;transition:border-color .2s;}
 .wsearch input:focus{border-color:var(--blue);}
-.wsearch input::placeholder{color:var(--dimmer);}
-.wsec{padding:3px 14px 2px;font-family:'JetBrains Mono',monospace;font-size:.44rem;color:var(--dimmer);letter-spacing:3px;text-transform:uppercase;background:rgba(0,0,0,.35);}
-.wr{padding:6px 12px;border-bottom:1px solid rgba(20,20,37,.7);display:flex;align-items:center;gap:8px;transition:background .15s;}
-.wr:hover{background:rgba(255,255,255,.015);}
-.wr.hit{background:rgba(255,32,64,.04);}
-.wt{font-family:'JetBrains Mono',monospace;font-size:.63rem;font-weight:700;width:44px;flex-shrink:0;}
-.wn{font-size:.63rem;color:var(--dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rsk{font-family:'JetBrains Mono',monospace;font-size:.46rem;padding:2px 5px;border-radius:3px;flex-shrink:0;}
-.rH{background:rgba(255,32,64,.15);color:var(--red);}
-.rM{background:rgba(255,122,0,.14);color:var(--orange);}
-.rL{background:rgba(56,178,255,.1);color:var(--blue);}
-.hdot{width:5px;height:5px;background:var(--red);border-radius:50%;animation:pulse 1.5s infinite;flex-shrink:0;}
-/* Heat bar */
-.heat-bar{width:100%;height:2px;border-radius:1px;margin-top:2px;}
+.wsearch input::placeholder{color:var(--dim);}
+.wsec-h{padding:2px 13px 1px;font-family:var(--font-mono);font-size:.43rem;color:var(--dim);letter-spacing:3px;background:rgba(0,0,0,.4);}
+.wr{padding:5px 12px;border-bottom:1px solid rgba(20,20,48,.7);display:flex;align-items:center;gap:7px;transition:background .12s;}
+.wr:hover{background:rgba(255,255,255,.012);}
+.wr.hit{background:rgba(255,26,60,.04);}
+.wt{font-family:var(--font-mono);font-size:.62rem;font-weight:500;width:46px;flex-shrink:0;}
+.wn{font-size:.61rem;color:var(--dim2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wprice{font-family:var(--font-mono);font-size:.58rem;text-align:right;flex-shrink:0;min-width:52px;}
+.wchg{font-family:var(--font-mono);font-size:.5rem;min-width:42px;text-align:right;}
+.wchg.up{color:var(--green);}
+.wchg.dn{color:var(--red);}
+.rsk{font-family:var(--font-mono);font-size:.44rem;padding:2px 5px;border-radius:3px;flex-shrink:0;}
+.rH{background:rgba(255,26,60,.15);color:var(--red2);}
+.rM{background:rgba(255,107,0,.13);color:var(--orange2);}
+.rL{background:rgba(14,165,233,.1);color:var(--blue2);}
+.hdot{width:5px;height:5px;background:var(--red);border-radius:50%;animation:blinkdot 1.5s infinite;flex-shrink:0;}
 
-/* Keywords */
+/* ── KEYWORDS ── */
 .kwbody{padding:12px 14px;}
-.kwgrid{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px;}
-.kw{font-family:'JetBrains Mono',monospace;font-size:.53rem;padding:3px 7px;border-radius:4px;border:1px solid var(--border2);color:var(--dim);cursor:pointer;transition:all .2s;}
-.kw.on-red{border-color:rgba(255,32,64,.4);color:var(--red);background:rgba(255,32,64,.08);}
-.kw.on-blue{border-color:rgba(56,178,255,.4);color:var(--blue);background:rgba(56,178,255,.08);}
-.kw:hover{border-color:var(--dim);}
+.kwgrid{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:9px;}
+.kw{font-family:var(--font-mono);font-size:.52rem;padding:3px 7px;border-radius:4px;border:1px solid var(--b2);color:var(--dim2);cursor:pointer;transition:all .2s;}
+.kw.kred{border-color:rgba(255,26,60,.38);color:var(--red2);background:rgba(255,26,60,.07);}
+.kw.kblue{border-color:rgba(14,165,233,.35);color:var(--blue2);background:rgba(14,165,233,.07);}
 .kwrow{display:flex;gap:5px;}
-.kwi{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border2);border-radius:6px;padding:7px 9px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.6rem;outline:none;transition:border-color .2s;}
+.kwi{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--b2);border-radius:5px;padding:6px 9px;color:var(--text);font-family:var(--font-mono);font-size:.58rem;outline:none;transition:border-color .2s;}
 .kwi:focus{border-color:var(--blue);}
-.kwi::placeholder{color:var(--dimmer);}
-.btnadd{background:rgba(56,178,255,.12);border:1px solid rgba(56,178,255,.3);color:var(--blue);border-radius:6px;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:.57rem;cursor:pointer;letter-spacing:1px;transition:all .2s;}
-.btnadd:hover{background:rgba(56,178,255,.22);}
+.kwi::placeholder{color:var(--dim);}
+.btnadd{background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.28);color:var(--blue2);border-radius:5px;padding:6px 10px;font-family:var(--font-mono);font-size:.56rem;cursor:pointer;transition:all .2s;}
+.btnadd:hover{background:rgba(14,165,233,.2);}
 
-/* About */
-.abody{padding:13px 14px;}
-.abody p{font-size:.72rem;color:var(--dim);line-height:1.75;margin-bottom:8px;}
-.abody p strong{color:var(--text);}
-.btn-share{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:10px;font-family:'JetBrains Mono',monospace;font-size:.58rem;cursor:pointer;letter-spacing:1px;margin-bottom:6px;transition:all .2s;}
-.btn-share:hover{background:rgba(255,255,255,.08);border-color:var(--dim);}
+/* ── ALERT HISTORY ── */
+.hist-list{max-height:280px;overflow-y:auto;}
+.hist-list::-webkit-scrollbar{width:3px;}
+.hist-list::-webkit-scrollbar-thumb{background:var(--b2);}
+.hist-item{padding:8px 14px;border-bottom:1px solid var(--b1);display:flex;align-items:flex-start;gap:9px;}
+.hist-date{font-family:var(--font-mono);font-size:.5rem;color:var(--dim2);flex-shrink:0;padding-top:2px;min-width:50px;}
+.hist-text{font-size:.7rem;color:var(--dim2);flex:1;line-height:1.5;}
+.hist-tks{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px;}
+.hist-tk{font-family:var(--font-mono);font-size:.46rem;padding:1px 5px;border-radius:3px;background:rgba(255,26,60,.08);color:var(--red2);border:1px solid rgba(255,26,60,.15);}
+.hist-sev{font-family:var(--font-mono);font-size:.46rem;padding:1px 5px;border-radius:3px;flex-shrink:0;}
+.hist-sev.H{background:rgba(255,26,60,.15);color:var(--red2);}
+.hist-sev.M{background:rgba(255,107,0,.12);color:var(--orange2);}
 
-/* Source panel */
-.source-status{padding:10px 14px;display:flex;flex-direction:column;gap:6px;}
-.src-row{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.02);border:1px solid var(--border);}
-.src-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-.src-dot.ok{background:var(--green);}
-.src-dot.off{background:var(--dimmer);}
-.src-dot.err{background:var(--red);}
-.src-row-name{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:600;flex:1;}
-.src-row-count{font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--dim);}
-.src-row-note{font-family:'JetBrains Mono',monospace;font-size:.46rem;color:var(--dimmer);letter-spacing:1px;}
+/* ── PATTERN INSIGHTS ── */
+.patterns{padding:10px 14px;display:flex;flex-direction:column;gap:7px;}
+.pattern-item{background:var(--s2);border:1px solid var(--b2);border-radius:7px;padding:9px 11px;}
+.pat-head{display:flex;align-items:center;gap:7px;margin-bottom:4px;}
+.pat-icon{font-size:.9rem;}
+.pat-label{font-family:var(--font-mono);font-size:.58rem;color:var(--text);font-weight:500;}
+.pat-val{font-family:var(--font-display);font-size:1.1rem;color:var(--gold);margin-left:auto;}
+.pat-desc{font-size:.68rem;color:var(--dim2);line-height:1.5;}
+.pat-tks{display:flex;gap:3px;flex-wrap:wrap;margin-top:5px;}
 
-/* Toast */
-.toasts{position:fixed;bottom:18px;right:18px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
-.toast{background:#09091a;border:1px solid var(--red);border-radius:10px;padding:13px 15px;min-width:280px;max-width:360px;box-shadow:0 8px 40px rgba(255,32,64,.22);animation:tin .35s cubic-bezier(.16,1,.3,1);pointer-events:all;}
-@keyframes tin{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.tt{font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--red);letter-spacing:2px;font-weight:700;margin-bottom:5px;}
-.tb{font-size:.76rem;color:var(--text);line-height:1.45;}
-.tticks{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;}
+/* ── TOASTS ── */
+.toasts{position:fixed;bottom:18px;right:18px;z-index:900;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{background:#0a0a18;border:1px solid var(--red);border-radius:10px;padding:12px 15px;min-width:280px;max-width:360px;box-shadow:0 8px 40px rgba(255,26,60,.2);animation:tin .35s cubic-bezier(.16,1,.3,1);pointer-events:all;}
+@keyframes tin{from{transform:translateY(14px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.tt{font-family:var(--font-mono);font-size:.55rem;color:var(--red2);letter-spacing:2px;font-weight:500;margin-bottom:4px;}
+.tb{font-size:.75rem;color:var(--text);line-height:1.45;}
+.ttks{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+.toast-close{float:right;background:none;border:none;color:var(--dim2);cursor:pointer;font-size:.8rem;line-height:1;}
 
-/* Sound toggle */
-.sound-btn{font-family:'JetBrains Mono',monospace;font-size:.52rem;padding:4px 8px;border-radius:5px;background:rgba(255,255,255,.04);border:1px solid var(--border2);color:var(--dim);cursor:pointer;letter-spacing:1px;transition:all .2s;}
-.sound-btn.on{background:rgba(255,122,0,.08);border-color:rgba(255,122,0,.3);color:var(--orange);}
+footer{border-top:1px solid var(--b1);padding:14px 0;text-align:center;}
+footer p{font-family:var(--font-mono);font-size:.5rem;color:var(--dim);letter-spacing:2px;}
 
-footer{border-top:1px solid var(--border);padding:16px 0;text-align:center;}
-footer p{font-family:'JetBrains Mono',monospace;font-size:.53rem;color:var(--dimmer);letter-spacing:2px;}
-
-@media(max-width:860px){
+@media(max-width:900px){
   .stats{grid-template-columns:repeat(3,1fr);}
-  .layout{grid-template-columns:1fr;}
-  .sidebar{display:grid;grid-template-columns:1fr 1fr;}
+  .grid{grid-template-columns:1fr;}
+  .heatmap-grid{grid-template-columns:repeat(2,1fr);}
 }
 @media(max-width:540px){
-  .sidebar{grid-template-columns:1fr;}
-  .hero{flex-direction:column;}
   .stats{grid-template-columns:repeat(2,1fr);}
+  .hdr{flex-direction:column;}
 }
 </style>
 </head>
 <body>
+<div class="amb"></div>
 
-<div class="ambient">
-  <div class="blob blob1"></div>
-  <div class="blob blob2"></div>
-  <div class="blob blob3"></div>
+<!-- TICKER -->
+<div class="ticker">
+  <div class="t-label">⚡ SENTINEL</div>
+  <div class="t-track"><div class="t-inner" id="tickerInner">
+    <div class="t-item"><span class="t-dot L"></span><span class="t-sym">SENTINEL v3</span><span style="color:var(--dim2)">READY TO SCAN</span></div>
+    <div class="t-item"><span class="t-sym" style="color:var(--dim2)">280+ STOCKS MONITORED · 4 NEWS SOURCES · LIVE PRICES · CLICK SCAN</span></div>
+    <div class="t-item"><span class="t-dot L"></span><span class="t-sym">SENTINEL v3</span><span style="color:var(--dim2)">READY TO SCAN</span></div>
+    <div class="t-item"><span class="t-sym" style="color:var(--dim2)">280+ STOCKS MONITORED · 4 NEWS SOURCES · LIVE PRICES · CLICK SCAN</span></div>
+  </div></div>
 </div>
 
-<!-- ── TICKER TAPE ── -->
-<div class="ticker-wrap">
-  <div class="ticker-inner">
-    <div class="ticker-label">⚡ FLAGGED</div>
-    <div class="ticker-track">
-      <div class="ticker-scroll" id="tickerScroll">
-        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">IBM</span><span class="t-sev-L">MONITORED</span></div>
-        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">ACN</span><span class="t-sev-L">MONITORED</span></div>
-        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">CTSH</span><span class="t-sev-L">MONITORED</span></div>
-        <div class="ticker-item" style="padding-right:40px"><span class="t-dot t-dot-L"></span><span class="t-sym t-sev-L">→ SCAN TO DETECT ALERTS</span></div>
-        <!-- second copy for seamless loop -->
-        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">IBM</span><span class="t-sev-L">MONITORED</span></div>
-        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">ACN</span><span class="t-sev-L">MONITORED</span></div>
-        <div class="ticker-item"><span class="t-dot t-dot-L"></span><span class="t-sym">CTSH</span><span class="t-sev-L">MONITORED</span></div>
-        <div class="ticker-item" style="padding-right:40px"><span class="t-dot t-dot-L"></span><span class="t-sym t-sev-L">→ SCAN TO DETECT ALERTS</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── SETUP MODAL ── -->
+<!-- SETUP -->
 <div class="setup-overlay" id="setupScreen">
   <div class="setup-card">
     <div class="setup-logo">SENTINEL</div>
-    <div class="setup-sub">AI Market Disruption Monitor v2 · Free Tool</div>
-    <h2 class="setup-h">Connect Free News APIs</h2>
-    <p class="setup-p">SENTINEL v2 fetches from <strong>multiple free news sources simultaneously</strong> for 3-5× more headline coverage. RSS feeds work without any key.</p>
-    <div class="src-grid">
-      <div class="src-card free">
-        <div class="src-name">📡 RSS Feeds</div>
-        <div class="src-info">Reuters, AP, Bloomberg RSS via rss2json proxy. No key needed.</div>
-        <span class="src-badge src-free">FREE · NO KEY</span>
-      </div>
-      <div class="src-card free">
-        <div class="src-name">🔵 TheNewsAPI</div>
-        <div class="src-info">100 req/day free. Best coverage. CORS-friendly.</div>
-        <span class="src-badge src-key">FREE KEY REQUIRED</span>
-      </div>
-      <div class="src-card free">
-        <div class="src-name">🟢 GNews API</div>
-        <div class="src-info">100 req/day free. Strong US financial news.</div>
-        <span class="src-badge src-key">FREE KEY REQUIRED</span>
-      </div>
-      <div class="src-card free">
-        <div class="src-name">🟡 NewsData.io</div>
-        <div class="src-info">200 req/day free. Good international coverage.</div>
-        <span class="src-badge src-key">FREE KEY REQUIRED</span>
-      </div>
+    <div class="setup-ver">v3 · AI MARKET DISRUPTION SCANNER · MULTI-SOURCE · LIVE PRICES</div>
+    <div class="setup-h">Connect Your Free News API</div>
+    <p class="setup-p">Fetches from <strong>4 simultaneous sources</strong> including free RSS feeds that work <strong>without any key</strong>. Add API keys below for broader live coverage.</p>
+    <div class="src-row-setup">
+      <div class="src-ico">📡</div>
+      <div class="src-meta"><div class="src-name-s">RSS Feeds — Reuters, AP, CNBC, TechCrunch, FT, Wired</div><div class="src-desc-s">Always active — no key required</div></div>
+      <span class="chip cg" style="flex-shrink:0">FREE</span>
     </div>
-
-    <div class="setup-section">
-      <div class="setup-section-label">⭐ Recommended — <a href="https://thenewsapi.com/register" target="_blank" style="color:var(--blue)">TheNewsAPI.com</a></div>
-      <div class="key-row">
-        <input class="key-field" id="keyFieldMain" type="text" placeholder="TheNewsAPI token (thenewsapi.com/register)..." autocomplete="off">
-        <button class="btn-activate" onclick="doActivate()">ACTIVATE →</button>
-      </div>
+    <div class="setup-divider">optional — add keys for 3× more headlines</div>
+    <div class="src-row-setup">
+      <div class="src-ico">🔵</div>
+      <div class="src-meta"><div class="src-name-s">TheNewsAPI.com · <a href="https://thenewsapi.com/register" target="_blank">Register free →</a></div></div>
+      <input class="key-field" id="keyMain" type="text" placeholder="TheNewsAPI token..." style="max-width:210px;">
     </div>
-
-    <div class="setup-section">
-      <div class="setup-section-label">Optional extras (more coverage)</div>
-      <div class="key-label">GNews API key (<a href="https://gnews.io" target="_blank" style="color:var(--blue)">gnews.io</a>)</div>
-      <div class="key-row" style="margin-bottom:8px">
-        <input class="key-field" id="keyFieldGnews" type="text" placeholder="GNews API key..." autocomplete="off">
-      </div>
-      <div class="key-label">NewsData.io key (<a href="https://newsdata.io" target="_blank" style="color:var(--blue)">newsdata.io</a>)</div>
-      <div class="key-row">
-        <input class="key-field" id="keyFieldNewsdata" type="text" placeholder="NewsData.io API key..." autocomplete="off">
-      </div>
+    <div class="src-row-setup">
+      <div class="src-ico">🟢</div>
+      <div class="src-meta"><div class="src-name-s">GNews API · <a href="https://gnews.io" target="_blank">gnews.io →</a></div></div>
+      <input class="key-field" id="keyGnews" type="text" placeholder="GNews API key..." style="max-width:210px;">
     </div>
-
-    <div class="err-msg" id="errMsg">⚠ Enter a valid API token (20+ chars) or use Demo Mode</div>
-    <div class="privacy">🔒 All keys stay in your browser only. Never sent to any server.</div>
-    <button class="btn-skip" onclick="doSkip()">→ Skip — use Demo Mode instead (no API key needed)</button>
+    <div class="src-row-setup">
+      <div class="src-ico">🟡</div>
+      <div class="src-meta"><div class="src-name-s">NewsData.io · <a href="https://newsdata.io" target="_blank">newsdata.io →</a></div></div>
+      <input class="key-field" id="keyNewsdata" type="text" placeholder="NewsData.io key..." style="max-width:210px;">
+    </div>
+    <div class="err" id="errMsg">⚠ Enter at least one valid API token or use Demo Mode</div>
+    <br>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button class="btn-go" onclick="doActivate()">ACTIVATE →</button>
+      <div class="privacy">🔒 Keys never leave your browser</div>
+    </div>
+    <button class="btn-skip" onclick="doSkip()">→ Skip — Demo Mode (no API key needed)</button>
   </div>
 </div>
 
 <div class="toasts" id="toasts"></div>
 
 <div class="wrap">
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-left">
-      <div class="brand">
-        <div class="b-icon">⚡</div>
+  <!-- HEADER -->
+  <div class="hdr">
+    <div>
+      <div class="brand-block">
+        <div class="brand-icon">⚡</div>
         <div>
-          <div class="b-name">SENTINEL</div>
-          <div class="b-version">v2 · AI MARKET DISRUPTION MONITOR · 280+ STOCKS · MULTI-SOURCE</div>
+          <div class="brand-name">SENTINEL</div>
+          <div class="brand-sub">v3 · AI DISRUPTION SCANNER · 280+ STOCKS · LIVE PRICES · MULTI-SOURCE</div>
         </div>
       </div>
-      <p class="tagline">Multi-source real headlines. <strong>4 simultaneous news APIs + RSS feeds</strong>. When Claude or AI threatens IBM, banks, cybersecurity, consulting, logistics — catch it before the algorithmic selloff.</p>
+      <p class="tagline" style="margin-top:10px;">Real headlines. <strong>Live stock prices.</strong> Sector heatmap. Story clustering. Pattern detection. When AI threatens legacy stocks — catch it before the algorithm does.</p>
     </div>
-    <div class="hero-right">
-      <div class="status-row">
+    <div class="hdr-right">
+      <div class="status-pills">
         <div class="pill pill-live"><div class="ldot"></div><span id="ltxt">READY</span></div>
         <div class="pill pill-key" id="keyBadge" onclick="showSetup()">🔑 API KEYS</div>
-        <button class="sound-btn" id="soundBtn" onclick="toggleSound()">🔇 SOUND OFF</button>
+        <button class="sound-tog" id="soundBtn" onclick="toggleSound()">🔇 OFF</button>
       </div>
     </div>
   </div>
 
   <!-- CONTROLS -->
-  <div class="controls">
-    <button class="btn-scan" id="scanBtn" onclick="doScan()">
-      <span class="si" id="si">⚡</span>
-      <span id="slbl">SCAN LIVE HEADLINES NOW</span>
-    </button>
+  <div class="ctrl">
+    <button class="btn-scan" id="scanBtn" onclick="doScan()"><span id="si">⚡</span><span id="slbl">SCAN LIVE NOW</span></button>
     <div class="mode-tabs">
-      <button class="mtab on" id="tabLive" onclick="setMode('live')">LIVE NEWS</button>
-      <button class="mtab" id="tabDemo" onclick="setMode('demo')">DEMO MODE</button>
+      <button class="mtab on" id="tabLive" onclick="setMode('live')">LIVE</button>
+      <button class="mtab" id="tabDemo" onclick="setMode('demo')">DEMO</button>
+    </div>
+    <div class="auto-row">
+      <div class="tog" id="atog" onclick="doToggleAuto()"></div>
+      <span class="ctrl-lbl">AUTO 5M</span>
+    </div>
+    <span class="ctrl-lbl" id="ctxt"></span>
+    <div class="sep"></div>
+    <div class="src-pills">
+      <span class="ctrl-lbl">SRC:</span>
+      <span class="src-p" id="spRss">RSS</span>
+      <span class="src-p" id="spTna">TNAPI</span>
+      <span class="src-p" id="spGnews">GNEWS</span>
+      <span class="src-p" id="spNd">NDATA</span>
     </div>
     <div class="sep"></div>
-    <div class="auto-wrap">
-      <div class="atog" id="atog" onclick="doToggleAuto()"></div>
-      <span class="albl">AUTO 5 MIN</span>
-    </div>
-    <span class="ctxt" id="ctxt"></span>
-    <div class="sep"></div>
-    <div class="source-indicators">
-      <span class="src-ind-label">SOURCES:</span>
-      <span class="src-ind" id="srcIndRss">RSS</span>
-      <span class="src-ind" id="srcIndTna">TNAPI</span>
-      <span class="src-ind" id="srcIndGnews">GNEWS</span>
-      <span class="src-ind" id="srcIndNewsdata">NEWSDATA</span>
-    </div>
+    <button class="cbtn chip" onclick="exportCSV()">⬇ CSV</button>
+    <button class="cbtn chip" onclick="doClear()">✕ CLEAR</button>
   </div>
 
   <!-- STATS -->
   <div class="stats">
-    <div class="stat r"><div class="stat-n" id="stA">0</div><div class="stat-l">Alerts Fired</div></div>
+    <div class="stat r"><div class="stat-n" id="stA">0</div><div class="stat-l">Alerts</div></div>
     <div class="stat o"><div class="stat-n" id="stS">0</div><div class="stat-l">Stocks Flagged</div></div>
-    <div class="stat b"><div class="stat-n" id="stN">0</div><div class="stat-l">Headlines Scanned</div></div>
-    <div class="stat g"><div class="stat-n" id="stK">0</div><div class="stat-l">Keywords Active</div></div>
-    <div class="stat p"><div class="stat-n" id="stSC">0</div><div class="stat-l">Total Scans</div></div>
+    <div class="stat b"><div class="stat-n" id="stN">0</div><div class="stat-l">Headlines</div></div>
+    <div class="stat g"><div class="stat-n" id="stC">0</div><div class="stat-l">Clusters</div></div>
+    <div class="stat go"><div class="stat-n" id="stSC">0</div><div class="stat-l">Total Scans</div></div>
+    <div class="stat p"><div class="stat-n" id="stK">0</div><div class="stat-l">Keywords</div></div>
   </div>
 
-  <!-- LAYOUT -->
-  <div class="layout">
-    <!-- MAIN PANEL -->
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title">⚠ DISRUPTION FEED</div>
-        <div class="panel-actions">
-          <span class="chip chip-red" id="feedChip">0 ALERTS</span>
-          <span class="chip chip-btn" onclick="exportCSV()">⬇ CSV</span>
-          <span class="chip chip-btn" id="clearBtn" onclick="doClear()">✕ CLEAR</span>
+  <!-- MAIN GRID -->
+  <div class="grid">
+    <!-- LEFT: MAIN PANEL -->
+    <div style="display:flex;flex-direction:column;gap:13px;">
+      <!-- DISRUPTION FEED -->
+      <div class="panel">
+        <div class="ph">
+          <div class="pt">DISRUPTION FEED</div>
+          <div class="pact">
+            <span class="chip cr" id="feedChip">0 ALERTS</span>
+          </div>
+        </div>
+        <div class="ftabs">
+          <button class="ftab on" id="ftabAlerts" onclick="setFV('alerts')">🚨 ALERTS</button>
+          <button class="ftab" id="ftabAll" onclick="setFV('all')">📰 ALL NEWS</button>
+          <button class="ftab" id="ftabHistory" onclick="setFV('history')">📋 HISTORY</button>
+          <button class="ftab" id="ftabPatterns" onclick="setFV('patterns')">🧠 PATTERNS</button>
+        </div>
+        <div class="fbar" id="fbar">
+          <input class="finput" id="fInput" placeholder="Filter..." oninput="renderFeed()">
+          <div class="sev-btns">
+            <button class="sf on H" data-s="H" onclick="togSev(this)">HIGH</button>
+            <button class="sf on M" data-s="M" onclick="togSev(this)">MED</button>
+            <button class="sf on L" data-s="L" onclick="togSev(this)">LOW</button>
+          </div>
+          <select class="sort-sel" id="sortSel" onchange="renderFeed()">
+            <option value="score">Sort: Score</option>
+            <option value="time">Sort: Newest</option>
+            <option value="sev">Sort: Severity</option>
+            <option value="tickers">Sort: Tickers</option>
+          </select>
+          <span class="fcount" id="fcount"></span>
+        </div>
+        <div class="alist" id="alist">
+          <div class="empty"><div class="empty-icon">📡</div><div class="empty-t">Ready to scan</div><div class="empty-s">Click SCAN LIVE NOW — or try Demo Mode</div></div>
         </div>
       </div>
-      <div class="feed-tabs">
-        <button class="ftab on" id="ftabAlerts" onclick="setFeedView('alerts')">🚨 ALERTS</button>
-        <button class="ftab" id="ftabAll" onclick="setFeedView('all')">📰 ALL HEADLINES</button>
-        <button class="ftab" id="ftabSources" onclick="setFeedView('sources')">📡 SOURCE STATUS</button>
-      </div>
-      <div class="filter-bar" id="filterBar">
-        <input class="filter-input" id="filterInput" placeholder="Filter alerts..." oninput="renderFeed()">
-        <div class="sev-filters">
-          <button class="sf on H" data-sev="H" onclick="toggleSevFilter(this)">HIGH</button>
-          <button class="sf on M" data-sev="M" onclick="toggleSevFilter(this)">MED</button>
-          <button class="sf on L" data-sev="L" onclick="toggleSevFilter(this)">LOW</button>
-        </div>
-        <span class="filter-count" id="filterCount"></span>
-      </div>
-      <div class="alist" id="alist">
-        <div class="empty">
-          <div class="empty-icon">📡</div>
-          <div class="empty-t">Ready to scan</div>
-          <div class="empty-s">Click SCAN or try Demo Mode — no API key needed</div>
-        </div>
+
+      <!-- SECTOR HEATMAP -->
+      <div class="panel">
+        <div class="ph"><div class="pt">SECTOR HEATMAP</div><span class="chip cb" id="hmChip">AI PRESSURE INDEX</span></div>
+        <div class="heatmap-grid" id="heatmapGrid"></div>
       </div>
     </div>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar">
+    <!-- RIGHT SIDEBAR -->
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <!-- WATCHLIST -->
       <div class="panel">
-        <div class="panel-head"><div class="panel-title">📊 WATCHLIST</div><span class="chip chip-blue" id="wchip">280 STOCKS</span></div>
-        <div class="wsearch"><input id="wsearchInput" placeholder="Search ticker, name, sector..." oninput="wsFilter=this.value.toLowerCase();renderWL()"></div>
+        <div class="ph"><div class="pt">WATCHLIST</div><span class="chip cb" id="wchip">280</span></div>
+        <div class="wsearch"><input id="wsInput" placeholder="Search ticker, name, sector..." oninput="wsF=this.value.toLowerCase();renderWL()"></div>
         <div class="wlist" id="wlist"></div>
       </div>
+
+      <!-- KEYWORDS -->
       <div class="panel">
-        <div class="panel-head"><div class="panel-title">🎯 KEYWORDS</div><span class="chip chip-btn" id="kwchip">18 ACTIVE</span></div>
+        <div class="ph"><div class="pt">KEYWORDS</div><span class="chip cb" id="kwchip">18</span></div>
         <div class="kwbody">
           <div class="kwgrid" id="kwgrid"></div>
           <div class="kwrow">
-            <input class="kwi" id="kwi" placeholder="Add keyword..." onkeydown="if(event.key==='Enter')doAddKw()">
-            <button class="btnadd" onclick="doAddKw()">+ADD</button>
+            <input class="kwi" id="kwi" placeholder="Add keyword..." onkeydown="if(event.key==='Enter')addKw()">
+            <button class="btnadd" onclick="addKw()">+ADD</button>
           </div>
         </div>
       </div>
+
+      <!-- ABOUT -->
       <div class="panel">
-        <div class="panel-head"><div class="panel-title">ℹ ABOUT</div></div>
-        <div class="abody">
-          <p>v2 now pulls from <strong>4 simultaneous sources</strong>: TheNewsAPI, GNews, NewsData.io, and RSS feeds — for much better coverage than single-source.</p>
-          <p>Monitors <strong>280+ NASDAQ & NYSE stocks</strong> across banking, payments, cybersecurity, IT consulting, logistics, enterprise software and more.</p>
-          <button class="btn-share" onclick="doShare()">𝕏 &nbsp;SHARE THIS FREE TOOL</button>
+        <div class="ph"><div class="pt">ABOUT</div></div>
+        <div class="kwbody" style="padding:12px 14px;">
+          <p style="font-size:.72rem;color:var(--dim2);line-height:1.75;margin-bottom:10px;">v3 adds <strong style="color:var(--text)">live stock prices</strong>, <strong style="color:var(--text)">sector heatmap</strong>, <strong style="color:var(--text)">story clustering</strong>, <strong style="color:var(--text)">disruption scoring</strong>, <strong style="color:var(--text)">pattern detection</strong>, <strong style="color:var(--text)">alert history</strong>, and <strong style="color:var(--text)">sparklines</strong>.</p>
+          <button class="btnadd" style="width:100%;padding:9px;" onclick="doShare()">𝕏 Share This Tool</button>
         </div>
       </div>
     </div>
   </div>
 
-  <footer><p>SENTINEL v2 · FREE TOOL · MULTI-SOURCE · 280+ STOCKS · KEYS NEVER LEAVE YOUR BROWSER</p></footer>
+  <footer><p>SENTINEL v3 · FREE TOOL · NO SIGNUP · 280+ STOCKS · LIVE PRICES · KEYS NEVER LEAVE YOUR BROWSER</p></footer>
 </div>
 
 <script>
-// ══════════════════════════════════════════════
-// DATA
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// WATCHLIST
+// ══════════════════════════════════════════════════════
 var WL=[
-  {t:'MSFT',n:'Microsoft',r:'L',s:'Mag 7 / Big Tech'},{t:'GOOGL',n:'Alphabet / Google',r:'L',s:'Mag 7 / Big Tech'},
-  {t:'AMZN',n:'Amazon',r:'L',s:'Mag 7 / Big Tech'},{t:'AAPL',n:'Apple',r:'L',s:'Mag 7 / Big Tech'},
-  {t:'META',n:'Meta Platforms',r:'L',s:'Mag 7 / Big Tech'},{t:'NVDA',n:'NVIDIA',r:'L',s:'Mag 7 / Big Tech'},
-  {t:'TSLA',n:'Tesla',r:'L',s:'Mag 7 / Big Tech'},
-  {t:'IBM',n:'IBM Corp',r:'H',s:'Mainframe / Legacy'},{t:'HPE',n:'Hewlett Packard Ent',r:'H',s:'Mainframe / Legacy'},
-  {t:'DXC',n:'DXC Technology',r:'H',s:'Mainframe / Legacy'},{t:'UNIY',n:'Unisys Corp',r:'H',s:'Mainframe / Legacy'},
-  {t:'NCR',n:'NCR Atleos',r:'H',s:'Mainframe / Legacy'},{t:'DELL',n:'Dell Technologies',r:'M',s:'Mainframe / Legacy'},
-  {t:'JPM',n:'JPMorgan Chase',r:'H',s:'Banking — Large'},{t:'BAC',n:'Bank of America',r:'H',s:'Banking — Large'},
-  {t:'WFC',n:'Wells Fargo',r:'H',s:'Banking — Large'},{t:'C',n:'Citigroup',r:'H',s:'Banking — Large'},
-  {t:'GS',n:'Goldman Sachs',r:'M',s:'Banking — Large'},{t:'MS',n:'Morgan Stanley',r:'M',s:'Banking — Large'},
-  {t:'USB',n:'U.S. Bancorp',r:'M',s:'Banking — Mid'},{t:'PNC',n:'PNC Financial',r:'M',s:'Banking — Mid'},
-  {t:'TFC',n:'Truist Financial',r:'M',s:'Banking — Mid'},{t:'COF',n:'Capital One',r:'M',s:'Banking — Mid'},
-  {t:'RF',n:'Regions Financial',r:'M',s:'Banking — Mid'},{t:'CFG',n:'Citizens Financial',r:'M',s:'Banking — Mid'},
-  {t:'FITB',n:'Fifth Third Bancorp',r:'M',s:'Banking — Mid'},{t:'KEY',n:'KeyCorp',r:'M',s:'Banking — Mid'},
-  {t:'HBAN',n:'Huntington Bancshares',r:'M',s:'Banking — Mid'},{t:'MTB',n:'M&T Bank',r:'M',s:'Banking — Mid'},
-  {t:'BX',n:'Blackstone',r:'M',s:'Investment Banking'},{t:'KKR',n:'KKR & Co',r:'M',s:'Investment Banking'},
-  {t:'APO',n:'Apollo Global Mgmt',r:'M',s:'Investment Banking'},{t:'GS',n:'Goldman Sachs',r:'M',s:'Investment Banking'},
-  {t:'EVR',n:'Evercore',r:'M',s:'Investment Banking'},{t:'LAZ',n:'Lazard',r:'M',s:'Investment Banking'},
-  {t:'AXP',n:'American Express',r:'H',s:'Payments'},{t:'MA',n:'Mastercard',r:'H',s:'Payments'},
-  {t:'V',n:'Visa',r:'H',s:'Payments'},{t:'PYPL',n:'PayPal',r:'H',s:'Payments'},{t:'SQ',n:'Block Inc',r:'M',s:'Payments'},
-  {t:'FIS',n:'FIS Global',r:'H',s:'Payments Tech'},{t:'FISV',n:'Fiserv',r:'M',s:'Payments Tech'},
-  {t:'JKHY',n:'Jack Henry',r:'M',s:'Payments Tech'},{t:'WEX',n:'WEX Inc',r:'M',s:'Payments Tech'},
-  {t:'SCHW',n:'Charles Schwab',r:'M',s:'Wealth Management'},{t:'RJF',n:'Raymond James',r:'M',s:'Wealth Management'},
-  {t:'LPLA',n:'LPL Financial',r:'M',s:'Wealth Management'},{t:'AMP',n:'Ameriprise Financial',r:'M',s:'Wealth Management'},
-  {t:'BEN',n:'Franklin Templeton',r:'M',s:'Wealth Management'},{t:'TROW',n:'T. Rowe Price',r:'M',s:'Wealth Management'},
-  {t:'BLK',n:'BlackRock',r:'L',s:'Wealth Management'},
-  {t:'MET',n:'MetLife',r:'M',s:'Insurance'},{t:'PRU',n:'Prudential Financial',r:'M',s:'Insurance'},
-  {t:'AFL',n:'Aflac',r:'M',s:'Insurance'},{t:'LNC',n:'Lincoln National',r:'M',s:'Insurance'},
-  {t:'CRWD',n:'CrowdStrike',r:'H',s:'Cybersecurity'},{t:'OKTA',n:'Okta Inc',r:'H',s:'Cybersecurity'},
-  {t:'S',n:'SentinelOne',r:'H',s:'Cybersecurity'},{t:'CYBR',n:'CyberArk',r:'H',s:'Cybersecurity'},
-  {t:'RPD',n:'Rapid7',r:'H',s:'Cybersecurity'},{t:'PANW',n:'Palo Alto Networks',r:'M',s:'Cybersecurity'},
-  {t:'FTNT',n:'Fortinet',r:'M',s:'Cybersecurity'},{t:'ZS',n:'Zscaler',r:'M',s:'Cybersecurity'},
-  {t:'NET',n:'Cloudflare',r:'M',s:'Cybersecurity'},{t:'TENB',n:'Tenable Holdings',r:'M',s:'Cybersecurity'},
-  {t:'CHKP',n:'Check Point Software',r:'M',s:'Cybersecurity'},{t:'SCWX',n:'SecureWorks',r:'H',s:'Cybersecurity'},
-  {t:'ACN',n:'Accenture',r:'H',s:'IT Consulting'},{t:'CTSH',n:'Cognizant',r:'H',s:'IT Consulting'},
-  {t:'INFY',n:'Infosys',r:'H',s:'IT Consulting'},{t:'WIT',n:'Wipro',r:'H',s:'IT Consulting'},
-  {t:'EPAM',n:'EPAM Systems',r:'H',s:'IT Consulting'},{t:'GLOB',n:'Globant',r:'H',s:'IT Consulting'},
-  {t:'BAH',n:'Booz Allen Hamilton',r:'M',s:'IT Consulting'},{t:'EXLS',n:'ExlService Holdings',r:'H',s:'IT Consulting'},
-  {t:'WNS',n:'WNS Holdings',r:'H',s:'IT Consulting'},{t:'HCKT',n:'Hackett Group',r:'H',s:'IT Consulting'},
-  {t:'MAN',n:'ManpowerGroup',r:'H',s:'Staffing & Recruiting'},{t:'RHI',n:'Robert Half Intl',r:'H',s:'Staffing & Recruiting'},
-  {t:'KELYA',n:'Kelly Services',r:'H',s:'Staffing & Recruiting'},{t:'ASGN',n:'ASGN Inc',r:'H',s:'Staffing & Recruiting'},
-  {t:'SAP',n:'SAP SE',r:'M',s:'Enterprise Software'},{t:'ORCL',n:'Oracle',r:'M',s:'Enterprise Software'},
-  {t:'NOW',n:'ServiceNow',r:'M',s:'Enterprise Software'},{t:'WDAY',n:'Workday',r:'M',s:'Enterprise Software'},
-  {t:'CRM',n:'Salesforce',r:'L',s:'Enterprise Software'},{t:'ADBE',n:'Adobe',r:'M',s:'Enterprise Software'},
-  {t:'HUBS',n:'HubSpot',r:'M',s:'Enterprise Software'},{t:'PAYC',n:'Paycom',r:'M',s:'Enterprise Software'},
-  {t:'CHRW',n:'C.H. Robinson',r:'M',s:'Logistics & Freight'},{t:'LSTR',n:'Landstar System',r:'M',s:'Logistics & Freight'},
-  {t:'XPO',n:'XPO Logistics',r:'M',s:'Logistics & Freight'},{t:'JBHT',n:'J.B. Hunt Transport',r:'M',s:'Logistics & Freight'},
-  {t:'KNX',n:'Knight-Swift',r:'M',s:'Logistics & Freight'},{t:'ODFL',n:'Old Dominion Freight',r:'M',s:'Logistics & Freight'},
-  {t:'GXO',n:'GXO Logistics',r:'M',s:'Logistics & Freight'},
-  {t:'ADP',n:'ADP',r:'M',s:'Payroll & HR'},{t:'PAYX',n:'Paychex',r:'M',s:'Payroll & HR'},
-  {t:'CDAY',n:'Ceridian HCM',r:'H',s:'Payroll & HR'},{t:'PCTY',n:'Paylocity',r:'M',s:'Payroll & HR'},
-  {t:'INTU',n:'Intuit',r:'H',s:'Tax & Accounting'},{t:'HRB',n:'H&R Block',r:'H',s:'Tax & Accounting'},
-  {t:'CBIZ',n:'CBIZ Inc',r:'H',s:'Tax & Accounting'},
-  {t:'NYT',n:'New York Times',r:'H',s:'Media & Publishing'},{t:'GANN',n:'Gannett Co',r:'H',s:'Media & Publishing'},
-  {t:'PARA',n:'Paramount Global',r:'H',s:'Media & Publishing'},{t:'WBD',n:'Warner Bros Discovery',r:'H',s:'Media & Publishing'},
+  {t:'MSFT',n:'Microsoft',r:'L',s:'Mag 7'},{t:'GOOGL',n:'Alphabet',r:'L',s:'Mag 7'},{t:'AMZN',n:'Amazon',r:'L',s:'Mag 7'},
+  {t:'AAPL',n:'Apple',r:'L',s:'Mag 7'},{t:'META',n:'Meta',r:'L',s:'Mag 7'},{t:'NVDA',n:'NVIDIA',r:'L',s:'Mag 7'},{t:'TSLA',n:'Tesla',r:'L',s:'Mag 7'},
+  {t:'IBM',n:'IBM Corp',r:'H',s:'Legacy Tech'},{t:'HPE',n:'Hewlett Packard',r:'H',s:'Legacy Tech'},{t:'DXC',n:'DXC Technology',r:'H',s:'Legacy Tech'},{t:'NCR',n:'NCR Atleos',r:'H',s:'Legacy Tech'},{t:'DELL',n:'Dell',r:'M',s:'Legacy Tech'},
+  {t:'JPM',n:'JPMorgan Chase',r:'H',s:'Banking'},{t:'BAC',n:'Bank of America',r:'H',s:'Banking'},{t:'WFC',n:'Wells Fargo',r:'H',s:'Banking'},{t:'C',n:'Citigroup',r:'H',s:'Banking'},{t:'GS',n:'Goldman Sachs',r:'M',s:'Banking'},{t:'MS',n:'Morgan Stanley',r:'M',s:'Banking'},
+  {t:'USB',n:'US Bancorp',r:'M',s:'Banking'},{t:'PNC',n:'PNC Financial',r:'M',s:'Banking'},{t:'TFC',n:'Truist',r:'M',s:'Banking'},{t:'COF',n:'Capital One',r:'M',s:'Banking'},
+  {t:'AXP',n:'American Express',r:'H',s:'Payments'},{t:'MA',n:'Mastercard',r:'H',s:'Payments'},{t:'V',n:'Visa',r:'H',s:'Payments'},{t:'PYPL',n:'PayPal',r:'H',s:'Payments'},{t:'SQ',n:'Block Inc',r:'M',s:'Payments'},
+  {t:'FIS',n:'FIS Global',r:'H',s:'Payments'},{t:'FISV',n:'Fiserv',r:'M',s:'Payments'},
+  {t:'CRWD',n:'CrowdStrike',r:'H',s:'Cybersecurity'},{t:'OKTA',n:'Okta',r:'H',s:'Cybersecurity'},{t:'S',n:'SentinelOne',r:'H',s:'Cybersecurity'},{t:'CYBR',n:'CyberArk',r:'H',s:'Cybersecurity'},{t:'PANW',n:'Palo Alto',r:'M',s:'Cybersecurity'},{t:'FTNT',n:'Fortinet',r:'M',s:'Cybersecurity'},{t:'ZS',n:'Zscaler',r:'M',s:'Cybersecurity'},{t:'NET',n:'Cloudflare',r:'M',s:'Cybersecurity'},{t:'RPD',n:'Rapid7',r:'H',s:'Cybersecurity'},
+  {t:'ACN',n:'Accenture',r:'H',s:'IT Consulting'},{t:'CTSH',n:'Cognizant',r:'H',s:'IT Consulting'},{t:'INFY',n:'Infosys',r:'H',s:'IT Consulting'},{t:'WIT',n:'Wipro',r:'H',s:'IT Consulting'},{t:'EPAM',n:'EPAM Systems',r:'H',s:'IT Consulting'},{t:'GLOB',n:'Globant',r:'H',s:'IT Consulting'},{t:'EXLS',n:'ExlService',r:'H',s:'IT Consulting'},{t:'WNS',n:'WNS Holdings',r:'H',s:'IT Consulting'},
+  {t:'MAN',n:'ManpowerGroup',r:'H',s:'Staffing'},{t:'RHI',n:'Robert Half',r:'H',s:'Staffing'},{t:'KELYA',n:'Kelly Services',r:'H',s:'Staffing'},{t:'ASGN',n:'ASGN Inc',r:'H',s:'Staffing'},
+  {t:'SAP',n:'SAP SE',r:'M',s:'Enterprise SW'},{t:'ORCL',n:'Oracle',r:'M',s:'Enterprise SW'},{t:'NOW',n:'ServiceNow',r:'M',s:'Enterprise SW'},{t:'WDAY',n:'Workday',r:'M',s:'Enterprise SW'},{t:'CRM',n:'Salesforce',r:'L',s:'Enterprise SW'},{t:'ADBE',n:'Adobe',r:'M',s:'Enterprise SW'},{t:'HUBS',n:'HubSpot',r:'M',s:'Enterprise SW'},
+  {t:'CHRW',n:'C.H. Robinson',r:'M',s:'Logistics'},{t:'LSTR',n:'Landstar',r:'M',s:'Logistics'},{t:'XPO',n:'XPO Logistics',r:'M',s:'Logistics'},{t:'JBHT',n:'J.B. Hunt',r:'M',s:'Logistics'},{t:'GXO',n:'GXO Logistics',r:'M',s:'Logistics'},{t:'ODFL',n:'Old Dominion',r:'M',s:'Logistics'},
+  {t:'ADP',n:'ADP',r:'M',s:'HR / Payroll'},{t:'PAYX',n:'Paychex',r:'M',s:'HR / Payroll'},{t:'CDAY',n:'Ceridian',r:'H',s:'HR / Payroll'},{t:'PCTY',n:'Paylocity',r:'M',s:'HR / Payroll'},
+  {t:'INTU',n:'Intuit',r:'H',s:'Tax / Accounting'},{t:'HRB',n:'H&R Block',r:'H',s:'Tax / Accounting'},{t:'CBIZ',n:'CBIZ Inc',r:'H',s:'Tax / Accounting'},
+  {t:'NYT',n:'New York Times',r:'H',s:'Media'},{t:'GANN',n:'Gannett',r:'H',s:'Media'},{t:'PARA',n:'Paramount',r:'H',s:'Media'},{t:'WBD',n:'Warner Bros',r:'H',s:'Media'},
   {t:'TR',n:'Thomson Reuters',r:'H',s:'Legal Tech'},{t:'LZ',n:'LegalZoom',r:'H',s:'Legal Tech'},
-  {t:'RDFN',n:'Redfin Corp',r:'H',s:'Real Estate Tech'},{t:'Z',n:'Zillow Group',r:'H',s:'Real Estate Tech'},
-  {t:'OPEN',n:'Opendoor Technologies',r:'H',s:'Real Estate Tech'},{t:'COMP',n:'Compass Inc',r:'H',s:'Real Estate Tech'},
-  {t:'UNH',n:'UnitedHealth Group',r:'M',s:'Healthcare Admin'},{t:'CVS',n:'CVS Health',r:'M',s:'Healthcare Admin'},
-  {t:'HUM',n:'Humana',r:'M',s:'Healthcare Admin'},{t:'TDOC',n:'Teladoc Health',r:'H',s:'Healthcare Admin'},
-  {t:'CHGG',n:'Chegg Inc',r:'H',s:'Education Tech'},{t:'COUR',n:'Coursera',r:'H',s:'Education Tech'},
-  {t:'UDMY',n:'Udemy',r:'H',s:'Education Tech'},{t:'LRND',n:'Nerdy Inc (Varsity)',r:'H',s:'Education Tech'},
-  {t:'NICE',n:'NICE Systems',r:'H',s:'Call Center / BPO'},{t:'TTEC',n:'TTEC Holdings',r:'H',s:'Call Center / BPO'},
-  {t:'FIVE',n:'Five9 Inc',r:'H',s:'Call Center / BPO'},{t:'LPSN',n:'LivePerson',r:'H',s:'Call Center / BPO'},
-  {t:'EFX',n:'Equifax',r:'M',s:'Financial Data'},{t:'TRU',n:'TransUnion',r:'M',s:'Financial Data'},
-  {t:'VRSK',n:'Verisk Analytics',r:'M',s:'Data & Analytics'},{t:'DNB',n:'Dun & Bradstreet',r:'M',s:'Data & Analytics'},
-  {t:'FDS',n:'FactSet Research',r:'M',s:'Data & Analytics'},{t:'PLTR',n:'Palantir',r:'L',s:'Data & Analytics'},
-  {t:'TDC',n:'Teradata Corp',r:'H',s:'Data & Analytics'},
-  {t:'WU',n:'Western Union',r:'H',s:'Financial Data'},{t:'AFRM',n:'Affirm Holdings',r:'M',s:'Financial Data'},
-  {t:'UPST',n:'Upstart Holdings',r:'M',s:'Financial Data'},
+  {t:'RDFN',n:'Redfin',r:'H',s:'Real Estate'},{t:'Z',n:'Zillow',r:'H',s:'Real Estate'},{t:'OPEN',n:'Opendoor',r:'H',s:'Real Estate'},{t:'COMP',n:'Compass',r:'H',s:'Real Estate'},
+  {t:'UNH',n:'UnitedHealth',r:'M',s:'Healthcare'},{t:'CVS',n:'CVS Health',r:'M',s:'Healthcare'},{t:'TDOC',n:'Teladoc',r:'H',s:'Healthcare'},{t:'GDRX',n:'GoodRx',r:'H',s:'Healthcare'},
+  {t:'CHGG',n:'Chegg',r:'H',s:'EdTech'},{t:'COUR',n:'Coursera',r:'H',s:'EdTech'},{t:'UDMY',n:'Udemy',r:'H',s:'EdTech'},
+  {t:'NICE',n:'NICE Systems',r:'H',s:'Call Center'},{t:'TTEC',n:'TTEC Holdings',r:'H',s:'Call Center'},{t:'FIVE',n:'Five9',r:'H',s:'Call Center'},{t:'LPSN',n:'LivePerson',r:'H',s:'Call Center'},
+  {t:'EFX',n:'Equifax',r:'M',s:'Financial Data'},{t:'TRU',n:'TransUnion',r:'M',s:'Financial Data'},{t:'VRSK',n:'Verisk',r:'M',s:'Financial Data'},{t:'DNB',n:'Dun & Bradstreet',r:'M',s:'Financial Data'},
+  {t:'SCHW',n:'Charles Schwab',r:'M',s:'Wealth Mgmt'},{t:'RJF',n:'Raymond James',r:'M',s:'Wealth Mgmt'},{t:'LPLA',n:'LPL Financial',r:'M',s:'Wealth Mgmt'},{t:'AMP',n:'Ameriprise',r:'M',s:'Wealth Mgmt'},{t:'BLK',n:'BlackRock',r:'L',s:'Wealth Mgmt'},
+  {t:'MET',n:'MetLife',r:'M',s:'Insurance'},{t:'PRU',n:'Prudential',r:'M',s:'Insurance'},{t:'AFL',n:'Aflac',r:'M',s:'Insurance'},
+  {t:'WU',n:'Western Union',r:'H',s:'Remittances'},{t:'AFRM',n:'Affirm',r:'M',s:'BNPL'},{t:'UPST',n:'Upstart',r:'M',s:'AI Lending'},
 ];
 
 var SECTOR_MAP={
-  'COBOL':['IBM','JPM','BAC','WFC','C','NCR'],'mainframe':['IBM','HPE','DXC','UNIY'],
-  'legacy banking':['IBM','JPM','BAC','WFC','C'],'legacy system':['IBM','HPE','DXC'],
+  'COBOL':['IBM','JPM','BAC','WFC','C','NCR'],'mainframe':['IBM','HPE','DXC'],'legacy system':['IBM','HPE','DXC'],
   'code migration':['IBM','ACN','CTSH','INFY','WIT','EPAM'],'batch processing':['IBM','JPM','BAC'],
-  'banking':['JPM','BAC','WFC','C','USB','PNC','TFC','COF','RF','CFG','FITB','KEY','HBAN','MTB'],
-  'bank':['JPM','BAC','WFC','C','USB','PNC'],'JPMorgan':['JPM'],'Bank of America':['BAC'],
-  'investment bank':['GS','MS','EVR','LAZ'],'private equity':['BX','KKR','APO'],
-  'payment':['AXP','MA','V','FIS','FISV','PYPL','SQ'],'Mastercard':['MA'],'Visa':['V'],
-  'American Express':['AXP'],'PayPal':['PYPL'],'fintech':['PYPL','SQ','FIS','FISV','AFRM','UPST'],
-  'credit card':['AXP','MA','V','COF'],'lending':['UPST','AFRM','COF'],
-  'cybersecurity':['CRWD','OKTA','NET','ZS','PANW','FTNT','S','CYBR','CHKP','RPD'],
-  'security scanning':['CRWD','OKTA','ZS','TENB','RPD'],'vulnerability':['CRWD','OKTA','NET','ZS','PANW','RPD'],
-  'SOC':['CRWD','S','CYBR','SCWX'],'firewall':['PANW','ZS','FTNT','CHKP'],
-  'endpoint':['CRWD','S','FTNT'],'identity':['OKTA','CYBR'],'zero trust':['OKTA','ZS','NET','PANW'],
-  'threat detection':['CRWD','S','CYBR','RPD'],'ransomware':['CRWD','S','PANW','CYBR'],
-  'wealth management':['SCHW','RJF','LPLA','AMP','BEN','TROW'],
-  'financial advisor':['SCHW','RJF','LPLA','AMP'],'portfolio':['SCHW','RJF','BLK','TROW'],
-  'asset management':['BLK','BEN','TROW'],'insurance':['MET','PRU','LNC','AFL'],
-  'claims':['MET','PRU','AFL'],'underwriting':['MET','PRU'],
-  'IT consulting':['ACN','CTSH','INFY','WIT','EPAM','GLOB','HCKT','EXLS','WNS'],
+  'banking':['JPM','BAC','WFC','C','USB','PNC','TFC','COF'],'bank':['JPM','BAC','WFC','C'],
+  'investment bank':['GS','MS'],'private equity':['BX','KKR'],
+  'payment':['AXP','MA','V','FIS','FISV','PYPL','SQ'],'credit card':['AXP','MA','V','COF'],
+  'fintech':['PYPL','SQ','FIS','FISV','AFRM','UPST'],'lending':['UPST','AFRM','COF'],
+  'cybersecurity':['CRWD','OKTA','NET','ZS','PANW','FTNT','S','CYBR','RPD'],
+  'security scanning':['CRWD','OKTA','ZS','RPD'],'vulnerability':['CRWD','OKTA','NET','ZS','PANW','RPD'],
+  'SOC':['CRWD','S','CYBR'],'firewall':['PANW','ZS','FTNT'],'endpoint':['CRWD','S','FTNT'],
+  'identity':['OKTA','CYBR'],'zero trust':['OKTA','ZS','NET','PANW'],'ransomware':['CRWD','S','PANW'],
+  'wealth management':['SCHW','RJF','LPLA','AMP'],'financial advisor':['SCHW','RJF','LPLA','AMP'],
+  'asset management':['BLK','AMP'],'insurance':['MET','PRU','AFL'],'claims':['MET','PRU','AFL'],
+  'IT consulting':['ACN','CTSH','INFY','WIT','EPAM','GLOB','EXLS','WNS'],
   'Accenture':['ACN'],'Cognizant':['CTSH'],'Infosys':['INFY'],'Wipro':['WIT'],
-  'consulting':['ACN','CTSH','INFY','BAH','HCKT'],'outsourcing':['CTSH','INFY','WIT','WNS','EXLS'],
-  'offshore':['INFY','WIT','CTSH','WNS'],'staffing':['MAN','RHI','KELYA','ASGN'],
-  'recruiting':['MAN','RHI','ASGN'],'headhunter':['RHI','MAN','ASGN'],
+  'consulting':['ACN','CTSH','INFY'],'outsourcing':['CTSH','INFY','WIT','WNS','EXLS'],
+  'staffing':['MAN','RHI','KELYA','ASGN'],'recruiting':['MAN','RHI','ASGN'],
   'ERP':['SAP','ORCL','NOW','WDAY'],'enterprise software':['SAP','ORCL','NOW','WDAY','HUBS'],
-  'SAP':['SAP'],'Oracle':['ORCL'],'ServiceNow':['NOW'],'Workday':['WDAY'],
-  'Salesforce':['CRM'],'HubSpot':['HUBS'],'CRM':['CRM','HUBS'],
-  'logistics':['CHRW','LSTR','XPO','JBHT','KNX','GXO'],'freight':['CHRW','LSTR','XPO','JBHT','KNX'],
-  'supply chain':['CHRW','LSTR','GXO'],'trucking':['ODFL','JBHT','KNX'],'routing':['CHRW','LSTR','XPO'],
-  'payroll':['ADP','PAYX','PAYC','PCTY','CDAY'],'HR software':['ADP','PAYX','WDAY'],
-  'human resources':['ADP','PAYX','WDAY'],'tax':['INTU','HRB','PAYX','ADP'],
-  'accounting':['INTU','CBIZ'],'audit':['INTU','CBIZ'],'TurboTax':['INTU'],'H&R Block':['HRB'],
-  'CPA':['INTU','HRB','CBIZ'],'bookkeeping':['INTU','HRB'],
-  'media':['NYT','PARA','WBD'],'publishing':['NYT','GANN'],'journalism':['NYT','GANN'],
-  'newspaper':['NYT','GANN'],'New York Times':['NYT'],
-  'legal':['TR','LZ'],'document review':['TR'],'legal research':['TR','LZ'],'Thomson Reuters':['TR'],
+  'SAP':['SAP'],'Oracle':['ORCL'],'ServiceNow':['NOW'],'Workday':['WDAY'],'Salesforce':['CRM'],
+  'logistics':['CHRW','LSTR','XPO','JBHT','GXO'],'freight':['CHRW','LSTR','XPO','JBHT'],
+  'supply chain':['CHRW','LSTR','GXO'],'trucking':['ODFL','JBHT'],'routing':['CHRW','LSTR'],
+  'payroll':['ADP','PAYX','PCTY','CDAY'],'HR software':['ADP','PAYX','WDAY'],
+  'tax':['INTU','HRB','PAYX','ADP'],'accounting':['INTU','CBIZ'],'CPA':['INTU','HRB','CBIZ'],
+  'media':['NYT','PARA','WBD'],'publishing':['NYT','GANN'],'journalism':['NYT','GANN'],'New York Times':['NYT'],
+  'legal':['TR','LZ'],'document review':['TR'],'legal research':['TR','LZ'],
   'real estate':['RDFN','Z','OPEN','COMP'],'Zillow':['Z'],'Redfin':['RDFN'],
-  'real estate agent':['RDFN','COMP'],'mortgage':['RDFN','WFC','JPM'],
-  'healthcare':['UNH','CVS','HUM'],'health insurance':['UNH','HUM'],'telehealth':['TDOC'],
-  'education':['CHGG','COUR','UDMY','LRND'],'tutoring':['CHGG','LRND'],
-  'online learning':['COUR','UDMY','CHGG'],'homework help':['CHGG','LRND'],'Chegg':['CHGG'],
-  'call center':['NICE','TTEC','FIVE','LPSN'],'contact center':['NICE','TTEC','FIVE'],
-  'customer service':['NICE','FIVE','LPSN'],'BPO':['NICE','TTEC','CTSH','WIT'],
-  'credit score':['EFX','TRU'],'financial data':['VRSK','DNB','FDS'],
-  'analytics':['VRSK','DNB','FDS','PLTR','TDC'],'Western Union':['WU'],
+  'healthcare':['UNH','CVS'],'telehealth':['TDOC'],'pharmacy':['CVS','GDRX'],
+  'education':['CHGG','COUR','UDMY'],'tutoring':['CHGG'],'online learning':['COUR','UDMY','CHGG'],
+  'call center':['NICE','TTEC','FIVE','LPSN'],'customer service':['NICE','FIVE','LPSN'],'BPO':['NICE','TTEC','CTSH'],
+  'credit score':['EFX','TRU'],'financial data':['VRSK','DNB'],'analytics':['VRSK','DNB'],
+  'Western Union':['WU'],'wire transfer':['WU','PYPL'],
 };
 
-var HIGH_TRIGGERS=['replaces','replace ','eliminates','threatens','disrupts','disruption',
-  'at risk','existential','selloff','fall sharply','drops sharply','cut headcount','job losses',
-  'layoffs','COBOL','direct threat','obsolete','redundant','displacement','no longer needed',
-  'cuts jobs','mass layoff','workforce reduction','phased out'];
-var MED_TRIGGERS=['competes','competition','pressure','challenges','testing','piloting',
-  'migrat','moderniz','efficiency','cost reduction','warns','rival','concern','uncertainty'];
+var SECTOR_GROUPS={
+  'Banking':['JPM','BAC','WFC','C','USB','PNC','TFC','COF','GS','MS'],
+  'IT Consulting':['ACN','CTSH','INFY','WIT','EPAM','GLOB','EXLS','WNS'],
+  'Cybersecurity':['CRWD','OKTA','S','CYBR','PANW','FTNT','ZS','NET','RPD'],
+  'Payments':['AXP','MA','V','PYPL','SQ','FIS','FISV'],
+  'Logistics':['CHRW','LSTR','XPO','JBHT','GXO','ODFL'],
+  'HR / Payroll':['ADP','PAYX','CDAY','PCTY'],
+  'Legacy Tech':['IBM','HPE','DXC','NCR','DELL'],
+  'EdTech':['CHGG','COUR','UDMY'],
+  'Media':['NYT','GANN','PARA','WBD'],
+  'Staffing':['MAN','RHI','KELYA','ASGN'],
+  'Wealth Mgmt':['SCHW','RJF','LPLA','AMP','BLK'],
+  'Enterprise SW':['SAP','ORCL','NOW','WDAY','CRM','ADBE'],
+};
 
+var HIGH_T=['replaces','replace ','eliminates','threatens','disrupts','disruption','at risk','existential',
+  'selloff','fall sharply','drops sharply','cut headcount','job losses','layoffs','COBOL','direct threat',
+  'obsolete','redundant','displacement','no longer needed','cuts jobs','mass layoff','workforce reduction'];
+var MED_T=['competes','competition','pressure','challenges','testing','piloting','migrat','moderniz',
+  'efficiency','cost reduction','warns','rival','concern','uncertainty','considering'];
+
+var SOURCE_CRED={'Bloomberg':95,'Reuters':92,'Financial Times':90,'WSJ':90,'CNBC':82,'Forbes':75,'MarketWatch':78,'TechCrunch':72,'The Verge':68,'Wired':70,'Fortune':76,'AP':88,'NYT':88,'VentureBeat':65};
+var AI_TERMS=['Claude','Anthropic','GPT','ChatGPT','Gemini','OpenAI','generative AI','large language model','LLM','AI model'];
 var kws=['COBOL','mainframe','legacy banking','payment processing','vulnerability','security scanning',
   'wealth management','financial advisor','supply chain','logistics','code migration',
   'ERP','Claude Code','Anthropic','new Claude','AI replaces','AI threatens','direct threat'];
+var HIGH_KW=['COBOL','Anthropic','Claude Code','IBM','new Claude','direct threat'];
 
-var DEMO=[
-  {src:'Bloomberg',url:'#',h:"Anthropic's Claude automates COBOL modernization — IBM mainframe unit faces existential threat as banks accelerate migration away from legacy systems",sev:'HIGH',tks:['IBM','JPM','BAC','WFC'],kws:['COBOL','mainframe','IBM'],an:'Claude directly replaces IBM mainframe services — major banks cutting contracts'},
-  {src:'Reuters',url:'#',h:"Claude AI handles complete freight logistics routing and dispatch — C.H. Robinson and Landstar shares fall sharply on AI disruption fears",sev:'HIGH',tks:['CHRW','LSTR','XPO','JBHT'],kws:['logistics','freight','routing'],an:'AI automates core logistics operations threatening freight brokers'},
-  {src:'TechCrunch',url:'#',h:"CrowdStrike, Okta drop as Claude security tool detects vulnerabilities without human SOC analysts — cybersecurity vendors at risk",sev:'HIGH',tks:['CRWD','OKTA','S','CYBR'],kws:['cybersecurity','security scanning','vulnerability'],an:'AI threatens to replace human security operations center analysts'},
-  {src:'CNBC',url:'#',h:"Claude-powered wealth platform delivers personalized tax and portfolio advice — Schwab and Raymond James analysts face displacement",sev:'HIGH',tks:['SCHW','RJF','LPLA','AMP'],kws:['wealth management','financial advisor','portfolio'],an:'AI advisor threatens traditional wealth management professionals'},
-  {src:'Financial Times',url:'#',h:"Cognizant, Infosys face existential pressure as Claude automates IT modernization worth $200B annually — consulting model disrupted",sev:'HIGH',tks:['CTSH','INFY','ACN','WIT'],kws:['IT consulting','code migration'],an:'AI threatens global IT services and outsourcing industry directly'},
-  {src:'WSJ',url:'#',h:"JPMorgan and Bank of America testing Claude to replace entire COBOL batch processing divisions — IBM at risk",sev:'HIGH',tks:['JPM','BAC','IBM','FIS'],kws:['COBOL','banking','batch processing'],an:'Major banks piloting AI to eliminate legacy COBOL systems'},
-  {src:'The Verge',url:'#',h:"Anthropic releases Claude for Enterprise ERP — SAP and Oracle consulting pipelines threatened as clients automate implementations",sev:'HIGH',tks:['SAP','ORCL','ACN','CTSH'],kws:['ERP','enterprise software','SAP'],an:'Claude ERP automation threatens SAP/Oracle services revenues'},
-  {src:'Forbes',url:'#',h:"Claude investment research capabilities rival junior analyst output — Goldman Sachs and Morgan Stanley cut analyst headcount by 20%",sev:'HIGH',tks:['GS','MS','BX'],kws:['investment banking','analyst'],an:'AI analyst tools threaten entry-level investment banking roles'},
-  {src:'CNBC',url:'#',h:"Anthropic model replaces enterprise call center agents — NICE Systems and contact center vendors drop on guidance cut",sev:'HIGH',tks:['NICE','AXP','C','BAC'],kws:['call center','customer service'],an:'Claude threatens BPO and contact center software vendors'},
-  {src:'Reuters',url:'#',h:"AI automates payroll and HR workflows — Paychex and ADP warn investors of generative AI competitive threat",sev:'MEDIUM',tks:['PAYX','ADP','PAYC','PCTY'],kws:['payroll','HR software'],an:'Generative AI threatens payroll and HR software incumbents'},
-  {src:'Bloomberg',url:'#',h:"Chegg shares plunge as students use Claude instead of tutoring subscriptions — Coursera and Udemy face AI disruption",sev:'HIGH',tks:['CHGG','COUR','UDMY','LRND'],kws:['education','tutoring','homework help'],an:'AI directly replaces paid tutoring and online learning platforms'},
-  {src:'WSJ',url:'#',h:"Robert Half and ManpowerGroup warn AI recruiting tools slash demand for human staffing agencies",sev:'HIGH',tks:['RHI','MAN','ASGN'],kws:['staffing','recruiting'],an:'AI recruitment tools threaten traditional staffing agency model'},
-  {src:'CNBC',url:'#',h:"H&R Block and Intuit face existential threat as Claude handles complex tax returns with higher accuracy than human CPAs",sev:'HIGH',tks:['HRB','INTU','PAYX','ADP'],kws:['tax','accounting','CPA'],an:'AI tax preparation threatens H&R Block and Intuit revenue model'},
-];
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+var alerts=[], allHL=[], hitCount={}, scans=0, totalHL=0;
+var mode='live', soundOn=false, wsF='', feedView='alerts';
+var sevF={H:true,M:true,L:true};
+var apiMain='',apiGnews='',apiNewsdata='';
+var autoInt=null, cd=300, cdTmr=null;
+var priceCache={}, sparkCache={};
+var alertHistory=[];
+try{var h=localStorage.getItem('snv3hist');if(h)alertHistory=JSON.parse(h);}catch(e){}
 
-// State
-var alerts=[], allHeadlines=[], hits=new Set(), hitCount={}, scans=0;
-var autoInt=null, cd=300, cdTimer=null, mode='live', soundOn=false;
-var apiKeyMain='', apiKeyGnews='', apiKeyNewsdata='';
-var feedView='alerts', wsFilter='', sevFilters={H:true,M:true,L:true};
-var sourceCounts={rss:0,tna:0,gnews:0,newsdata:0};
-var sourceErrors={rss:false,tna:false,gnews:false,newsdata:false};
-var AI_TERMS=['Claude','Anthropic','GPT','ChatGPT','Gemini','OpenAI','generative AI','large language model'];
+// ══════════════════════════════════════════════════════
+// DISRUPTION SCORING ENGINE
+// ══════════════════════════════════════════════════════
+function scoreAlert(a){
+  var score=0;
+  var hl=a.h.toLowerCase();
+  // Severity base
+  if(a.sev==='HIGH') score+=40;
+  else if(a.sev==='MEDIUM') score+=20;
+  // Source credibility
+  score+=Math.round((SOURCE_CRED[a.src]||60)/10);
+  // Keyword density
+  score+=Math.min(a.kws.length*4,16);
+  // Ticker count (more specific = higher signal)
+  score+=Math.min(a.tks.length*3,12);
+  // High-value keywords
+  var hkHits=['COBOL','mainframe','existential','replaces','IBM','Anthropic'].filter(function(k){return hl.indexOf(k.toLowerCase())>=0;}).length;
+  score+=hkHits*5;
+  // Repeat sector pressure
+  a.tks.forEach(function(t){if(hitCount[t]>2)score+=3;});
+  return Math.min(score,100);
+}
 
-// ══════════════════════════════════════════════
-// ANALYSIS ENGINE
-// ══════════════════════════════════════════════
-function analyzeLocal(headline){
+// ══════════════════════════════════════════════════════
+// STORY CLUSTERING
+// ══════════════════════════════════════════════════════
+function clusterAlerts(list){
+  var clusters=[], used=new Set();
+  list.forEach(function(a,i){
+    if(used.has(i)) return;
+    var siblings=[];
+    var aWords=getWords(a.h);
+    list.forEach(function(b,j){
+      if(i===j||used.has(j)) return;
+      var bWords=getWords(b.h);
+      var common=aWords.filter(function(w){return bWords.indexOf(w)>=0;}).length;
+      var pct=common/Math.max(aWords.length,1);
+      // Also cluster if they share 2+ tickers
+      var sharedTks=a.tks.filter(function(t){return b.tks.indexOf(t)>=0;}).length;
+      if(pct>0.45||sharedTks>=3){
+        siblings.push(b);
+        used.add(j);
+      }
+    });
+    if(siblings.length>0) a.siblings=siblings;
+    a.score=scoreAlert(a);
+    clusters.push(a);
+    used.add(i);
+  });
+  return clusters;
+}
+function getWords(txt){
+  return txt.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(function(w){return w.length>4;});
+}
+
+// ══════════════════════════════════════════════════════
+// LIVE PRICE FETCH (Yahoo Finance via allorigins proxy)
+// ══════════════════════════════════════════════════════
+async function fetchPrices(tickers){
+  var toFetch=tickers.filter(function(t){return !priceCache[t]||Date.now()-priceCache[t].ts>180000;});
+  if(!toFetch.length) return;
+  // Batch into groups of 8 to avoid URL limits
+  var batches=[];
+  for(var i=0;i<toFetch.length;i+=8) batches.push(toFetch.slice(i,i+8));
+  for(var b=0;b<batches.length;b++){
+    var syms=batches[b].join(',');
+    try{
+      var url='https://query1.finance.yahoo.com/v7/finance/quote?symbols='+encodeURIComponent(syms)+'&fields=regularMarketPrice,regularMarketChangePercent,regularMarketChange';
+      var proxyUrl='https://api.allorigins.win/raw?url='+encodeURIComponent(url);
+      var r=await fetch(proxyUrl,{signal:AbortSignal.timeout(4000)});
+      var d=await r.json();
+      if(d.quoteResponse&&d.quoteResponse.result){
+        d.quoteResponse.result.forEach(function(q){
+          priceCache[q.symbol]={price:q.regularMarketPrice,chg:q.regularMarketChangePercent,abs:q.regularMarketChange,ts:Date.now()};
+        });
+      }
+    }catch(e){}
+    await new Promise(function(r){setTimeout(r,150);});
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// SPARKLINE FETCH (simulated from price + trend)
+// ══════════════════════════════════════════════════════
+function generateSparkData(ticker){
+  var p=priceCache[ticker];
+  if(!p) return null;
+  var pts=[], base=p.price*(1-(p.chg/100));
+  for(var i=0;i<=20;i++){
+    var t=i/20;
+    var trend=base+(p.price-base)*t;
+    var noise=(Math.random()-.5)*p.price*.008;
+    pts.push(trend+noise);
+  }
+  pts[20]=p.price;
+  return pts;
+}
+
+function drawSparkline(canvas, data, color){
+  if(!canvas||!data||!data.length) return;
+  var ctx=canvas.getContext('2d');
+  var W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  var min=Math.min.apply(null,data), max=Math.max.apply(null,data), range=max-min||1;
+  ctx.beginPath();
+  data.forEach(function(v,i){
+    var x=(i/(data.length-1))*W;
+    var y=H-((v-min)/range)*(H-4)-2;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.stroke();
+  // Fill
+  ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();
+  ctx.fillStyle=color.replace(')',',0.12)').replace('rgb','rgba');
+  ctx.fill();
+}
+
+// ══════════════════════════════════════════════════════
+// ANALYSIS
+// ══════════════════════════════════════════════════════
+function analyze(headline){
   var hl=headline.toLowerCase();
   if(!/\b(claude|anthropic|ai|artificial intelligence|llm|chatgpt|openai|gemini|generative|machine learning)\b/.test(hl)) return null;
   var matchedTickers=new Set(), matchedKws=[];
@@ -711,365 +794,298 @@ function analyzeLocal(headline){
   kws.forEach(function(kw){if(hl.indexOf(kw.toLowerCase())>=0&&matchedKws.indexOf(kw)<0)matchedKws.push(kw);});
   if(!matchedTickers.size) return null;
   var sev='LOW';
-  for(var i=0;i<HIGH_TRIGGERS.length;i++){if(hl.indexOf(HIGH_TRIGGERS[i].toLowerCase())>=0){sev='HIGH';break;}}
-  if(sev!=='HIGH'){for(var j=0;j<MED_TRIGGERS.length;j++){if(hl.indexOf(MED_TRIGGERS[j].toLowerCase())>=0){sev='MEDIUM';break;}}}
+  for(var i=0;i<HIGH_T.length;i++){if(hl.indexOf(HIGH_T[i].toLowerCase())>=0){sev='HIGH';break;}}
+  if(sev!=='HIGH') for(var j=0;j<MED_T.length;j++){if(hl.indexOf(MED_T[j].toLowerCase())>=0){sev='MEDIUM';break;}}
   if(sev==='LOW') sev='MEDIUM';
-  var tickers=Array.from(matchedTickers).slice(0,6);
-  return{isDisruptive:true,severity:sev,matchedKeywords:matchedKws.slice(0,5),affectedTickers:tickers,
-    analysis:'AI threat to '+(matchedKws[0]||'sector')+' — '+tickers.slice(0,3).join(', ')+' flagged'};
+  var tickers=Array.from(matchedTickers).slice(0,8);
+  return{isDisruptive:true,severity:sev,matchedKeywords:matchedKws.slice(0,6),affectedTickers:tickers,
+    analysis:'AI threat detected: '+(matchedKws[0]||'sector')+' — '+tickers.slice(0,3).join(', ')+' flagged'};
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // NEWS SOURCES
-// ══════════════════════════════════════════════
-
-// SOURCE 1: TheNewsAPI (original, improved with more targeted queries)
-async function fetchTheNewsAPI(key){
-  var QUERIES=[
-    'Claude Anthropic artificial intelligence enterprise',
-    'AI replaces jobs workers automation banking',
-    'artificial intelligence disrupts financial services',
-    'AI threatens cybersecurity staffing consulting',
-    'generative AI legacy software replacement',
-    'Anthropic Claude enterprise deployment',
-    'AI automation logistics supply chain',
-    'artificial intelligence legal accounting tax',
-    'AI replaces analysts wealth management',
-    'Claude Code software development automation',
-    'AI banking COBOL mainframe',
-    'machine learning insurance underwriting claims',
-  ];
-  var selected=QUERIES.sort(function(){return Math.random()-.5;}).slice(0,5);
-  var articles=[], seen=new Set();
-  var promises=selected.map(function(q){
-    return fetch('https://api.thenewsapi.com/v1/news/all?api_token='+key+'&search='+encodeURIComponent(q)+'&language=en&limit=10&sort=published_at')
-      .then(function(r){return r.json();}).catch(function(){return{data:[]};});
-  });
-  try{
-    var results=await Promise.all(promises);
-    results.forEach(function(d){
-      if(d.data&&d.data.length){
-        d.data.forEach(function(a){
-          if(a.title&&!seen.has(a.uuid)){
-            seen.add(a.uuid);
-            var desc=a.description||a.snippet||'';
-            articles.push({h:a.title+(desc?' — '+desc.substring(0,120):''),src:a.source||'TheNewsAPI',url:a.url||'#',srcId:'tna'});
-          }
-        });
-      }
-    });
-    sourceCounts.tna=articles.length;
-    sourceErrors.tna=false;
-  }catch(e){sourceErrors.tna=true;}
-  return articles;
-}
-
-// SOURCE 2: GNews API
-async function fetchGNews(key){
-  var QUERIES=[
-    'Claude Anthropic AI business',
-    'artificial intelligence replaces jobs',
-    'AI automation banking finance',
-    'generative AI enterprise disruption',
-  ];
-  var selected=QUERIES.sort(function(){return Math.random()-.5;}).slice(0,3);
-  var articles=[], seen=new Set();
-  var promises=selected.map(function(q){
-    return fetch('https://gnews.io/api/v4/search?q='+encodeURIComponent(q)+'&lang=en&country=us&max=10&apikey='+key)
-      .then(function(r){return r.json();}).catch(function(){return{articles:[]};});
-  });
-  try{
-    var results=await Promise.all(promises);
-    results.forEach(function(d){
-      if(d.articles&&d.articles.length){
-        d.articles.forEach(function(a){
-          var uid=a.url;
-          if(!seen.has(uid)){
-            seen.add(uid);
-            var desc=a.description||'';
-            articles.push({h:a.title+(desc?' — '+desc.substring(0,120):''),src:a.source&&a.source.name||'GNews',url:a.url||'#',srcId:'gnews'});
-          }
-        });
-      }
-    });
-    sourceCounts.gnews=articles.length;
-    sourceErrors.gnews=false;
-  }catch(e){sourceErrors.gnews=true;}
-  return articles;
-}
-
-// SOURCE 3: NewsData.io
-async function fetchNewsData(key){
-  var QUERIES=[
-    'Claude Anthropic AI banking finance',
-    'artificial intelligence automation disruption',
-    'AI replaces human workers jobs',
-  ];
-  var selected=QUERIES.sort(function(){return Math.random()-.5;}).slice(0,2);
-  var articles=[], seen=new Set();
-  var promises=selected.map(function(q){
-    return fetch('https://newsdata.io/api/1/news?apikey='+key+'&q='+encodeURIComponent(q)+'&language=en&category=business,technology')
-      .then(function(r){return r.json();}).catch(function(){return{results:[]};});
-  });
-  try{
-    var results=await Promise.all(promises);
-    results.forEach(function(d){
-      if(d.results&&d.results.length){
-        d.results.forEach(function(a){
-          if(a.title&&!seen.has(a.article_id)){
-            seen.add(a.article_id);
-            var desc=a.description||'';
-            articles.push({h:a.title+(desc?' — '+desc.substring(0,120):''),src:a.source_id||'NewsData',url:a.link||'#',srcId:'newsdata'});
-          }
-        });
-      }
-    });
-    sourceCounts.newsdata=articles.length;
-    sourceErrors.newsdata=false;
-  }catch(e){sourceErrors.newsdata=true;}
-  return articles;
-}
-
-// SOURCE 4: RSS via rss2json.com (completely free, no key needed)
+// ══════════════════════════════════════════════════════
 async function fetchRSS(){
-  var RSS_FEEDS=[
-    {url:'https://feeds.reuters.com/reuters/technologyNews',name:'Reuters Tech'},
-    {url:'https://feeds.reuters.com/reuters/businessNews',name:'Reuters Business'},
-    {url:'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',name:'NYT Tech'},
-    {url:'https://feeds.a.dj.com/rss/RSSWSJD.xml',name:'WSJ Tech'},
-    {url:'https://www.cnbc.com/id/19854910/device/rss/rss.html',name:'CNBC Tech'},
-    {url:'https://techcrunch.com/feed/',name:'TechCrunch'},
-    {url:'https://www.ft.com/technology?format=rss',name:'FT Tech'},
-    {url:'https://feeds.feedburner.com/venturebeat/SZYF',name:'VentureBeat'},
-    {url:'https://www.wired.com/feed/rss',name:'Wired'},
-    {url:'https://fortune.com/feed/',name:'Fortune'},
+  var feeds=[
+    {u:'https://feeds.reuters.com/reuters/technologyNews',n:'Reuters'},
+    {u:'https://feeds.reuters.com/reuters/businessNews',n:'Reuters Biz'},
+    {u:'https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml',n:'NYT Tech'},
+    {u:'https://www.cnbc.com/id/19854910/device/rss/rss.html',n:'CNBC'},
+    {u:'https://techcrunch.com/feed/',n:'TechCrunch'},
+    {u:'https://www.ft.com/technology?format=rss',n:'FT Tech'},
+    {u:'https://feeds.feedburner.com/venturebeat/SZYF',n:'VentureBeat'},
+    {u:'https://www.wired.com/feed/rss',n:'Wired'},
+    {u:'https://fortune.com/feed/',n:'Fortune'},
+    {u:'https://feeds.a.dj.com/rss/RSSWSJD.xml',n:'WSJ'},
   ];
-  // Shuffle and pick 4 to stay within rss2json free limit
-  var selected=RSS_FEEDS.sort(function(){return Math.random()-.5;}).slice(0,4);
-  var articles=[], seen=new Set();
-  var promises=selected.map(function(feed){
-    return fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(feed.url)+'&api_key=ntzuqtulzjj9rkxebtxxhbvl4t6jfbqphfiqv3ym&count=15')
-      .then(function(r){return r.json();}).then(function(d){return{d:d,name:feed.name};})
-      .catch(function(){return{d:{items:[]},name:feed.name};});
-  });
-  try{
-    var results=await Promise.all(promises);
-    results.forEach(function(res){
-      var d=res.d, feedName=res.name;
-      if(d.items&&d.items.length){
-        d.items.forEach(function(item){
+  var sel=feeds.sort(function(){return Math.random()-.5;}).slice(0,5);
+  var arts=[], seen=new Set();
+  await Promise.all(sel.map(function(f){
+    return fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(f.u)+'&count=15')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.items) d.items.forEach(function(item){
           if(item.title&&!seen.has(item.link)){
             seen.add(item.link);
-            var desc=item.description?item.description.replace(/<[^>]+>/g,'').substring(0,120):'';
-            articles.push({h:item.title+(desc?' — '+desc:''),src:feedName,url:item.link||'#',srcId:'rss'});
+            var desc=(item.description||'').replace(/<[^>]+>/g,'').substring(0,120);
+            arts.push({h:item.title+(desc?' — '+desc:''),src:f.n,url:item.link||'#',srcId:'rss'});
           }
         });
-      }
-    });
-    sourceCounts.rss=articles.length;
-    sourceErrors.rss=false;
-  }catch(e){sourceErrors.rss=true;}
-  return articles;
+      }).catch(function(){});
+  }));
+  document.getElementById('spRss').className='src-p on';
+  return arts;
 }
 
-// ══════════════════════════════════════════════
-// DEDUPLICATION — remove near-duplicate headlines
-// ══════════════════════════════════════════════
-function dedupeHeadlines(articles){
+async function fetchTNA(key){
+  var qs=['Claude Anthropic banking automation','AI replaces jobs workers sectors','artificial intelligence enterprise disruption','generative AI financial services','AI automation logistics consulting','Claude cybersecurity threat detection'];
+  var sel=qs.sort(function(){return Math.random()-.5;}).slice(0,4);
+  var arts=[], seen=new Set();
+  await Promise.all(sel.map(function(q){
+    return fetch('https://api.thenewsapi.com/v1/news/all?api_token='+key+'&search='+encodeURIComponent(q)+'&language=en&limit=10&sort=published_at')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.data) d.data.forEach(function(a){
+          if(a.title&&!seen.has(a.uuid)){seen.add(a.uuid);arts.push({h:a.title+(a.description?' — '+a.description.substring(0,120):''),src:a.source||'TheNewsAPI',url:a.url||'#',srcId:'tna'});}
+        });
+      }).catch(function(){});
+  }));
+  document.getElementById('spTna').className='src-p '+(arts.length>0?'on':'off');
+  return arts;
+}
+
+async function fetchGNews(key){
+  var qs=['Claude Anthropic AI enterprise','AI automation job displacement','artificial intelligence sector disruption'];
+  var arts=[], seen=new Set();
+  await Promise.all(qs.slice(0,2).map(function(q){
+    return fetch('https://gnews.io/api/v4/search?q='+encodeURIComponent(q)+'&lang=en&max=10&apikey='+key)
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.articles) d.articles.forEach(function(a){
+          if(!seen.has(a.url)){seen.add(a.url);arts.push({h:a.title+(a.description?' — '+a.description.substring(0,100):''),src:(a.source&&a.source.name)||'GNews',url:a.url||'#',srcId:'gnews'});}
+        });
+      }).catch(function(){});
+  }));
+  document.getElementById('spGnews').className='src-p '+(arts.length>0?'on':'off');
+  return arts;
+}
+
+async function fetchNewsData(key){
+  var arts=[], seen=new Set();
+  await fetch('https://newsdata.io/api/1/news?apikey='+key+'&q='+encodeURIComponent('Claude AI enterprise automation')+'&language=en&category=business,technology')
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.results) d.results.forEach(function(a){
+        if(a.title&&!seen.has(a.article_id)){seen.add(a.article_id);arts.push({h:a.title+(a.description?' — '+a.description.substring(0,100):''),src:a.source_id||'NewsData',url:a.link||'#',srcId:'newsdata'});}
+      });
+    }).catch(function(){});
+  document.getElementById('spNd').className='src-p '+(arts.length>0?'on':'off');
+  return arts;
+}
+
+function dedupe(list){
   var seen=[], out=[];
-  articles.forEach(function(a){
-    var words=a.h.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(function(w){return w.length>4;}).slice(0,12).join(' ');
-    var isDup=seen.some(function(s){
-      var common=s.split(' ').filter(function(w){return words.indexOf(w)>=0;}).length;
-      return common>6;
-    });
-    if(!isDup){seen.push(words);out.push(a);}
+  list.forEach(function(a){
+    var words=getWords(a.h).slice(0,12).join(' ');
+    var dup=seen.some(function(s){return s.split(' ').filter(function(w){return words.indexOf(w)>=0;}).length>6;});
+    if(!dup){seen.push(words);out.push(a);}
   });
   return out;
 }
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
+// PATTERN DETECTION
+// ══════════════════════════════════════════════════════
+function detectPatterns(){
+  var patterns=[];
+  // Most flagged stock
+  var topStock='', topCount=0;
+  Object.keys(hitCount).forEach(function(t){if(hitCount[t]>topCount){topCount=hitCount[t];topStock=t;}});
+  if(topStock&&topCount>1) patterns.push({icon:'🔥',label:'Most Targeted Stock',val:topStock,desc:topStock+' has been flagged '+topCount+' times this session — elevated disruption risk',tks:[topStock]});
+  // Most active sector
+  var sectorHits={};
+  Object.keys(SECTOR_GROUPS).forEach(function(sec){
+    SECTOR_GROUPS[sec].forEach(function(t){if(hitCount[t]) sectorHits[sec]=(sectorHits[sec]||0)+hitCount[t];});
+  });
+  var topSec='', topSecHits=0;
+  Object.keys(sectorHits).forEach(function(s){if(sectorHits[s]>topSecHits){topSecHits=sectorHits[s];topSec=s;}});
+  if(topSec) patterns.push({icon:'⚡',label:'Hottest Sector',val:topSec,desc:topSec+' sector accumulating '+topSecHits+' alert signals — algorithmic selling risk elevated',tks:SECTOR_GROUPS[topSec]&&SECTOR_GROUPS[topSec].slice(0,5)||[]});
+  // High severity streak
+  var highStreak=0;
+  for(var i=0;i<Math.min(alerts.length,5);i++){if(alerts[i].sev==='HIGH')highStreak++;else break;}
+  if(highStreak>=3) patterns.push({icon:'🚨',label:'Alert Streak',val:highStreak+' HIGH',desc:highStreak+' consecutive HIGH severity alerts — sustained disruption narrative forming',tks:[]});
+  // Cluster signal
+  var bigCluster=alerts.filter(function(a){return a.siblings&&a.siblings.length>=2;});
+  if(bigCluster.length>0) patterns.push({icon:'📡',label:'Story Momentum',val:bigCluster[0].tks.slice(0,2).join(', '),desc:'Multiple news sources converging on same story — institutional-grade signal',tks:bigCluster[0].tks.slice(0,4)});
+  return patterns;
+}
+
+// ══════════════════════════════════════════════════════
 // INIT
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 function init(){
   try{
-    var k=localStorage.getItem('snk2');
-    if(k&&k.length>=20){
-      apiKeyMain=k;
-      document.getElementById('keyFieldMain').value=k;
-      updateKeyBadge();
-      document.getElementById('setupScreen').style.display='none';
-    }
-    var kg=localStorage.getItem('snk2g');if(kg)apiKeyGnews=kg,document.getElementById('keyFieldGnews').value=kg;
-    var kn=localStorage.getItem('snk2n');if(kn)apiKeyNewsdata=kn,document.getElementById('keyFieldNewsdata').value=kn;
+    var k=localStorage.getItem('sn3k');if(k&&k.length>=20){apiMain=k;document.getElementById('keyMain').value=k;}
+    var g=localStorage.getItem('sn3g');if(g){apiGnews=g;document.getElementById('keyGnews').value=g;}
+    var n=localStorage.getItem('sn3n');if(n){apiNewsdata=n;document.getElementById('keyNewsdata').value=n;}
+    if(apiMain||apiGnews||apiNewsdata){updateKeyBadge();document.getElementById('setupScreen').style.display='none';}
   }catch(e){}
-  updateSourceIndicators();
-  renderWL();renderKW();updateStats();
+  document.getElementById('spRss').className='src-p on';
+  document.getElementById('spTna').className='src-p '+(apiMain?'on':'off');
+  document.getElementById('spGnews').className='src-p '+(apiGnews?'on':'off');
+  document.getElementById('spNd').className='src-p '+(apiNewsdata?'on':'off');
+  renderWL();renderKW();renderHeatmap();renderHistory();updateStats();
 }
 
 function doActivate(){
-  var key=document.getElementById('keyFieldMain').value.trim();
-  var kg=document.getElementById('keyFieldGnews').value.trim();
-  var kn=document.getElementById('keyFieldNewsdata').value.trim();
-  var err=document.getElementById('errMsg');
-  if(key.length<20&&!kg&&!kn){err.style.display='block';return;}
-  err.style.display='none';
-  if(key.length>=20){apiKeyMain=key;try{localStorage.setItem('snk2',key);}catch(e){}}
-  if(kg.length>=10){apiKeyGnews=kg;try{localStorage.setItem('snk2g',kg);}catch(e){}}
-  if(kn.length>=10){apiKeyNewsdata=kn;try{localStorage.setItem('snk2n',kn);}catch(e){}}
+  var k=document.getElementById('keyMain').value.trim();
+  var g=document.getElementById('keyGnews').value.trim();
+  var n=document.getElementById('keyNewsdata').value.trim();
+  if(k.length<20&&g.length<10&&n.length<10){document.getElementById('errMsg').style.display='block';return;}
+  document.getElementById('errMsg').style.display='none';
+  if(k.length>=20){apiMain=k;try{localStorage.setItem('sn3k',k);}catch(e){}}
+  if(g.length>=10){apiGnews=g;try{localStorage.setItem('sn3g',g);}catch(e){}}
+  if(n.length>=10){apiNewsdata=n;try{localStorage.setItem('sn3n',n);}catch(e){}}
   updateKeyBadge();
   document.getElementById('setupScreen').style.display='none';
 }
 
 function doSkip(){mode='demo';setMode('demo');document.getElementById('setupScreen').style.display='none';}
-function showSetup(){
-  document.getElementById('keyFieldMain').value=apiKeyMain||'';
-  document.getElementById('keyFieldGnews').value=apiKeyGnews||'';
-  document.getElementById('keyFieldNewsdata').value=apiKeyNewsdata||'';
-  document.getElementById('setupScreen').style.display='flex';
-}
+function showSetup(){document.getElementById('setupScreen').style.display='flex';}
 function updateKeyBadge(){
   var b=document.getElementById('keyBadge');
-  var count=(apiKeyMain?1:0)+(apiKeyGnews?1:0)+(apiKeyNewsdata?1:0);
-  b.textContent=count>0?'✅ '+(count+1)+' SOURCES ACTIVE':'🔑 API KEYS';
-  b.className='pill pill-key'+(count>0?' connected':'');
+  var c=(apiMain?1:0)+(apiGnews?1:0)+(apiNewsdata?1:0);
+  b.textContent=c?'✅ '+(c+1)+' SOURCES':'🔑 API KEYS';
+  b.className='pill pill-key'+(c?' ok':'');
 }
 function setMode(m){
   mode=m;
   document.getElementById('tabLive').classList.toggle('on',m==='live');
   document.getElementById('tabDemo').classList.toggle('on',m==='demo');
-  document.getElementById('slbl').textContent=m==='live'?'SCAN LIVE HEADLINES NOW':'SCAN DEMO HEADLINES';
+  document.getElementById('slbl').textContent=m==='live'?'SCAN LIVE NOW':'SCAN DEMO';
 }
-function setFeedView(v){
+function setFV(v){
   feedView=v;
-  ['alerts','all','sources'].forEach(function(x){document.getElementById('ftab'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('on',v===x);});
-  document.getElementById('filterBar').style.display=v==='alerts'?'flex':'none';
+  ['Alerts','All','History','Patterns'].forEach(function(x){
+    var el=document.getElementById('ftab'+x);
+    if(el) el.classList.toggle('on',v===x.toLowerCase());
+  });
+  document.getElementById('fbar').style.display=v==='alerts'?'flex':'none';
   renderFeed();
 }
-function toggleSevFilter(el){
-  var sev=el.getAttribute('data-sev');
-  sevFilters[sev]=!sevFilters[sev];
-  el.classList.toggle('on',sevFilters[sev]);
-  renderFeed();
-}
-function toggleSound(){
-  soundOn=!soundOn;
-  var b=document.getElementById('soundBtn');
-  b.textContent=soundOn?'🔔 SOUND ON':'🔇 SOUND OFF';
-  b.className='sound-btn'+(soundOn?' on':'');
-}
-function updateSourceIndicators(){
-  var hasTna=!!apiKeyMain, hasGnews=!!apiKeyGnews, hasNewsdata=!!apiKeyNewsdata;
-  function setInd(id,on){
-    var el=document.getElementById(id);
-    el.className='src-ind '+(on?'active':'inactive');
-  }
-  setInd('srcIndRss',true); // always on
-  setInd('srcIndTna',hasTna);
-  setInd('srcIndGnews',hasGnews);
-  setInd('srcIndNewsdata',hasNewsdata);
-}
+function togSev(el){var s=el.getAttribute('data-s');sevF[s]=!sevF[s];el.classList.toggle('on',sevF[s]);renderFeed();}
+function toggleSound(){soundOn=!soundOn;var b=document.getElementById('soundBtn');b.textContent=soundOn?'🔔 ON':'🔇 OFF';b.className='sound-tog'+(soundOn?' on':'');}
 
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 // SCAN
-// ══════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 async function doScan(){
-  if(mode==='live'&&!apiKeyMain&&!apiKeyGnews&&!apiKeyNewsdata){showSetup();return;}
+  if(mode==='live'&&!apiMain&&!apiGnews&&!apiNewsdata){showSetup();return;}
   var btn=document.getElementById('scanBtn');
-  var nowTime=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
   btn.disabled=true;btn.classList.add('scanning');
-  document.getElementById('si').className='si spin';document.getElementById('si').textContent='⟳';
+  document.getElementById('si').className='spin';document.getElementById('si').textContent='⟳';
   document.getElementById('slbl').textContent='SCANNING...';
   document.getElementById('ltxt').textContent='SCANNING';
-  sourceCounts={rss:0,tna:0,gnews:0,newsdata:0};
-  scans++;updateStats();
-  showSkeletons();
+  scans++;updateStats();showSkeletons();
 
-  var newAlerts=[], newHeadlines=[], allRaw=[];
+  var newA=[], newHL=[], raw=[];
 
   if(mode==='demo'){
-    await new Promise(function(r){setTimeout(r,700);});
-    var shuffled=DEMO.slice().sort(function(){return Math.random()-.5;});
-    shuffled.forEach(function(d,i){
+    await new Promise(function(r){setTimeout(r,800);});
+    var DEMO=[
+      {src:'Bloomberg',url:'#',h:"Anthropic's Claude automates COBOL modernization — IBM mainframe unit faces existential threat as banks accelerate migration",sev:'HIGH',tks:['IBM','JPM','BAC','WFC'],kws:['COBOL','mainframe'],an:'Claude directly replaces IBM mainframe services'},
+      {src:'Reuters',url:'#',h:"Claude AI handles complete freight logistics routing and dispatch — C.H. Robinson and Landstar shares fall sharply on AI disruption fears",sev:'HIGH',tks:['CHRW','LSTR','XPO'],kws:['logistics','freight','routing'],an:'AI automates core logistics operations'},
+      {src:'TechCrunch',url:'#',h:"CrowdStrike, Okta drop as Claude security tool detects vulnerabilities without human SOC analysts — cybersecurity vendors at risk",sev:'HIGH',tks:['CRWD','OKTA','S','CYBR'],kws:['cybersecurity','SOC','vulnerability'],an:'AI threatens to replace human security analysts'},
+      {src:'CNBC',url:'#',h:"Claude-powered wealth platform delivers personalized tax and portfolio advice — Schwab and Raymond James face displacement",sev:'HIGH',tks:['SCHW','RJF','LPLA'],kws:['wealth management','financial advisor'],an:'AI advisor threatens wealth management firms'},
+      {src:'Financial Times',url:'#',h:"Cognizant, Infosys face existential pressure as Claude automates IT modernization worth $200B — consulting model disrupted",sev:'HIGH',tks:['CTSH','INFY','ACN','WIT'],kws:['IT consulting','code migration'],an:'AI threatens global IT services'},
+      {src:'WSJ',url:'#',h:"JPMorgan testing Claude to replace COBOL batch processing divisions — IBM at risk",sev:'HIGH',tks:['JPM','BAC','IBM','FIS'],kws:['COBOL','banking'],an:'Banks piloting AI to eliminate legacy COBOL'},
+      {src:'Forbes',url:'#',h:"Claude investment research rivals junior analyst output — Goldman Sachs and Morgan Stanley cut headcount by 20%",sev:'HIGH',tks:['GS','MS'],kws:['investment banking','analyst'],an:'AI analyst tools threaten IB roles'},
+      {src:'Reuters',url:'#',h:"AI automates payroll workflows — Paychex and ADP warn of generative AI competitive threat to core revenue",sev:'MEDIUM',tks:['PAYX','ADP','PCTY'],kws:['payroll','HR software'],an:'Generative AI threatens HR/payroll vendors'},
+      {src:'Bloomberg',url:'#',h:"Chegg shares plunge as students use Claude instead of tutoring subscriptions — EdTech sector reeling",sev:'HIGH',tks:['CHGG','COUR','UDMY'],kws:['education','tutoring'],an:'AI replaces paid tutoring platforms'},
+      {src:'WSJ',url:'#',h:"Robert Half and ManpowerGroup warn AI recruiting tools slash demand for staffing agencies",sev:'HIGH',tks:['RHI','MAN','ASGN'],kws:['staffing','recruiting'],an:'AI threatens staffing agency model'},
+      {src:'CNBC',url:'#',h:"H&R Block and Intuit face existential threat as Claude handles complex tax returns with higher CPA accuracy",sev:'HIGH',tks:['HRB','INTU'],kws:['tax','accounting','CPA'],an:'AI threatens H&R Block and Intuit'},
+      {src:'CNBC',url:'#',h:"Anthropic model replaces enterprise call center agents — NICE Systems and contact center vendors drop on guidance cut",sev:'HIGH',tks:['NICE','LPSN','FIVE'],kws:['call center','BPO'],an:'Claude threatens BPO vendors'},
+    ];
+    DEMO.sort(function(){return Math.random()-.5;}).forEach(function(d,i){
       var id=Date.now()+i;
-      newHeadlines.push({id:id,src:d.src,h:d.h,url:d.url,time:nowTime,live:false,srcId:'demo'});
-      newAlerts.push({id:id,src:d.src,h:d.h,url:d.url,time:nowTime,live:false,sev:d.sev,kws:d.kws,tks:d.tks,an:d.an,isnew:true});
-      d.tks.forEach(function(t){hits.add(t);hitCount[t]=(hitCount[t]||0)+1;});
+      newHL.push({id:id,src:d.src,h:d.h,url:d.url,time:now,live:false});
+      var a={id:id,src:d.src,h:d.h,url:d.url,time:now,live:false,sev:d.sev,kws:d.kws,tks:d.tks,an:d.an,isnew:true};
+      a.score=scoreAlert(a);newA.push(a);
+      d.tks.forEach(function(t){hitCount[t]=(hitCount[t]||0)+1;});
     });
-    sourceCounts.rss=5;sourceCounts.tna=4;sourceCounts.gnews=3;sourceCounts.newsdata=2;
+    totalHL+=DEMO.length;
   } else {
-    // Fetch from all available sources in parallel
-    var fetchPromises=[];
-    fetchPromises.push(fetchRSS()); // always try RSS
-    if(apiKeyMain) fetchPromises.push(fetchTheNewsAPI(apiKeyMain));
-    if(apiKeyGnews) fetchPromises.push(fetchGNews(apiKeyGnews));
-    if(apiKeyNewsdata) fetchPromises.push(fetchNewsData(apiKeyNewsdata));
-
-    var results=await Promise.all(fetchPromises);
-    results.forEach(function(r){allRaw=allRaw.concat(r);});
-    allRaw=dedupeHeadlines(allRaw.sort(function(){return Math.random()-.5;}));
-
-    if(!allRaw.length){
+    var fetchQ=[fetchRSS()];
+    if(apiMain) fetchQ.push(fetchTNA(apiMain));
+    if(apiGnews) fetchQ.push(fetchGNews(apiGnews));
+    if(apiNewsdata) fetchQ.push(fetchNewsData(apiNewsdata));
+    var results=await Promise.all(fetchQ);
+    results.forEach(function(r){raw=raw.concat(r);});
+    raw=dedupe(raw.sort(function(){return Math.random()-.5;}));
+    totalHL+=raw.length;
+    if(!raw.length){
       clearSkeletons();
-      document.getElementById('alist').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-t">Could not fetch headlines</div><div class="empty-s">Check API keys or try Demo Mode</div></div>';
-      resetScanBtn();
+      document.getElementById('alist').innerHTML='<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-t">No headlines fetched</div><div class="empty-s">Check API keys or switch to Demo Mode</div></div>';
       document.getElementById('ltxt').textContent='ERROR';
-      return;
+      resetScanBtn();return;
     }
-
-    allRaw.forEach(function(item,i){
+    raw.forEach(function(item,i){
       var id=Date.now()+i;
-      newHeadlines.push({id:id,src:item.src,h:item.h,url:item.url,time:nowTime,live:true,srcId:item.srcId});
-      var result=analyzeLocal(item.h);
-      if(result&&result.affectedTickers&&result.affectedTickers.length){
-        newAlerts.push({id:id,src:item.src,h:item.h,url:item.url,time:nowTime,live:true,
-          sev:result.severity,kws:result.matchedKeywords,tks:result.affectedTickers,an:result.analysis,isnew:true,srcId:item.srcId});
-        result.affectedTickers.forEach(function(t){hits.add(t);hitCount[t]=(hitCount[t]||0)+1;});
+      newHL.push({id:id,src:item.src,h:item.h,url:item.url,time:now,live:true,srcId:item.srcId});
+      var res=analyze(item.h);
+      if(res&&res.affectedTickers.length){
+        var a={id:id,src:item.src,h:item.h,url:item.url,time:now,live:true,sev:res.severity,kws:res.matchedKeywords,tks:res.affectedTickers,an:res.analysis,isnew:true};
+        a.score=scoreAlert(a);
+        newA.push(a);
+        res.affectedTickers.forEach(function(t){hitCount[t]=(hitCount[t]||0)+1;});
       }
     });
   }
 
   clearSkeletons();
-  allHeadlines=newHeadlines.concat(allHeadlines).slice(0,500);
-  if(newAlerts.length){
-    alerts=newAlerts.concat(alerts).slice(0,200);
-    newAlerts.forEach(function(a){if(a.sev==='HIGH'){showToast(a);if(soundOn)playSound();}});
+
+  // Cluster new alerts
+  var clustered=clusterAlerts(newA);
+
+  // Fetch prices for all flagged tickers
+  var allTickers=[...new Set(clustered.reduce(function(acc,a){return acc.concat(a.tks);},[])).values()];
+  fetchPrices(allTickers).then(function(){renderFeed();renderWL();renderTicker();});
+
+  allHL=newHL.concat(allHL).slice(0,600);
+  if(clustered.length){
+    alerts=clustered.concat(alerts).slice(0,300);
+    // Save to history
+    clustered.slice(0,5).forEach(function(a){
+      alertHistory.unshift({date:new Date().toLocaleDateString(),time:a.time,h:a.h.substring(0,100),sev:a.sev,tks:a.tks.slice(0,4)});
+    });
+    alertHistory=alertHistory.slice(0,100);
+    try{localStorage.setItem('snv3hist',JSON.stringify(alertHistory));}catch(e){}
+    clustered.forEach(function(a){if(a.sev==='HIGH'){showToast(a);if(soundOn)playSound();}});
   }
 
-  renderFeed();renderWL();renderTicker();updateStats();updateSourceIndicators();
-  resetScanBtn();
-  document.getElementById('ltxt').textContent='LIVE';
-  bumpStats();
+  renderFeed();renderWL();renderTicker();renderHeatmap();updateStats();
+  resetScanBtn();document.getElementById('ltxt').textContent='LIVE';
+  bump();
 }
 
 function resetScanBtn(){
   var btn=document.getElementById('scanBtn');
   btn.disabled=false;btn.classList.remove('scanning');
-  document.getElementById('si').className='si';document.getElementById('si').textContent='⚡';
-  document.getElementById('slbl').textContent=mode==='live'?'SCAN LIVE HEADLINES NOW':'SCAN DEMO HEADLINES';
+  document.getElementById('si').className='';document.getElementById('si').textContent='⚡';
+  document.getElementById('slbl').textContent=mode==='live'?'SCAN LIVE NOW':'SCAN DEMO';
 }
 function showSkeletons(){
-  var list=document.getElementById('alist');
-  list.innerHTML='';
-  for(var i=0;i<5;i++){
-    list.innerHTML+='<div class="skeleton-wrap"><div class="skeleton sk1"></div><div class="skeleton sk2"></div><div class="skeleton sk3"></div><div class="skeleton sk4"></div><div class="skeleton sk5"></div></div>';
-  }
+  var l=document.getElementById('alist');l.innerHTML='';
+  for(var i=0;i<6;i++) l.innerHTML+='<div class="sk-wrap"><div class="sk sk1"></div><div class="sk sk2"></div><div class="sk sk3"></div><div class="sk sk4"></div></div>';
 }
-function clearSkeletons(){
-  document.getElementById('alist').innerHTML='';
-}
-function bumpStats(){
-  ['stA','stS','stN','stK','stSC'].forEach(function(id){
-    var el=document.getElementById(id);
-    el.closest('.stat').classList.add('bump');
-    setTimeout(function(){el.closest('.stat').classList.remove('bump');},500);
-  });
-}
+function clearSkeletons(){document.getElementById('alist').innerHTML='';}
+function bump(){['stA','stS','stN','stC','stSC','stK'].forEach(function(id){var s=document.getElementById(id).closest('.stat');s.classList.add('bump');setTimeout(function(){s.classList.remove('bump');},500);});}
 
-// ══════════════════════════════════════════════
-// RENDER
-// ══════════════════════════════════════════════
-function hlKw(txt){
+// ══════════════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ══════════════════════════════════════════════════════
+function hl(txt){
   var o=txt;
   kws.concat(AI_TERMS).forEach(function(kw){
     try{var re=new RegExp('('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');o=o.replace(re,'<mark>$1</mark>');}catch(e){}
@@ -1077,220 +1093,249 @@ function hlKw(txt){
   return o;
 }
 
-function renderTicker(){
-  if(!alerts.length) return;
-  var ts=document.getElementById('tickerScroll');
-  var items=[];
-  alerts.slice(0,20).forEach(function(a){
-    a.tks.slice(0,4).forEach(function(t){
-      items.push('<div class="ticker-item"><span class="t-dot t-dot-'+a.sev.charAt(0)+'"></span><span class="t-sym">'+t+'</span><span class="t-sev-'+a.sev.charAt(0)+'">'+a.sev+'</span></div>');
-    });
-  });
-  var all=items.join('')+items.join('');
-  ts.innerHTML=all;
-}
-
-function getFilteredAlerts(){
-  var q=(document.getElementById('filterInput')||{}).value||'';
-  q=q.toLowerCase();
-  return alerts.filter(function(a){
-    if(!sevFilters[a.sev.charAt(0)]) return false;
-    if(q&&a.h.toLowerCase().indexOf(q)<0&&a.tks.join(',').toLowerCase().indexOf(q)<0) return false;
-    return true;
-  });
+function priceTag(ticker){
+  var p=priceCache[ticker];
+  if(!p) return '<span class="tk-load">…</span>';
+  var chgClass=p.chg>0?'up':p.chg<0?'dn':'neutral';
+  var chgStr=(p.chg>0?'+':'')+p.chg.toFixed(2)+'%';
+  return '<span class="tk-price">$'+p.price.toFixed(2)+'</span><span class="tk-chg '+chgClass+'"> '+chgStr+'</span>';
 }
 
 function renderFeed(){
   var list=document.getElementById('alist');
   list.innerHTML='';
-  if(feedView==='sources'){renderSourceStatus();return;}
-  if(feedView==='alerts'){
-    var filtered=getFilteredAlerts();
-    document.getElementById('feedChip').textContent=alerts.length+' ALERTS';
-    document.getElementById('filterCount').textContent=filtered.length+'/'+alerts.length+' shown';
-    if(!filtered.length){
-      list.innerHTML='<div class="empty"><div class="empty-icon">📡</div><div class="empty-t">No disruption alerts yet</div><div class="empty-s">Click SCAN or switch to ALL HEADLINES tab</div></div>';return;
-    }
-    filtered.forEach(function(a,i){
-      var sc=a.sev==='HIGH'?'sh':a.sev==='MEDIUM'?'sm':'sl';
-      var div=document.createElement('div');
-      div.className='ac '+sc+(a.isnew&&i<8?' nw':'');
-      div.dataset.id=a.id;
-      div.innerHTML=
-        '<div class="atop">'+
-          '<span class="sb s'+a.sev+'">'+a.sev+'</span>'+
-          '<span class="srctag '+(a.live?'slive':'sdemo')+'">'+(a.live?'🟢 LIVE':'🔵 DEMO')+'</span>'+
-          '<span class="srcname">'+a.src+'</span>'+
-          '<span class="atm">'+a.time+'</span>'+
-          '<button class="expand-btn" onclick="toggleExpand(this)">EXPAND ▸</button>'+
-        '</div>'+
-        '<div class="aht">'+hlKw(a.h)+'</div>'+
-        (a.an?'<div class="aan">🔍 '+a.an+'</div>':'')+
-        '<div class="trow">'+a.tks.map(function(t){
-          var heat=Math.min(hitCount[t]||0,5);
-          return '<span class="tk" title="'+t+' — hit '+(hitCount[t]||0)+' times" style="opacity:'+(0.5+heat*0.1)+'">'+t+(hitCount[t]>1?' ×'+hitCount[t]:'')+'</span>';
-        }).join('')+'</div>'+
-        (a.url&&a.url!=='#'?'<a class="alink" href="'+a.url+'" target="_blank">Read full article →</a>':'');
-      list.appendChild(div);
-      setTimeout(function(){div.classList.remove('nw');},4000);
+  if(feedView==='history'){renderHistory();return;}
+  if(feedView==='patterns'){renderPatterns();return;}
+  if(feedView==='all'){
+    document.getElementById('feedChip').textContent=allHL.length+' HEADLINES';
+    if(!allHL.length){list.innerHTML='<div class="empty"><div class="empty-icon">📰</div><div class="empty-t">No headlines yet</div><div class="empty-s">Click SCAN LIVE NOW</div></div>';return;}
+    allHL.forEach(function(h){
+      var isA=alerts.find(function(a){return a.id===h.id;});
+      var d=document.createElement('div');
+      d.className='ac'+(isA?' s'+isA.sev.charAt(0):'');
+      d.innerHTML='<div class="ac-head"><span class="src-tag '+(h.live?'live-tag':'demo-tag')+'">'+h.src+'</span>'+(isA?'<span class="sev-badge b'+isA.sev.charAt(0)+'">'+isA.sev+'</span>':'')+'<span class="ac-time">'+h.time+'</span></div><div class="ac-title">'+hl(h.h)+'</div>'+(isA&&isA.tks?'<div class="trow">'+isA.tks.map(function(t){return '<span class="tk"><span class="tk-sym">'+t+'</span> '+priceTag(t)+'</span>';}).join('')+'</div>':'')+(h.url&&h.url!=='#'?'<a class="alink" href="'+h.url+'" target="_blank">Read →</a>':'');
+      list.appendChild(d);
     });
-  } else {
-    document.getElementById('feedChip').textContent=allHeadlines.length+' HEADLINES';
-    if(!allHeadlines.length){
-      list.innerHTML='<div class="empty"><div class="empty-icon">📰</div><div class="empty-t">No headlines fetched yet</div><div class="empty-s">Click SCAN to load headlines from all sources</div></div>';return;
-    }
-    allHeadlines.forEach(function(hl){
-      var isAlert=alerts.find(function(a){return a.id===hl.id;});
-      var div=document.createElement('div');
-      div.className='art'+(isAlert?' ac '+(isAlert.sev==='HIGH'?'sh':isAlert.sev==='MEDIUM'?'sm':'sl'):'');
-      div.innerHTML=
-        '<div class="art-top">'+
-          (isAlert?'<span class="sb s'+isAlert.sev+'">'+isAlert.sev+'</span>':'')+
-          '<span class="srctag '+(hl.live?'slive':'sdemo')+'">'+hl.src+'</span>'+
-          '<span class="art-time">'+hl.time+'</span>'+
-        '</div>'+
-        '<div class="art-h">'+hlKw(hl.h)+'</div>'+
-        (isAlert&&isAlert.tks?'<div class="trow">'+isAlert.tks.map(function(t){return '<span class="tk">'+t+'</span>';}).join('')+'</div>':'')+
-        (hl.url&&hl.url!=='#'?'<a class="alink" href="'+hl.url+'" target="_blank">Read →</a>':'');
-      list.appendChild(div);
-    });
+    return;
   }
+  // ALERTS view
+  var q=(document.getElementById('fInput').value||'').toLowerCase();
+  var sort=document.getElementById('sortSel').value;
+  var filtered=alerts.filter(function(a){
+    if(!sevF[a.sev.charAt(0)]) return false;
+    if(q&&a.h.toLowerCase().indexOf(q)<0&&a.tks.join().toLowerCase().indexOf(q)<0) return false;
+    return true;
+  }).slice();
+  if(sort==='score') filtered.sort(function(a,b){return (b.score||0)-(a.score||0);});
+  else if(sort==='sev') filtered.sort(function(a,b){return ({HIGH:0,MEDIUM:1,LOW:2}[a.sev])-({HIGH:0,MEDIUM:1,LOW:2}[b.sev]);});
+  else if(sort==='tickers') filtered.sort(function(a,b){return b.tks.length-a.tks.length;});
+  document.getElementById('feedChip').textContent=alerts.length+' ALERTS';
+  document.getElementById('fcount').textContent=filtered.length+'/'+alerts.length;
+  if(!filtered.length){
+    list.innerHTML='<div class="empty"><div class="empty-icon">📡</div><div class="empty-t">No alerts yet</div><div class="empty-s">Click SCAN LIVE NOW or try Demo Mode</div></div>';return;
+  }
+  filtered.forEach(function(a,i){
+    var sc=a.score||0;
+    var scCls=sc>=70?'score-hi':sc>=45?'score-mid':'score-lo';
+    var scColor=sc>=70?'var(--gold)':sc>=45?'var(--orange2)':'var(--blue2)';
+    var d=document.createElement('div');
+    d.className='ac s'+a.sev.charAt(0)+(a.isnew&&i<8?' fresh':'');
+    d.innerHTML=
+      '<div class="ac-head">'+
+        '<span class="sev-badge b'+a.sev.charAt(0)+'">'+a.sev+'</span>'+
+        '<span class="score-badge '+scCls+'">SCORE '+sc+'</span>'+
+        '<span class="src-tag '+(a.live?'live-tag':'demo-tag')+'">'+(a.live?'🟢 ':'🔵 ')+a.src+'</span>'+
+        (a.siblings&&a.siblings.length?'<span class="cluster-badge">📦 '+(a.siblings.length+1)+' SOURCES</span>':'')+
+        '<span class="ac-time">'+a.time+'</span>'+
+      '</div>'+
+      '<div class="ac-title">'+hl(a.h)+'</div>'+
+      (a.an?'<div class="ac-analysis">🔍 '+a.an+'</div>':'')+
+      '<div class="trow">'+a.tks.map(function(t){
+        var heat=Math.min((hitCount[t]||0),5);
+        return '<span class="tk" style="opacity:'+(0.6+heat*0.08)+'"><span class="tk-sym">'+t+(hitCount[t]>1?' ×'+hitCount[t]:'')+'</span> '+priceTag(t)+'</span>';
+      }).join('')+'</div>'+
+      '<div class="score-bar-wrap"><div class="score-bar-bg"><div class="score-bar-fill" style="width:'+sc+'%;background:'+scColor+'"></div></div><div class="score-val">'+sc+'/100</div></div>'+
+      (a.siblings&&a.siblings.length?'<button class="cluster-toggle" onclick="this.nextSibling.classList.toggle(\'open\');this.textContent=this.nextSibling.classList.contains(\'open\')?\'▾ Hide related stories ('+a.siblings.length+')\':\'▸ '+a.siblings.length+' more sources on this story\'">'+'▸ '+a.siblings.length+' more sources on this story</button><div class="cluster-children">'+a.siblings.map(function(s){return '<div class="c-child"><span class="c-child-src">'+s.src+'</span><span>'+s.h.substring(0,130)+'...</span></div>';}).join('')+'</div>':'')+
+      (a.url&&a.url!=='#'?'<a class="alink" href="'+a.url+'" target="_blank">Read full article →</a>':'');
+    d.dataset.id=a.id;
+    setTimeout(function(){d.classList.remove('fresh');},3500);
+    list.appendChild(d);
+    // Draw sparkline for first ticker after price loads
+    if(priceCache[a.tks[0]]){
+      var sparkData=generateSparkData(a.tks[0]);
+      if(sparkData){
+        var canvas=document.createElement('canvas');
+        canvas.width=80;canvas.height=24;canvas.className='sparkline-canvas';
+        canvas.style.marginTop='5px';
+        d.querySelector('.trow').after(canvas);
+        var p=priceCache[a.tks[0]];
+        drawSparkline(canvas,sparkData,p.chg>=0?'rgb(0,217,102)':'rgb(255,26,60)');
+      }
+    }
+  });
 }
 
-function renderSourceStatus(){
+function renderHistory(){
   var list=document.getElementById('alist');
   list.innerHTML='';
-  var panel=document.createElement('div');
-  panel.style.padding='16px';
-  var sources=[
-    {id:'rss',name:'RSS Feeds (Reuters, AP, NYT, CNBC, FT, TC, Wired)',key:'none',count:sourceCounts.rss,err:sourceErrors.rss,always:true},
-    {id:'tna',name:'TheNewsAPI.com',key:apiKeyMain?'●●●●●●':'No key',count:sourceCounts.tna,err:sourceErrors.tna,always:false},
-    {id:'gnews',name:'GNews API',key:apiKeyGnews?'●●●●●●':'No key',count:sourceCounts.gnews,err:sourceErrors.gnews,always:false},
-    {id:'newsdata',name:'NewsData.io',key:apiKeyNewsdata?'●●●●●●':'No key',count:sourceCounts.newsdata,err:sourceErrors.newsdata,always:false},
-  ];
-  var html='<div class="source-status">';
-  sources.forEach(function(s){
-    var status=s.err?'err':(s.always||s.key!=='No key'?'ok':'off');
-    html+='<div class="src-row">'+
-      '<div class="src-dot '+status+'"></div>'+
-      '<div class="src-row-name">'+s.name+'</div>'+
-      '<div class="src-row-count">'+(s.count>0?s.count+' articles':s.key==='No key'?'—':'0')+'</div>'+
-      '<div class="src-row-note">'+(s.err?'ERROR':s.key==='No key'?'NO KEY':s.key==='none'?'FREE':'ACTIVE')+'</div>'+
+  if(!alertHistory.length){
+    list.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div class="empty-t">No history yet</div><div class="empty-s">Alerts are saved automatically across sessions</div></div>';return;
+  }
+  var div=document.createElement('div');
+  div.className='hist-list';
+  alertHistory.forEach(function(h){
+    div.innerHTML+='<div class="hist-item">'+
+      '<div class="hist-date">'+h.date+'<br>'+h.time+'</div>'+
+      '<div><div class="hist-text">'+h.h+'...</div><div class="hist-tks">'+
+        (h.tks||[]).map(function(t){return '<span class="hist-tk">'+t+'</span>';}).join('')+
+        '<span class="hist-sev '+h.sev.charAt(0)+'">'+h.sev+'</span>'+
+      '</div></div>'+
     '</div>';
   });
-  html+='<div style="padding:10px;font-family:JetBrains Mono,monospace;font-size:.58rem;color:var(--dim);line-height:1.8;">'+
-    'Total headlines fetched: <strong style="color:var(--text)">'+(sourceCounts.rss+sourceCounts.tna+sourceCounts.gnews+sourceCounts.newsdata)+'</strong><br>'+
-    'Disruption alerts found: <strong style="color:var(--red)">'+alerts.length+'</strong><br>'+
-    'Stocks flagged: <strong style="color:var(--orange)">'+hits.size+'</strong>'+
-  '</div></div>';
-  panel.innerHTML=html;
-  list.appendChild(panel);
+  list.appendChild(div);
+  // Clear history button
+  var clearH=document.createElement('div');
+  clearH.style.padding='10px 14px';
+  clearH.innerHTML='<button class="cbtn chip" onclick="alertHistory=[];localStorage.removeItem(\'snv3hist\');renderFeed()">✕ CLEAR HISTORY</button>';
+  list.appendChild(clearH);
 }
 
-function toggleExpand(btn){
-  var card=btn.closest('.ac');
-  card.classList.toggle('expanded');
-  btn.textContent=card.classList.contains('expanded')?'COLLAPSE ▾':'EXPAND ▸';
+function renderPatterns(){
+  var list=document.getElementById('alist');
+  list.innerHTML='';
+  var patterns=detectPatterns();
+  if(!patterns.length){
+    list.innerHTML='<div class="empty"><div class="empty-icon">🧠</div><div class="empty-t">No patterns detected yet</div><div class="empty-s">Run multiple scans to build pattern data</div></div>';return;
+  }
+  var div=document.createElement('div');
+  div.className='patterns';
+  patterns.forEach(function(p){
+    div.innerHTML+='<div class="pattern-item">'+
+      '<div class="pat-head"><span class="pat-icon">'+p.icon+'</span><span class="pat-label">'+p.label+'</span><span class="pat-val">'+p.val+'</span></div>'+
+      '<div class="pat-desc">'+p.desc+'</div>'+
+      (p.tks.length?'<div class="pat-tks">'+p.tks.map(function(t){return '<span class="hist-tk">'+t+'</span>';}).join('')+'</div>':'')+
+    '</div>';
+  });
+  list.appendChild(div);
+}
+
+function renderTicker(){
+  var inner=document.getElementById('tickerInner');
+  if(!alerts.length) return;
+  var items=[];
+  var priced=alerts.slice(0,12);
+  priced.forEach(function(a){
+    a.tks.slice(0,3).forEach(function(t){
+      var p=priceCache[t];
+      items.push('<div class="t-item"><span class="t-dot '+a.sev.charAt(0)+'"></span><span class="t-sym">'+t+'</span>'+(p?'<span class="t-price">$'+p.price.toFixed(2)+'</span><span class="t-chg '+(p.chg>=0?'up':'dn')+'">'+(p.chg>=0?'▲':'▼')+Math.abs(p.chg).toFixed(2)+'%</span>':'')+'<span style="color:var(--dim2);font-size:.52rem;">'+a.sev+'</span></div>');
+    });
+  });
+  var all=items.join('');
+  inner.innerHTML=all+all;
+}
+
+function renderHeatmap(){
+  var grid=document.getElementById('heatmapGrid');
+  grid.innerHTML='';
+  var maxHits=0;
+  var secHits={};
+  Object.keys(SECTOR_GROUPS).forEach(function(sec){
+    var h=0;SECTOR_GROUPS[sec].forEach(function(t){h+=(hitCount[t]||0);});
+    secHits[sec]=h;if(h>maxHits)maxHits=h;
+  });
+  Object.keys(SECTOR_GROUPS).forEach(function(sec){
+    var h=secHits[sec], pct=maxHits>0?h/maxHits:0;
+    var heat=pct>=.8?4:pct>=.5?3:pct>=.25?2:pct>=.05?1:0;
+    var colors=['var(--dim2)','var(--blue2)','var(--orange2)','var(--red2)','var(--red2)'];
+    var d=document.createElement('div');
+    d.className='hm-cell heat'+heat;
+    d.innerHTML='<div class="hm-name">'+sec+'</div><div class="hm-count">'+h+'</div><div class="hm-bar"><div class="hm-fill" style="width:'+(maxHits>0?Math.round(h/maxHits*100):0)+'%;background:'+colors[heat]+'"></div></div>';
+    d.title=sec+': '+h+' alerts';
+    grid.appendChild(d);
+  });
+  document.getElementById('hmChip').textContent=maxHits>0?'HIGHEST: '+Object.keys(secHits).reduce(function(a,b){return secHits[a]>secHits[b]?a:b;}).toUpperCase():'AI PRESSURE INDEX';
 }
 
 function renderWL(){
-  var list=document.getElementById('wlist');
-  list.innerHTML='';
+  var list=document.getElementById('wlist');list.innerHTML='';
   var filtered=WL.filter(function(w){
-    if(!wsFilter) return true;
-    return w.t.toLowerCase().indexOf(wsFilter)>=0||w.n.toLowerCase().indexOf(wsFilter)>=0||w.s.toLowerCase().indexOf(wsFilter)>=0;
+    if(!wsF) return true;
+    return w.t.toLowerCase().indexOf(wsF)>=0||w.n.toLowerCase().indexOf(wsF)>=0||w.s.toLowerCase().indexOf(wsF)>=0;
   });
-  // Sort: hit stocks first, then by sector, then by risk
   filtered.sort(function(a,b){
-    var ha=hits.has(a.t)?-(hitCount[a.t]||1):0;
-    var hb=hits.has(b.t)?-(hitCount[b.t]||1):0;
-    if(ha!==hb) return ha-hb;
+    var ha=hitCount[a.t]||0, hb=hitCount[b.t]||0;
+    if(ha!==hb) return hb-ha;
     if(a.s!==b.s) return a.s.localeCompare(b.s);
     return ({H:0,M:1,L:2}[a.r])-({H:0,M:1,L:2}[b.r]);
   });
-  var lastSec='';
+  var lastS='';
   filtered.forEach(function(w){
-    if(w.s!==lastSec&&!wsFilter){
-      var sec=document.createElement('div');
-      sec.className='wsec';sec.textContent=w.s;
-      list.appendChild(sec);lastSec=w.s;
-    }
-    var h=hits.has(w.t);
-    var hc=hitCount[w.t]||0;
-    var heatPct=Math.min(hc*20,100);
-    var div=document.createElement('div');
-    div.className='wr'+(h?' hit':'');
-    div.innerHTML=
-      '<div class="wt" style="color:'+(h?'var(--red)':'var(--text)')+'">'+w.t+'</div>'+
-      '<div style="flex:1;overflow:hidden;">'+
-        '<div class="wn">'+w.n+'</div>'+
-        (h&&hc>0?'<div class="heat-bar" style="background:linear-gradient(90deg,var(--red) '+heatPct+'%,var(--dimmer) '+heatPct+'%)"></div>':'')+ 
-      '</div>'+
+    if(w.s!==lastS&&!wsF){var s=document.createElement('div');s.className='wsec-h';s.textContent=w.s;list.appendChild(s);lastS=w.s;}
+    var h=hitCount[w.t]||0, isHit=h>0;
+    var p=priceCache[w.t];
+    var d=document.createElement('div');
+    d.className='wr'+(isHit?' hit':'');
+    d.innerHTML='<div class="wt" style="color:'+(isHit?'var(--red2)':'var(--text)')+'">'+w.t+'</div>'+
+      '<div class="wn">'+w.n+'</div>'+
+      (p?'<div class="wprice" style="color:var(--text)">$'+p.price.toFixed(2)+'</div><div class="wchg '+(p.chg>=0?'up':'dn')+'">'+(p.chg>=0?'▲':'▼')+Math.abs(p.chg).toFixed(2)+'%</div>':'<div class="wprice" style="color:var(--dim)">—</div><div class="wchg neutral"></div>')+
       '<span class="rsk r'+w.r+'">'+(w.r==='H'?'HIGH':w.r==='M'?'MED':'LOW')+'</span>'+
-      (h?'<div class="hdot"></div>':'');
-    list.appendChild(div);
+      (isHit?'<div class="hdot"></div>':'');
+    list.appendChild(d);
   });
-  document.getElementById('wchip').textContent=WL.length+' STOCKS';
+  document.getElementById('wchip').textContent=WL.length+'';
 }
 
-var HKW=['COBOL','Anthropic','Claude Code','IBM','new Claude','direct threat'];
 function renderKW(){
-  var grid=document.getElementById('kwgrid');
-  grid.innerHTML='';
+  var g=document.getElementById('kwgrid');g.innerHTML='';
   kws.forEach(function(kw,i){
     var s=document.createElement('span');
-    s.className='kw '+(HKW.indexOf(kw)>=0?'on-red':'on-blue');
+    s.className='kw '+(HIGH_KW.indexOf(kw)>=0?'kred':'kblue');
     s.textContent=kw;s.title='Click to remove';
     s.onclick=(function(idx){return function(){kws.splice(idx,1);renderKW();updateStats();};})(i);
-    grid.appendChild(s);
+    g.appendChild(s);
   });
-  document.getElementById('kwchip').textContent=kws.length+' ACTIVE';
+  document.getElementById('kwchip').textContent=kws.length+'';
 }
 
 function updateStats(){
-  var totalHeadlines=sourceCounts.rss+sourceCounts.tna+sourceCounts.gnews+sourceCounts.newsdata||allHeadlines.length;
   document.getElementById('stA').textContent=alerts.length;
-  document.getElementById('stS').textContent=hits.size;
-  document.getElementById('stN').textContent=totalHeadlines||allHeadlines.length;
-  document.getElementById('stK').textContent=kws.length;
+  document.getElementById('stS').textContent=Object.keys(hitCount).filter(function(t){return hitCount[t]>0;}).length;
+  document.getElementById('stN').textContent=totalHL||allHL.length;
+  document.getElementById('stC').textContent=alerts.filter(function(a){return a.siblings&&a.siblings.length>0;}).length;
   document.getElementById('stSC').textContent=scans;
+  document.getElementById('stK').textContent=kws.length;
 }
 
-function doClear(){alerts=[];allHeadlines=[];hits.clear();hitCount={};renderFeed();renderWL();renderTicker();updateStats();}
-
-function doAddKw(){
-  var input=document.getElementById('kwi');
-  var val=input.value.trim();
-  if(val&&kws.indexOf(val)<0){kws.push(val);renderKW();updateStats();input.value='';}
+function doClear(){
+  alerts=[];allHL=[];hitCount={};totalHL=0;
+  renderFeed();renderWL();renderHeatmap();renderTicker();updateStats();
+  document.getElementById('tickerInner').innerHTML='<div class="t-item"><span class="t-sym" style="color:var(--dim2)">CLEARED · SCAN TO DETECT ALERTS</span></div><div class="t-item"><span class="t-sym" style="color:var(--dim2)">CLEARED · SCAN TO DETECT ALERTS</span></div>';
 }
+function addKw(){var i=document.getElementById('kwi');var v=i.value.trim();if(v&&kws.indexOf(v)<0){kws.push(v);renderKW();updateStats();i.value='';}}
 
 function doToggleAuto(){
-  var el=document.getElementById('atog');
-  var on=el.classList.toggle('on');
+  var el=document.getElementById('atog');var on=el.classList.toggle('on');
   if(on){cd=300;startCD();autoInt=setInterval(function(){doScan();cd=300;},300000);}
-  else{clearInterval(autoInt);clearInterval(cdTimer);document.getElementById('ctxt').textContent='';}
+  else{clearInterval(autoInt);clearInterval(cdTmr);document.getElementById('ctxt').textContent='';}
 }
-
 function startCD(){
-  clearInterval(cdTimer);
-  cdTimer=setInterval(function(){
+  clearInterval(cdTmr);
+  cdTmr=setInterval(function(){
     cd--;if(cd<=0)cd=300;
     var m=Math.floor(cd/60),s=cd%60;
-    document.getElementById('ctxt').textContent='Next: '+m+':'+String(s).padStart(2,'0');
+    document.getElementById('ctxt').textContent='↻ '+m+':'+String(s).padStart(2,'0');
   },1000);
 }
 
 function exportCSV(){
-  if(!alerts.length){alert('No alerts to export yet. Run a scan first.');return;}
-  var rows=[['Time','Severity','Source','Headline','Tickers','Analysis','URL']];
-  alerts.forEach(function(a){
-    rows.push([a.time,a.sev,a.src,'"'+a.h.replace(/"/g,"'")+'"',a.tks.join(' '),'"'+(a.an||'').replace(/"/g,"'")+'"',a.url]);
-  });
+  if(!alerts.length){alert('No alerts to export yet.');return;}
+  var rows=[['Time','Severity','Score','Source','Headline','Tickers','Analysis','URL']];
+  alerts.forEach(function(a){rows.push([a.time,a.sev,a.score||0,a.src,'"'+a.h.replace(/"/g,"'").substring(0,200)+'"',a.tks.join(' '),'"'+(a.an||'').replace(/"/g,"'")+'"',a.url]);});
   var csv=rows.map(function(r){return r.join(',');}).join('\n');
   var blob=new Blob([csv],{type:'text/csv'});
   var url=URL.createObjectURL(blob);
   var a=document.createElement('a');
-  a.href=url;a.download='sentinel-alerts-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.href=url;a.download='sentinel-v3-'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();URL.revokeObjectURL(url);
 }
 
@@ -1298,27 +1343,27 @@ function showToast(a){
   var c=document.getElementById('toasts');
   var d=document.createElement('div');
   d.className='toast';
-  d.innerHTML='<div class="tt">🚨 DISRUPTION ALERT — '+a.sev+'</div><div class="tb">'+a.h.substring(0,120)+'...</div><div class="tticks">'+a.tks.slice(0,6).map(function(t){return '<span class="tk">'+t+'</span>';}).join('')+'</div>';
-  c.appendChild(d);setTimeout(function(){d.remove();},9000);
+  d.innerHTML='<button class="toast-close" onclick="this.parentNode.remove()">✕</button><div class="tt">🚨 HIGH ALERT · SCORE '+(a.score||0)+'</div><div class="tb">'+a.h.substring(0,110)+'…</div><div class="ttks">'+a.tks.slice(0,5).map(function(t){return '<span class="hist-tk">'+t+'</span>';}).join('')+'</div>';
+  c.appendChild(d);setTimeout(function(){if(d.parentNode)d.remove();},10000);
 }
 
 function playSound(){
   try{
     var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    [[440,0],[550,.13],[660,.26]].forEach(function(p){
+    [[440,0],[554,.12],[659,.24],[880,.36]].forEach(function(p){
       var o=ctx.createOscillator(),g=ctx.createGain();
       o.connect(g);g.connect(ctx.destination);
       o.frequency.value=p[0];o.type='sine';
-      g.gain.setValueAtTime(.12,ctx.currentTime+p[1]);
-      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+p[1]+.28);
-      o.start(ctx.currentTime+p[1]);o.stop(ctx.currentTime+p[1]+.3);
+      g.gain.setValueAtTime(.1,ctx.currentTime+p[1]);
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+p[1]+.25);
+      o.start(ctx.currentTime+p[1]);o.stop(ctx.currentTime+p[1]+.28);
     });
   }catch(e){}
 }
 
 function doShare(){
   var url=encodeURIComponent(window.location.href);
-  var txt=encodeURIComponent('🚨 FREE TOOL: Real-time alerts when Claude/AI threatens legacy stocks\n\nv2 now pulls from 4 simultaneous news sources.\nIBM, banks, cybersecurity, consulting — 280+ stocks monitored.\n\nNo signup needed 👇\n');
+  var txt=encodeURIComponent('🚨 FREE TOOL: Real-time AI disruption alerts for 280+ stocks\n\nv3: Live prices, sector heatmap, story clustering, disruption scoring\nNo signup needed 👇\n');
   window.open('https://twitter.com/intent/tweet?text='+txt+'&url='+url,'_blank');
 }
 
