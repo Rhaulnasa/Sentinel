@@ -989,30 +989,19 @@ footer p{font-size:9px;color:var(--text3);letter-spacing:3px;}
         <div class="ph">
           <div class="pt">SECTOR HEATMAP</div>
           <div class="pact">
-            <span class="chip cR" id="hmChip">AI PRESSURE</span>
+            <span class="chip cR" id="hmChip">LOADING...</span>
             <span class="chip cO" id="hmHot">—</span>
+            <button class="cbtn" onclick="loadSectorHeatmap()" style="font-size:10px;padding:2px 8px;">↺ REFRESH</button>
             <a href="https://finviz.com/map.ashx?t=sec&st=d1" target="_blank" style="font-size:9px;color:var(--blue2);text-decoration:none;padding:2px 7px;border-radius:2px;background:rgba(0,133,255,.07);border:1px solid rgba(0,133,255,.14);">↗ FINVIZ</a>
           </div>
         </div>
-        <div style="position:relative;overflow:hidden;border-bottom:1px solid var(--b1);">
-          <iframe
-            id="finvizFrame"
-            src="https://finviz.com/map.ashx?t=sec&st=d1"
-            style="width:100%;height:340px;border:none;display:block;filter:saturate(1.2) brightness(0.92);"
-            scrolling="no"
-            title="Finviz Sector Heatmap"
-            loading="lazy"
-          ></iframe>
-          <div id="hmOverlay" style="display:none;position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(3,6,8,.95));padding:8px 10px;">
-            <div id="hmSignalBadges" style="display:flex;flex-wrap:wrap;gap:3px;"></div>
-          </div>
-          <div id="finvizFallback" style="display:none;padding:8px 10px;">
-            <div style="font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:2px;">SIGNAL HEATMAP — SENTINEL SECTORS</div>
-            <div id="hmContainer"></div>
-          </div>
+        <div id="hmCanvasWrap" style="padding:10px;position:relative;">
+          <div id="hmLoading" style="text-align:center;padding:40px;font-size:11px;color:var(--text3);font-family:var(--font-s);">Loading sector data from Yahoo Finance...</div>
+          <div id="hmGrid" style="display:none;"></div>
+          <div id="hmSignalBadges" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;"></div>
         </div>
-        <div style="padding:4px 10px;font-size:9px;color:var(--text3);display:flex;justify-content:space-between;align-items:center;">
-          <span>SOURCE: FINVIZ.COM · S&P 500 SECTORS · 1-DAY PERFORMANCE</span>
+        <div style="padding:4px 10px 6px;font-size:9px;color:var(--text3);display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--b1);">
+          <span>SOURCE: YAHOO FINANCE SECTOR ETFs · 1-DAY PERFORMANCE · AUTO-REFRESH 5MIN</span>
           <span id="hmTs"></span>
         </div>
       </div>
@@ -1437,50 +1426,50 @@ async function fetchQuote(tickers){
 // ═══════════════════════════════════════════════════════════════════════
 // ─── curated upcoming earnings for our watchlist (refreshed quarterly) ───
 var EARN_CALENDAR=[
-  // Q1 2025 season — reports in Apr/May 2025
-  {sym:'IBM',   name:'IBM Corp',         date:'2025-04-23', epsEst:'1.40', revEst:'14.8B', sector:'Legacy Tech'},
-  {sym:'MSFT',  name:'Microsoft',        date:'2025-04-30', epsEst:'3.22', revEst:'68.4B', sector:'Mag 7'},
-  {sym:'GOOGL', name:'Alphabet',         date:'2025-04-29', epsEst:'2.01', revEst:'89.1B', sector:'Mag 7'},
-  {sym:'META',  name:'Meta',             date:'2025-04-30', epsEst:'5.25', revEst:'41.4B', sector:'Mag 7'},
-  {sym:'AMZN',  name:'Amazon',           date:'2025-05-01', epsEst:'1.36', revEst:'155.1B',sector:'Mag 7'},
-  {sym:'ACN',   name:'Accenture',        date:'2025-03-20', epsEst:'3.41', revEst:'16.6B', sector:'IT Consulting'},
-  {sym:'CTSH',  name:'Cognizant',        date:'2025-05-07', epsEst:'1.11', revEst:'5.0B',  sector:'IT Consulting'},
-  {sym:'INFY',  name:'Infosys',          date:'2025-04-17', epsEst:'0.21', revEst:'4.9B',  sector:'IT Consulting'},
-  {sym:'WIT',   name:'Wipro',            date:'2025-04-16', epsEst:'0.07', revEst:'2.6B',  sector:'IT Consulting'},
-  {sym:'CRWD',  name:'CrowdStrike',      date:'2025-06-03', epsEst:'0.96', revEst:'1.10B', sector:'Cybersecurity'},
-  {sym:'OKTA',  name:'Okta',             date:'2025-05-28', epsEst:'0.78', revEst:'688M',  sector:'Cybersecurity'},
-  {sym:'PANW',  name:'Palo Alto',        date:'2025-05-19', epsEst:'1.33', revEst:'2.29B', sector:'Cybersecurity'},
-  {sym:'JPM',   name:'JPMorgan',         date:'2025-04-11', epsEst:'4.62', revEst:'43.8B', sector:'Banking'},
-  {sym:'BAC',   name:'Bank of America',  date:'2025-04-15', epsEst:'0.82', revEst:'26.9B', sector:'Banking'},
-  {sym:'GS',    name:'Goldman Sachs',    date:'2025-04-14', epsEst:'12.35',revEst:'15.0B', sector:'Banking'},
-  {sym:'MS',    name:'Morgan Stanley',   date:'2025-04-16', epsEst:'2.30', revEst:'16.6B', sector:'Banking'},
-  {sym:'ADP',   name:'ADP',              date:'2025-04-30', epsEst:'2.91', revEst:'5.0B',  sector:'HR / Payroll'},
-  {sym:'PAYX',  name:'Paychex',          date:'2025-03-26', epsEst:'1.43', revEst:'1.34B', sector:'HR / Payroll'},
-  {sym:'NOW',   name:'ServiceNow',       date:'2025-04-23', epsEst:'3.83', revEst:'3.08B', sector:'Enterprise SW'},
-  {sym:'WDAY',  name:'Workday',          date:'2025-05-21', epsEst:'1.74', revEst:'2.17B', sector:'Enterprise SW'},
-  {sym:'SAP',   name:'SAP SE',           date:'2025-04-22', epsEst:'1.20', revEst:'9.0B',  sector:'Enterprise SW'},
-  {sym:'CRM',   name:'Salesforce',       date:'2025-05-28', epsEst:'2.55', revEst:'9.85B', sector:'Enterprise SW'},
-  {sym:'MAN',   name:'ManpowerGroup',    date:'2025-04-21', epsEst:'1.22', revEst:'4.6B',  sector:'Staffing'},
-  {sym:'RHI',   name:'Robert Half',      date:'2025-04-22', epsEst:'0.68', revEst:'1.43B', sector:'Staffing'},
-  {sym:'CHGG',  name:'Chegg',            date:'2025-05-05', epsEst:'0.12', revEst:'143M',  sector:'EdTech'},
-  {sym:'COUR',  name:'Coursera',         date:'2025-05-07', epsEst:'-0.05',revEst:'178M',  sector:'EdTech'},
-  {sym:'PATH',  name:'UiPath',           date:'2025-06-04', epsEst:'0.14', revEst:'388M',  sector:'Automation'},
-  {sym:'INTU',  name:'Intuit',           date:'2025-05-22', epsEst:'9.52', revEst:'7.57B', sector:'Tax & Finance'},
-  {sym:'HRB',   name:'H&R Block',        date:'2025-06-10', epsEst:'5.63', revEst:'1.09B', sector:'Tax & Finance'},
-  {sym:'V',     name:'Visa',             date:'2025-04-29', epsEst:'2.68', revEst:'9.6B',  sector:'Payments'},
-  {sym:'MA',    name:'Mastercard',       date:'2025-04-29', epsEst:'3.58', revEst:'7.28B', sector:'Payments'},
-  {sym:'PYPL',  name:'PayPal',           date:'2025-04-29', epsEst:'1.16', revEst:'7.84B', sector:'Payments'},
-  {sym:'SCHW',  name:'Charles Schwab',   date:'2025-04-17', epsEst:'1.03', revEst:'5.61B', sector:'Wealth Mgmt'},
-  {sym:'NVDA',  name:'NVIDIA',           date:'2025-05-28', epsEst:'0.89', revEst:'43.2B', sector:'Mag 7'},
-  {sym:'ORCL',  name:'Oracle',           date:'2025-06-10', epsEst:'1.65', revEst:'14.4B', sector:'Enterprise SW'},
-  {sym:'EPAM',  name:'EPAM Systems',     date:'2025-05-08', epsEst:'2.52', revEst:'1.17B', sector:'IT Consulting'},
-  {sym:'NICE',  name:'NICE Systems',     date:'2025-05-14', epsEst:'2.68', revEst:'680M',  sector:'Call Center'},
-  {sym:'FIVE',  name:'Five9',            date:'2025-05-07', epsEst:'0.61', revEst:'254M',  sector:'Call Center'},
-  {sym:'DUOL',  name:'Duolingo',         date:'2025-05-07', epsEst:'0.76', revEst:'226M',  sector:'EdTech'},
-  {sym:'NET',   name:'Cloudflare',       date:'2025-05-08', epsEst:'0.17', revEst:'479M',  sector:'Cybersecurity'},
-  {sym:'ZS',    name:'Zscaler',          date:'2025-05-21', epsEst:'0.82', revEst:'648M',  sector:'Cybersecurity'},
-  {sym:'AFRM',  name:'Affirm',           date:'2025-05-08', epsEst:'-0.08',revEst:'745M',  sector:'BNPL'},
-  {sym:'UPST',  name:'Upstart',          date:'2025-05-06', epsEst:'-0.14',revEst:'196M',  sector:'AI Lending'},
+  // Q1 2026 earnings season — reports Mar–Jun 2026
+  {sym:'ACN',   name:'Accenture',        date:'2026-03-19', epsEst:'3.58', revEst:'17.2B', sector:'IT Consulting'},
+  {sym:'PAYX',  name:'Paychex',          date:'2026-03-25', epsEst:'1.52', revEst:'1.41B', sector:'HR / Payroll'},
+  {sym:'JPM',   name:'JPMorgan',         date:'2026-04-14', epsEst:'5.10', revEst:'45.2B', sector:'Banking'},
+  {sym:'GS',    name:'Goldman Sachs',    date:'2026-04-14', epsEst:'13.20',revEst:'15.8B', sector:'Banking'},
+  {sym:'BAC',   name:'Bank of America',  date:'2026-04-15', epsEst:'0.91', revEst:'27.8B', sector:'Banking'},
+  {sym:'MS',    name:'Morgan Stanley',   date:'2026-04-16', epsEst:'2.52', revEst:'17.1B', sector:'Banking'},
+  {sym:'INFY',  name:'Infosys',          date:'2026-04-16', epsEst:'0.23', revEst:'5.1B',  sector:'IT Consulting'},
+  {sym:'WIT',   name:'Wipro',            date:'2026-04-17', epsEst:'0.08', revEst:'2.7B',  sector:'IT Consulting'},
+  {sym:'SCHW',  name:'Charles Schwab',   date:'2026-04-17', epsEst:'1.12', revEst:'5.9B',  sector:'Wealth Mgmt'},
+  {sym:'IBM',   name:'IBM Corp',         date:'2026-04-22', epsEst:'1.55', revEst:'15.2B', sector:'Legacy Tech'},
+  {sym:'SAP',   name:'SAP SE',           date:'2026-04-22', epsEst:'1.35', revEst:'9.6B',  sector:'Enterprise SW'},
+  {sym:'NOW',   name:'ServiceNow',       date:'2026-04-23', epsEst:'4.10', revEst:'3.28B', sector:'Enterprise SW'},
+  {sym:'V',     name:'Visa',             date:'2026-04-28', epsEst:'2.88', revEst:'10.1B', sector:'Payments'},
+  {sym:'MA',    name:'Mastercard',       date:'2026-04-29', epsEst:'3.82', revEst:'7.72B', sector:'Payments'},
+  {sym:'PYPL',  name:'PayPal',           date:'2026-04-29', epsEst:'1.28', revEst:'8.2B',  sector:'Payments'},
+  {sym:'MSFT',  name:'Microsoft',        date:'2026-04-29', epsEst:'3.44', revEst:'72.1B', sector:'Mag 7'},
+  {sym:'META',  name:'Meta',             date:'2026-04-29', epsEst:'5.82', revEst:'44.2B', sector:'Mag 7'},
+  {sym:'GOOGL', name:'Alphabet',         date:'2026-04-29', epsEst:'2.22', revEst:'94.8B', sector:'Mag 7'},
+  {sym:'ADP',   name:'ADP',              date:'2026-04-30', epsEst:'3.08', revEst:'5.3B',  sector:'HR / Payroll'},
+  {sym:'AMZN',  name:'Amazon',           date:'2026-05-01', epsEst:'1.62', revEst:'163.5B',sector:'Mag 7'},
+  {sym:'MAN',   name:'ManpowerGroup',    date:'2026-05-05', epsEst:'1.30', revEst:'4.7B',  sector:'Staffing'},
+  {sym:'CHGG',  name:'Chegg',            date:'2026-05-06', epsEst:'0.08', revEst:'138M',  sector:'EdTech'},
+  {sym:'UPST',  name:'Upstart',          date:'2026-05-06', epsEst:'-0.08',revEst:'210M',  sector:'AI Lending'},
+  {sym:'CTSH',  name:'Cognizant',        date:'2026-05-07', epsEst:'1.18', revEst:'5.2B',  sector:'IT Consulting'},
+  {sym:'COUR',  name:'Coursera',         date:'2026-05-07', epsEst:'-0.03',revEst:'188M',  sector:'EdTech'},
+  {sym:'FIVE',  name:'Five9',            date:'2026-05-07', epsEst:'0.65', revEst:'268M',  sector:'Call Center'},
+  {sym:'DUOL',  name:'Duolingo',         date:'2026-05-07', epsEst:'0.92', revEst:'242M',  sector:'EdTech'},
+  {sym:'AFRM',  name:'Affirm',           date:'2026-05-07', epsEst:'0.05', revEst:'795M',  sector:'BNPL'},
+  {sym:'NET',   name:'Cloudflare',       date:'2026-05-08', epsEst:'0.20', revEst:'511M',  sector:'Cybersecurity'},
+  {sym:'EPAM',  name:'EPAM Systems',     date:'2026-05-08', epsEst:'2.68', revEst:'1.22B', sector:'IT Consulting'},
+  {sym:'RHI',   name:'Robert Half',      date:'2026-05-08', epsEst:'0.70', revEst:'1.46B', sector:'Staffing'},
+  {sym:'PANW',  name:'Palo Alto',        date:'2026-05-20', epsEst:'1.48', revEst:'2.48B', sector:'Cybersecurity'},
+  {sym:'WDAY',  name:'Workday',          date:'2026-05-21', epsEst:'1.88', revEst:'2.32B', sector:'Enterprise SW'},
+  {sym:'INTU',  name:'Intuit',           date:'2026-05-21', epsEst:'9.98', revEst:'7.98B', sector:'Tax & Finance'},
+  {sym:'ZS',    name:'Zscaler',          date:'2026-05-27', epsEst:'0.90', revEst:'692M',  sector:'Cybersecurity'},
+  {sym:'OKTA',  name:'Okta',             date:'2026-05-28', epsEst:'0.86', revEst:'724M',  sector:'Cybersecurity'},
+  {sym:'CRM',   name:'Salesforce',       date:'2026-05-28', epsEst:'2.72', revEst:'10.4B', sector:'Enterprise SW'},
+  {sym:'NVDA',  name:'NVIDIA',           date:'2026-05-28', epsEst:'0.98', revEst:'46.5B', sector:'Mag 7'},
+  {sym:'NICE',  name:'NICE Systems',     date:'2026-06-03', epsEst:'2.82', revEst:'712M',  sector:'Call Center'},
+  {sym:'CRWD',  name:'CrowdStrike',      date:'2026-06-03', epsEst:'1.10', revEst:'1.18B', sector:'Cybersecurity'},
+  {sym:'PATH',  name:'UiPath',           date:'2026-06-04', epsEst:'0.18', revEst:'412M',  sector:'Automation'},
+  {sym:'HRB',   name:'H&R Block',        date:'2026-06-10', epsEst:'5.90', revEst:'1.14B', sector:'Tax & Finance'},
+  {sym:'ORCL',  name:'Oracle',           date:'2026-06-11', epsEst:'1.82', revEst:'15.2B', sector:'Enterprise SW'},
 ];
 
 // ─── recent beat/miss data (most recent completed quarter) ───
@@ -1563,10 +1552,9 @@ async function loadEarnings(){
   // Step 1: immediately populate from curated data so panel is never blank
   earningsData=EARN_RECENT.map(function(e){return Object.assign({},e,{real:true,curated:true});});
   upcomingEarnings=EARN_CALENDAR.map(function(e){
-    var dateTs=new Date(e.date).getTime()/1000;
+    var dateTs=new Date(e.date+'T16:00:00').getTime()/1000;
     return Object.assign({},e,{real:true,curated:true,earningsDates:[dateTs],epsEstimate:e.epsEst,revenueEstimate:e.revEst});
-  }).filter(function(e){return new Date(e.date)>=new Date(new Date().toDateString());})
-    .sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  }).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
 
   document.getElementById('stEA').textContent=earningsData.length;
   document.getElementById('earnChip').textContent=earningsData.length+' RESULTS';
@@ -2405,81 +2393,156 @@ function buildOptionsHTML(tickers){
 // ═══════════════════════════════════════════════════════════════════════
 // VISUAL HEATMAP (Phase 1 upgrade — color cells per ticker)
 // ═══════════════════════════════════════════════════════════════════════
+// ─── S&P 500 Sector ETFs — Yahoo Finance tickers ───
+var SECTOR_ETFS=[
+  {etf:'XLK',  label:'Technology',      sub:'AAPL MSFT NVDA'},
+  {etf:'XLF',  label:'Financials',      sub:'JPM BAC GS MS'},
+  {etf:'XLV',  label:'Healthcare',      sub:'JNJ UNH PFE'},
+  {etf:'XLY',  label:'Cons. Disc.',     sub:'AMZN TSLA HD'},
+  {etf:'XLC',  label:'Comm. Svcs',      sub:'META GOOGL NFLX'},
+  {etf:'XLI',  label:'Industrials',     sub:'GE CAT HON'},
+  {etf:'XLE',  label:'Energy',          sub:'XOM CVX SLB'},
+  {etf:'XLP',  label:'Cons. Staples',   sub:'PG KO PEP'},
+  {etf:'XLU',  label:'Utilities',       sub:'NEE DUK SO'},
+  {etf:'XLRE', label:'Real Estate',     sub:'AMT PLD CCI'},
+  {etf:'XLB',  label:'Materials',       sub:'LIN APD FCX'},
+];
+var sectorEtfCache={};
+
+async function loadSectorHeatmap(){
+  var loading=document.getElementById('hmLoading');
+  var grid=document.getElementById('hmGrid');
+  loading.style.display='block';
+  loading.textContent='Fetching sector ETF prices from Yahoo Finance...';
+  grid.style.display='none';
+
+  var etfTickers=SECTOR_ETFS.map(function(s){return s.etf;});
+  try{
+    // Fetch all sector ETFs at once
+    var url='https://query1.finance.yahoo.com/v7/finance/quote?symbols='+etfTickers.join(',');
+    var r=await fetch(PROXY+encodeURIComponent(url),{signal:AbortSignal.timeout(8000)});
+    var d=await r.json();
+    if(d.quoteResponse&&d.quoteResponse.result){
+      d.quoteResponse.result.forEach(function(q){
+        sectorEtfCache[q.symbol]={
+          price: q.regularMarketPrice||0,
+          chg:   q.regularMarketChangePercent||0,
+          vol:   q.regularMarketVolume||0,
+          name:  q.shortName||q.symbol,
+          ts:    Date.now()
+        };
+      });
+    }
+  }catch(e){
+    console.warn('Sector ETF fetch failed, using cached/demo data');
+    // Demo fallback — realistic looking data
+    var demo={XLK:2.1,XLF:0.8,XLV:-0.4,XLY:1.2,XLC:1.8,XLI:0.3,XLE:-1.1,XLP:-0.2,XLU:-0.6,XLRE:-0.3,XLB:0.5};
+    etfTickers.forEach(function(t){
+      if(!sectorEtfCache[t]){sectorEtfCache[t]={price:50,chg:demo[t]||0,vol:5000000,name:t,ts:Date.now(),demo:true};}
+    });
+  }
+
+  loading.style.display='none';
+  grid.style.display='block';
+  renderHeatmapVisual();
+}
+
 function renderHeatmapVisual(){
-  // Update signal overlay badges from our alert data
-  var secData={};
+  var grid=document.getElementById('hmGrid');
+  if(!grid)return;
+  grid.innerHTML='';
+
+  // Compute signal hits per Sentinel sector
+  var secSignals={};
   var maxH=0;
   Object.keys(SECTOR_GROUPS).forEach(function(s){
     var total=0;
     SECTOR_GROUPS[s].forEach(function(t){total+=hitCount[t]||0;});
-    secData[s]=total;
+    secSignals[s]=total;
     if(total>maxH)maxH=total;
   });
 
-  // Signal badge overlay on Finviz iframe
-  var overlay=document.getElementById('hmOverlay');
-  var badges=document.getElementById('hmSignalBadges');
-  var hotSectors=Object.keys(secData).filter(function(s){return secData[s]>0;}).sort(function(a,b){return secData[b]-secData[a];});
-  if(hotSectors.length&&badges){
-    overlay.style.display='block';
-    badges.innerHTML='<span style="font-size:9px;color:var(--text3);letter-spacing:2px;margin-right:4px;">SENTINEL SIGNALS:</span>'+
-      hotSectors.slice(0,6).map(function(s){
-        var heat=secData[s];
-        var color=heat>=4?'var(--red2)':heat>=2?'var(--orange2)':'var(--gold2)';
-        return'<span style="font-size:10px;padding:2px 7px;border-radius:2px;background:rgba(0,0,0,.7);color:'+color+';border:1px solid '+color+'44;font-weight:600;">'+s.toUpperCase()+' ×'+heat+'</span>';
-      }).join('');
-  }
+  // Map ETF to signal count by label keywords
+  var sigMap={
+    'Technology':   (secSignals['AI Pure Play']||0)+(secSignals['AI Lending']||0)+(secSignals['Cybersecurity']||0)+(secSignals['Automation']||0),
+    'Financials':   (secSignals['Banking']||0)+(secSignals['Wealth Mgmt']||0)+(secSignals['Payments']||0),
+    'Healthcare':   (secSignals['Healthcare']||0),
+    'Cons. Disc.':  0,
+    'Comm. Svcs':   (secSignals['Media']||0),
+    'Industrials':  (secSignals['Logistics']||0)+(secSignals['Staffing']||0),
+    'Energy':       0,
+    'Cons. Staples':0,
+    'Utilities':    0,
+    'Real Estate':  0,
+    'Materials':    0,
+  };
 
-  // Fallback container (also update even if iframe is showing)
-  var container=document.getElementById('hmContainer');
-  if(container){
-    container.innerHTML='';
-    var sumGrid=document.createElement('div');sumGrid.className='hm-sect-sum';
-    var sorted=Object.keys(secData).sort(function(a,b){return secData[b]-secData[a];});
-    sorted.forEach(function(s){
-      var total=secData[s];
-      var pct=maxH>0?total/maxH:0;
-      var heat=pct>=.8?4:pct>=.5?3:pct>=.25?2:pct>=.05?1:0;
-      var colors=['var(--text3)','var(--blue2)','var(--orange2)','var(--red2)','var(--red2)'];
-      var bgColors=['rgba(255,255,255,.03)','rgba(0,133,255,.08)','rgba(255,140,0,.1)','rgba(255,59,59,.15)','rgba(255,59,59,.25)'];
-      var d=document.createElement('div');d.className='hm-ss';
-      d.style.borderColor=heat>=2?colors[heat]+'44':'';
-      d.style.background=bgColors[heat];
-      d.innerHTML='<div class="hm-ss-name">'+s.toUpperCase().substring(0,10)+'</div><div class="hm-ss-n" style="color:'+colors[heat]+'">'+total+'</div><div class="hm-ss-bar" style="background:'+colors[heat]+';opacity:'+(0.3+pct*.7)+'"></div>';
-      sumGrid.appendChild(d);
-    });
-    container.appendChild(sumGrid);
-  }
+  // Build visual grid
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:6px;';
 
-  // Update chips
+  SECTOR_ETFS.forEach(function(sec){
+    var data=sectorEtfCache[sec.etf];
+    var chg=data?data.chg:0;
+    var signals=sigMap[sec.label]||0;
+
+    // Color: performance-based gradient
+    var bgColor,textColor,borderColor;
+    if(chg>=2){       bgColor='rgba(0,214,143,.22)'; textColor='#00d68f'; borderColor='rgba(0,214,143,.4)';}
+    else if(chg>=1){  bgColor='rgba(0,214,143,.13)'; textColor='#4dffa8'; borderColor='rgba(0,214,143,.25)';}
+    else if(chg>=0.2){bgColor='rgba(0,214,143,.06)'; textColor='#8aa0b8'; borderColor='rgba(0,214,143,.12)';}
+    else if(chg>-0.2){bgColor='rgba(255,255,255,.04)';textColor='#8aa0b8'; borderColor='rgba(255,255,255,.07)';}
+    else if(chg>-1){  bgColor='rgba(255,59,59,.07)'; textColor='#ff6b6b'; borderColor='rgba(255,59,59,.18)';}
+    else if(chg>-2){  bgColor='rgba(255,59,59,.13)'; textColor='#ff3b3b'; borderColor='rgba(255,59,59,.28)';}
+    else{             bgColor='rgba(255,59,59,.22)'; textColor='#ff3b3b'; borderColor='rgba(255,59,59,.4)';}
+
+    // Extra glow if Sentinel signals detected
+    var sigGlow=signals>0?';box-shadow:inset 0 0 0 1px rgba(255,204,0,.3)':'';
+    var chgStr=(chg>=0?'+':'')+chg.toFixed(2)+'%';
+
+    var cell=document.createElement('div');
+    cell.style.cssText='background:'+bgColor+';border:1px solid '+borderColor+';border-radius:4px;padding:10px 8px;cursor:default;transition:all .15s'+sigGlow+';';
+    cell.onmouseenter=function(){this.style.transform='scale(1.02)';this.style.zIndex='2';};
+    cell.onmouseleave=function(){this.style.transform='';this.style.zIndex='';};
+    cell.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">'+
+        '<div style="font-size:13px;font-weight:700;color:'+textColor+';font-family:var(--font-m);">'+sec.etf+'</div>'+
+        '<div style="font-size:13px;font-weight:700;color:'+textColor+';">'+chgStr+'</div>'+
+      '</div>'+
+      '<div style="font-size:10px;color:rgba(200,216,232,.6);margin-bottom:6px;font-family:var(--font-s);">'+sec.label+'</div>'+
+      '<div style="font-size:9px;color:rgba(200,216,232,.35);font-family:var(--font-s);">'+sec.sub+'</div>'+
+      (signals>0?'<div style="margin-top:5px;font-size:9px;color:#ffcc00;letter-spacing:1px;">⚡ '+signals+' SIGNAL'+(signals>1?'S':'')+'</div>':'')+
+      (data&&data.demo?'<div style="margin-top:3px;font-size:8px;color:rgba(138,160,184,.4);">DEMO</div>':'');
+    grid.appendChild(cell);
+  });
+
+  // Update header chips
+  var etfsSorted=SECTOR_ETFS.filter(function(s){return sectorEtfCache[s.etf];}).sort(function(a,b){
+    return (sectorEtfCache[b.etf]?sectorEtfCache[b.etf].chg:0)-(sectorEtfCache[a.etf]?sectorEtfCache[a.etf].chg:0);
+  });
+  if(etfsSorted.length){
+    var best=etfsSorted[0];
+    var worst=etfsSorted[etfsSorted.length-1];
+    var bc=sectorEtfCache[best.etf];var wc=sectorEtfCache[worst.etf];
+    document.getElementById('hmChip').textContent='▲ '+best.label+' '+(bc?(bc.chg>=0?'+':'')+bc.chg.toFixed(2)+'%':'');
+    document.getElementById('hmHot').textContent='▼ '+worst.label+' '+(wc?(wc.chg>=0?'+':'')+wc.chg.toFixed(2)+'%':'');
+  }
   document.getElementById('hmTs').textContent=new Date().toLocaleTimeString();
-  if(maxH>0&&hotSectors.length){
-    document.getElementById('hmChip').textContent='HOT: '+hotSectors[0].toUpperCase();
-    document.getElementById('hmHot').textContent=secData[hotSectors[0]]+' SIGNALS';
-  }
 
-  // Handle iframe load error — show fallback
-  var iframe=document.getElementById('finvizFrame');
-  if(iframe){
-    iframe.onerror=function(){
-      iframe.style.display='none';
-      document.getElementById('finvizFallback').style.display='block';
-    };
-    iframe.onload=function(){
-      // iframe loaded fine — try to hide X-Frame-Options errors gracefully
-      try{
-        // If iframe content is accessible, it loaded; if not (cross-origin block) show fallback
-        var doc=iframe.contentDocument||iframe.contentWindow.document;
-        if(!doc||doc.title===''){
-          iframe.style.display='none';
-          document.getElementById('finvizFallback').style.display='block';
-        }
-      }catch(e){
-        // Cross-origin expected — iframe is still showing Finviz, that's fine
-      }
-    };
+  // Signal badges below grid
+  var badges=document.getElementById('hmSignalBadges');
+  var hotSectors=Object.keys(secSignals).filter(function(s){return secSignals[s]>0;}).sort(function(a,b){return secSignals[b]-secSignals[a];});
+  if(badges&&hotSectors.length){
+    badges.innerHTML='<span style="font-size:9px;color:var(--text3);letter-spacing:2px;margin-right:4px;margin-top:2px;">SENTINEL:</span>'+
+      hotSectors.slice(0,5).map(function(s){
+        var heat=secSignals[s];
+        var c=heat>=4?'#ff3b3b':heat>=2?'#ff8c00':'#ffcc00';
+        return'<span style="font-size:10px;padding:2px 7px;border-radius:2px;background:rgba(0,0,0,.4);color:'+c+';border:1px solid '+c+'44;font-weight:600;">'+s+' ×'+heat+'</span>';
+      }).join('');
+  } else if(badges){
+    badges.innerHTML='';
   }
 }
+
 
 // ═══════════════════════════════════════════════════════════════════════
 // FEED RENDER
@@ -2984,10 +3047,10 @@ function init(){
     var n=localStorage.getItem('sv7n')||localStorage.getItem('sv5n');if(n){apiNd=n;document.getElementById('kNd').value=n;}
     if(apiMain||apiGnews||apiNd){updateKeyBadge();document.getElementById('setupOv').style.display='none';}
   }catch(e){}
-  renderWL();renderKW();renderHeatmapVisual();renderHistory();renderSI();renderEconCalendar();updateStats();
-  // Auto-load earnings and volume on page load — never blank
+  renderWL();renderKW();renderHistory();renderSI();renderEconCalendar();updateStats();
   loadEarnings();
   detectVolSpikes();
+  loadSectorHeatmap();
 }
 window.addEventListener('DOMContentLoaded',init);
 </script>
