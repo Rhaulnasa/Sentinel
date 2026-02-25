@@ -1545,46 +1545,120 @@ async function fetchEarningsForTicker(t){
   }catch(e){return null;}
 }
 
+// ─── Fetch one date from Nasdaq earnings calendar API ───
+async function fetchNasdaqEarningsDate(dateStr){
+  try{
+    var url='https://api.nasdaq.com/api/calendar/earnings?date='+dateStr;
+    var r=await fetch(PROXY+encodeURIComponent(url),{
+      signal:AbortSignal.timeout(8000),
+      headers:{'Accept':'application/json'}
+    });
+    var d=await r.json();
+    if(d&&d.data&&d.data.rows&&d.data.rows.length){
+      return d.data.rows.map(function(row){
+        // Nasdaq API fields: symbol, name, marketCap, fiscalQuarterEnding, epsForecast, noOfEsts, lastYearRptDt, lastYearEPS, time
+        var sym=(row.symbol||'').replace(/[^A-Z]/g,'');
+        if(!sym)return null;
+        var epsEst=row.epsForecast&&row.epsForecast!=='N/A'?row.epsForecast:null;
+        var lastYrEps=row.lastYearEPS&&row.lastYearEPS!=='N/A'?row.lastYearEPS:null;
+        var time=row.time||'';// 'time-pre-market', 'time-after-hours', 'time-not-supplied'
+        var timeLabel=time==='time-pre-market'?'PRE':time==='time-after-hours'?'AH':'';
+        var wl=WL.find(function(w){return w.t===sym;});
+        return{
+          sym:sym,
+          name:row.name||( wl?wl.n:sym),
+          date:dateStr,
+          epsEst:epsEst,
+          epsEstimate:epsEst,
+          lastYearEPS:lastYrEps,
+          quarter:row.fiscalQuarterEnding||'',
+          noOfEsts:row.noOfEsts||'',
+          timeLabel:timeLabel,
+          sector:wl?wl.s:'',
+          earningsDates:[new Date(dateStr+'T16:00:00').getTime()/1000],
+          real:true,
+          nasdaq:true
+        };
+      }).filter(Boolean);
+    }
+    return[];
+  }catch(e){return[];}
+}
+
+// ─── Get date string YYYY-MM-DD for offset from today ───
+function dateOffset(days){
+  var d=new Date();d.setDate(d.getDate()+days);
+  return d.toISOString().slice(0,10);
+}
+
 async function loadEarnings(){
-  document.getElementById('earnList').innerHTML='<div class="earn-loading">Loading earnings data...</div>';
+  var listEl=document.getElementById('earnList');
+  listEl.innerHTML='<div class="earn-loading">Loading earnings from Nasdaq...</div>';
   document.getElementById('earnChip').textContent='LOADING...';
 
-  // Step 1: immediately populate from curated data so panel is never blank
+  // Step 1: show curated fallback immediately so panel is never blank
   earningsData=EARN_RECENT.map(function(e){return Object.assign({},e,{real:true,curated:true});});
   upcomingEarnings=EARN_CALENDAR.map(function(e){
     var dateTs=new Date(e.date+'T16:00:00').getTime()/1000;
     return Object.assign({},e,{real:true,curated:true,earningsDates:[dateTs],epsEstimate:e.epsEst,revenueEstimate:e.revEst});
   }).sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  document.getElementById('stEA').textContent=earningsData.length;
+  document.getElementById('earnChip').textContent='LOADING NASDAQ...';
+  renderEarnings();
+
+  // Step 2: Fetch Nasdaq earnings API — today through next 14 days for upcoming, past 5 days for recent
+  var fetchDates=[];
+  for(var i=-5;i<=14;i++){fetchDates.push(dateOffset(i));}
+
+  var nasdaqRecent=[];
+  var nasdaqUpcoming=[];
+  var today=new Date().toISOString().slice(0,10);
+  var liveCount=0;
+
+  for(var j=0;j<fetchDates.length;j++){
+    var dateStr=fetchDates[j];
+    var rows=await fetchNasdaqEarningsDate(dateStr);
+    if(rows.length){
+      liveCount+=rows.length;
+      if(dateStr<=today){
+        nasdaqRecent=nasdaqRecent.concat(rows);
+      } else {
+        nasdaqUpcoming=nasdaqUpcoming.concat(rows);
+      }
+    }
+    await new Promise(function(r){setTimeout(r,150);});
+  }
+
+  if(liveCount>0){
+    // Merge Nasdaq live data with curated — Nasdaq data takes priority for matching symbols
+    // For recent: use Nasdaq rows that have epsForecast, supplement with curated
+    var nasdaqSymsRecent=nasdaqRecent.map(function(e){return e.sym;});
+    var curatedRecentExtra=EARN_RECENT.filter(function(e){
+      return!nasdaqSymsRecent.includes(e.sym);
+    }).map(function(e){return Object.assign({},e,{real:true,curated:true});});
+    earningsData=nasdaqRecent.concat(curatedRecentExtra);
+
+    // For upcoming: replace curated with Nasdaq live, keep curated entries not in Nasdaq
+    var nasdaqSymsUp=nasdaqUpcoming.map(function(e){return e.sym;});
+    var curatedUpExtra=EARN_CALENDAR.filter(function(e){
+      return!nasdaqSymsUp.includes(e.sym)&&new Date(e.date)>new Date();
+    }).map(function(e){
+      var dateTs=new Date(e.date+'T16:00:00').getTime()/1000;
+      return Object.assign({},e,{real:true,curated:true,earningsDates:[dateTs],epsEstimate:e.epsEst,revenueEstimate:e.revEst});
+    });
+    upcomingEarnings=nasdaqUpcoming.concat(curatedUpExtra).sort(function(a,b){
+      return new Date(a.date)-new Date(b.date);
+    });
+
+    document.getElementById('earnSrc').textContent='SOURCE: NASDAQ.COM LIVE · '+liveCount+' REPORTS · '+new Date().toLocaleTimeString();
+  } else {
+    document.getElementById('earnSrc').textContent='SOURCE: CURATED DATA (NASDAQ UNAVAILABLE) · '+new Date().toLocaleTimeString();
+  }
 
   document.getElementById('stEA').textContent=earningsData.length;
   document.getElementById('earnChip').textContent=earningsData.length+' RESULTS';
-  document.getElementById('earnSrc').textContent='SOURCE: CURATED + YAHOO FINANCE · '+new Date().toLocaleTimeString();
   renderEarnings();
   bump();
-
-  // Step 2: try to enrich with live Yahoo Finance data in background (top 10 tickers)
-  var topTickers=['IBM','MSFT','GOOGL','AMZN','META','NVDA','ACN','CTSH','CRWD','JPM'];
-  var liveResults=[];
-  for(var i=0;i<topTickers.length;i++){
-    var r=await fetchEarningsForTicker(topTickers[i]);
-    if(r&&r.live)(liveResults.push(r));
-    await new Promise(function(res){setTimeout(res,180);});
-  }
-  // Merge live data over curated entries
-  liveResults.forEach(function(live){
-    var idx=earningsData.findIndex(function(e){return e.sym===live.sym;});
-    if(idx>=0&&(live.epsActual||live.beat!==undefined)){
-      earningsData[idx]=Object.assign({},earningsData[idx],live,{curated:false});
-    }
-    var uidx=upcomingEarnings.findIndex(function(e){return e.sym===live.sym;});
-    if(uidx>=0&&live.earningsDates&&live.earningsDates.length){
-      upcomingEarnings[uidx]=Object.assign({},upcomingEarnings[uidx],live,{curated:false});
-    }
-  });
-  if(liveResults.length){
-    document.getElementById('earnSrc').textContent='SOURCE: YAHOO FINANCE LIVE · '+new Date().toLocaleTimeString();
-    renderEarnings();
-  }
 }
 
 function renderEarnings(){
@@ -1595,8 +1669,9 @@ function renderEarnings(){
       list.innerHTML='<div class="earn-loading">Loading earnings data...</div>';
       return;
     }
-    // sort: misses first (most notable for disruption), then beats
     data.sort(function(a,b){
+      var da=a.date||'0000-00-00';var db=b.date||'0000-00-00';
+      if(da!==db)return db>da?1:-1;
       var sa=(a.miss?2:0)+(a.beat?1:0);
       var sb=(b.miss?2:0)+(b.beat?1:0);
       return sb-sa;
@@ -1604,33 +1679,43 @@ function renderEarnings(){
     data.forEach(function(e){
       var wl=WL.find(function(w){return w.t===e.sym;});
       var p=priceCache[e.sym];
-      var cls=e.beat?'beat':e.miss?'miss':'';
       var surpriseNum=e.epsSurprise?parseFloat(e.epsSurprise):0;
+      var hasBeatMiss=e.beat||e.miss;
+      var cls=e.beat?'beat':e.miss?'miss':'';
+      var displayDate=e.date?new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
       var div=document.createElement('div');
       div.className='earn-item '+cls;
       div.innerHTML=
         '<div class="earn-hd">'+
           '<div class="earn-sym" style="color:'+(e.beat?'var(--green2)':e.miss?'var(--red2)':'var(--text)')+'">'+e.sym+'</div>'+
-          (e.beat?'<span class="earn-badge eb-beat">BEAT</span>':e.miss?'<span class="earn-badge eb-miss">MISS</span>':'<span class="earn-badge" style="background:rgba(255,255,255,.05);color:var(--text3);border:1px solid var(--b2);">INLINE</span>')+
-          '<div class="earn-co">'+(e.name||(wl?wl.n:''))+'</div>'+
-          (e.period?'<span style="font-size:10px;color:var(--text3);margin-left:auto;">'+e.period+'</span>':'')+
-          (p?'<span style="font-size:11px;color:'+(p.chg>=0?'var(--green2)':'var(--red2)')+';">'+(p.chg>=0?'▲':'▼')+Math.abs(p.chg).toFixed(2)+'%</span>':'')+
+          (hasBeatMiss
+            ?(e.beat?'<span class="earn-badge eb-beat">BEAT</span>':'<span class="earn-badge eb-miss">MISS</span>')
+            :(e.nasdaq
+              ?'<span class="earn-badge" style="background:rgba(0,133,255,.1);color:var(--blue2);border:1px solid rgba(0,133,255,.25);">NASDAQ</span>'
+              :'<span class="earn-badge" style="background:rgba(255,255,255,.04);color:var(--text3);border:1px solid var(--b2);">CURATED</span>'))+
+          (e.timeLabel?'<span style="font-size:9px;padding:1px 5px;background:rgba(0,212,255,.08);color:var(--cyan2);border-radius:2px;border:1px solid rgba(0,212,255,.15);">'+e.timeLabel+'</span>':'')+
+          '<div class="earn-co" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(e.name||(wl?wl.n:''))+'</div>'+
+          (e.quarter?'<span style="font-size:9px;color:var(--text3);">'+e.quarter+'</span>':e.period?'<span style="font-size:9px;color:var(--text3);">'+e.period+'</span>':'')+
+          (displayDate?'<span style="font-size:10px;color:var(--text3);margin-left:4px;">'+displayDate+'</span>':'')+
+          (p?'<span style="font-size:11px;color:'+(p.chg>=0?'var(--green2)':'var(--red2)')+';">'+( p.chg>=0?'\u25b2':'\u25bc')+Math.abs(p.chg).toFixed(2)+'%</span>':'')+
         '</div>'+
         '<div class="earn-data">'+
-          '<div class="earn-cell"><div class="earn-lbl">EPS ACTUAL</div><div class="earn-val '+(e.beat?'earn-beat':e.miss?'earn-miss':'earn-neutral')+'">'+(e.epsActual||'—')+'</div></div>'+
-          '<div class="earn-cell"><div class="earn-lbl">EPS EST</div><div class="earn-val earn-neutral">'+(e.epsEst||'—')+'</div></div>'+
-          '<div class="earn-cell"><div class="earn-lbl">REV ACTUAL</div><div class="earn-val earn-neutral">'+(e.revActual||'—')+'</div></div>'+
-          '<div class="earn-cell"><div class="earn-lbl">SURPRISE</div><div class="earn-val '+(surpriseNum>0?'earn-beat':surpriseNum<0?'earn-miss':'earn-neutral')+'">'+(e.epsSurprise||'—')+'</div></div>'+
-        '</div>'+
-        (e.curated?'':'');
+          '<div class="earn-cell"><div class="earn-lbl">'+(hasBeatMiss?'EPS ACTUAL':'EPS FORECAST')+'</div><div class="earn-val '+(e.beat?'earn-beat':e.miss?'earn-miss':'earn-neutral')+'">'+(e.epsActual||e.epsEst||'—')+'</div></div>'+
+          '<div class="earn-cell"><div class="earn-lbl">'+(hasBeatMiss?'EPS EST':'LAST YR EPS')+'</div><div class="earn-val earn-neutral">'+(hasBeatMiss?(e.epsEst||'—'):(e.lastYearEPS||'—'))+'</div></div>'+
+          '<div class="earn-cell"><div class="earn-lbl">'+(hasBeatMiss?'REVENUE':'# ESTS')+'</div><div class="earn-val earn-neutral">'+(hasBeatMiss?(e.revActual||'—'):(e.noOfEsts||'—'))+'</div></div>'+
+          '<div class="earn-cell"><div class="earn-lbl">'+(hasBeatMiss?'SURPRISE':'SECTOR')+'</div><div class="earn-val '+(hasBeatMiss?(surpriseNum>0?'earn-beat':surpriseNum<0?'earn-miss':'earn-neutral'):'')+'">'+
+            (hasBeatMiss?(e.epsSurprise||'—'):(e.sector||(wl?wl.s:'')||'—'))+
+          '</div></div>'+
+        '</div>';
       list.appendChild(div);
     });
   } else {
     var upcoming=upcomingEarnings;
     if(!upcoming.length){
-      list.innerHTML='<div class="earn-loading">No upcoming earnings found</div>';
+      list.innerHTML='<div class="earn-loading">No upcoming earnings — data loading...</div>';
       return;
     }
+    var todayStr=new Date().toISOString().slice(0,10);
     upcoming.sort(function(a,b){
       var da=a.date?new Date(a.date).getTime():(a.earningsDates&&a.earningsDates[0]?a.earningsDates[0]*1000:9e12);
       var db=b.date?new Date(b.date).getTime():(b.earningsDates&&b.earningsDates[0]?b.earningsDates[0]*1000:9e12);
@@ -1638,29 +1723,32 @@ function renderEarnings(){
     });
     upcoming.forEach(function(e){
       var wl=WL.find(function(w){return w.t===e.sym;});
-      var earnDate=e.date||( e.earningsDates&&e.earningsDates[0]?new Date(e.earningsDates[0]*1000).toISOString().slice(0,10):null);
-      var displayDate=earnDate?new Date(earnDate).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'TBD';
-      var daysUntil=earnDate?Math.round((new Date(earnDate)-new Date(new Date().toDateString()))/(1000*86400)):null;
+      var earnDate=e.date||(e.earningsDates&&e.earningsDates[0]?new Date(e.earningsDates[0]*1000).toISOString().slice(0,10):null);
+      var displayDate=earnDate?new Date(earnDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}):'TBD';
+      var daysUntil=earnDate?Math.round((new Date(earnDate)-new Date(todayStr))/(1000*86400)):null;
       var isToday=daysUntil===0;
-      var isThisWeek=daysUntil!==null&&daysUntil>=0&&daysUntil<=7;
-      var isNext2Weeks=daysUntil!==null&&daysUntil>7&&daysUntil<=14;
+      var isTomorrow=daysUntil===1;
+      var isThisWeek=daysUntil!==null&&daysUntil>=0&&daysUntil<=5;
+      var isNext2Weeks=daysUntil!==null&&daysUntil>5&&daysUntil<=14;
       var p=priceCache[e.sym];
       var div=document.createElement('div');
-      div.className='earn-item upcoming'+(isToday?' beat':isThisWeek?' ':' ');
+      div.className='earn-item upcoming'+(isToday?' beat':'');
       div.innerHTML=
         '<div class="earn-hd">'+
           '<div class="earn-sym" style="color:'+(isToday?'var(--gold2)':isThisWeek?'var(--cyan2)':'var(--text)')+'">'+e.sym+'</div>'+
-          (isToday?'<span class="earn-badge" style="background:rgba(255,204,0,.2);color:var(--gold2);border:1px solid rgba(255,204,0,.3);">TODAY</span>':
+          (isToday?'<span class="earn-badge" style="background:rgba(255,204,0,.2);color:var(--gold2);border:1px solid rgba(255,204,0,.4);">TODAY</span>':
+           isTomorrow?'<span class="earn-badge eb-up">TOMORROW</span>':
            isThisWeek?'<span class="earn-badge eb-up">'+daysUntil+'d</span>':
-           isNext2Weeks?'<span class="earn-badge" style="background:rgba(0,212,255,.08);color:var(--cyan2);border:1px solid rgba(0,212,255,.18);">'+daysUntil+'d</span>':
+           isNext2Weeks?'<span class="earn-badge" style="background:rgba(0,212,255,.07);color:var(--cyan2);border:1px solid rgba(0,212,255,.15);">'+daysUntil+'d</span>':
            (daysUntil!==null?'<span style="font-size:10px;color:var(--text3);">in '+daysUntil+'d</span>':''))+
-          '<div class="earn-co">'+(e.name||(wl?wl.n:''))+'</div>'+
-          '<div class="earn-date" style="margin-left:auto;">'+displayDate+'</div>'+
+          (e.timeLabel?'<span style="font-size:9px;padding:1px 5px;background:rgba(0,212,255,.08);color:var(--cyan2);border-radius:2px;border:1px solid rgba(0,212,255,.15);">'+e.timeLabel+'</span>':'')+
+          '<div class="earn-co" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(e.name||(wl?wl.n:''))+'</div>'+
+          '<div class="earn-date" style="margin-left:4px;white-space:nowrap;font-size:10px;color:var(--text3);">'+displayDate+'</div>'+
         '</div>'+
         '<div class="earn-data">'+
-          '<div class="earn-cell"><div class="earn-lbl">EPS EST</div><div class="earn-val earn-neutral">'+(e.epsEst||e.epsEstimate||e.forwardEPS||'—')+'</div></div>'+
-          '<div class="earn-cell"><div class="earn-lbl">REV EST</div><div class="earn-val earn-neutral">'+(e.revEst||e.revenueEstimate||'—')+'</div></div>'+
-          '<div class="earn-cell"><div class="earn-lbl">SECTOR</div><div class="earn-val" style="color:var(--text2);font-size:10px;">'+(e.sector||wl&&wl.s||'—')+'</div></div>'+
+          '<div class="earn-cell"><div class="earn-lbl">EPS EST</div><div class="earn-val earn-neutral">'+(e.epsEst||e.epsEstimate||'—')+'</div></div>'+
+          '<div class="earn-cell"><div class="earn-lbl">LAST YR EPS</div><div class="earn-val earn-neutral">'+(e.lastYearEPS||'—')+'</div></div>'+
+          '<div class="earn-cell"><div class="earn-lbl">SECTOR</div><div class="earn-val" style="color:var(--text2);font-size:10px;">'+(e.sector||(wl?wl.s:'')||'—')+'</div></div>'+
           '<div class="earn-cell"><div class="earn-lbl">PRICE</div><div class="earn-val" style="color:'+(p?(p.chg>=0?'var(--green2)':'var(--red2)'):'var(--text3)')+'">'+( p?'$'+p.price.toFixed(2):'—')+'</div></div>'+
         '</div>';
       list.appendChild(div);
