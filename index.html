@@ -2557,30 +2557,22 @@ function updateStats(){
 // MISC HELPERS
 // ═══════════════════════════════════════════════════
 function doActivate(){
-  // Hide overlay IMMEDIATELY — nothing should block entry
   var ov=document.getElementById('setupOv');
-  if(ov){ov.style.display='none';ov.style.visibility='hidden';ov.style.pointerEvents='none';}
+  if(ov){ov.style.display='none';}
   try{
-    var k=document.getElementById('kMain').value.trim();
-    var g=document.getElementById('kGnews').value.trim();
-    var n=document.getElementById('kNd').value.trim();
+    var k=(document.getElementById('kMain')||{value:''}).value.trim();
+    var g=(document.getElementById('kGnews')||{value:''}).value.trim();
+    var n=(document.getElementById('kNd')||{value:''}).value.trim();
     if(k.length>=20){apiMain=k;try{localStorage.setItem('sv7k',k);}catch(e){}}
     if(g.length>=10){apiGnews=g;try{localStorage.setItem('sv7g',g);}catch(e){}}
     if(n.length>=10){apiNd=n;try{localStorage.setItem('sv7n',n);}catch(e){}}
     mode='live';
     try{setMode('live');}catch(e){}
     try{updateKeyBadge();}catch(e){}
-  }catch(e){console.log('activate err:',e);}
+  }catch(e){console.log('activate:',e);}
 }
-function doSkip(){
-  var ov=document.getElementById('setupOv');
-  if(ov){ov.style.display='none';ov.style.visibility='hidden';ov.style.pointerEvents='none';}
-  mode='demo';try{setMode('demo');}catch(e){}
-}
-function showSetup(){
-  var ov=document.getElementById('setupOv');
-  if(ov){ov.style.display='flex';ov.style.visibility='visible';ov.style.pointerEvents='all';}
-}
+function doSkip(){mode='demo';setMode('demo');document.getElementById('setupOv').style.display='none';}
+function showSetup(){document.getElementById('setupOv').style.display='flex';}
 function updateKeyBadge(){
   var b=document.getElementById('keyBadge');var c=(apiMain?1:0)+(apiGnews?1:0)+(apiNd?1:0);
   b.textContent=c?'✅ '+(c+1)+' SRCS':'🔑 KEYS';b.className='pill p-key'+(c?' ok':'');
@@ -2616,7 +2608,8 @@ function startCD(){
 function shareAlert(id){
   var a=alerts.find(function(x){return x.id==id;});if(!a)return;
   var si=a.tks.map(function(t){var s=siCache[t];return s&&s.real&&s.shortPct!=null?t+'(SI:'+(s.shortPct*100).toFixed(0)+'%)':null;}).filter(Boolean).join(' ');
-  var txt='🚨 SENTINEL v7 — '+['ma'=>'M&A','earn'=>'EARNINGS','ai'=>'AI THREAT'][a.type]||'ALERT'+'\n['+a.sev+'] SCORE: '+(a.score||0)+'/100\n\n'+a.h.substring(0,200)+'\n\nSTOCKS: '+a.tks.join(' ')+(si?'\nSI: '+si:'')+'\n\nsentinelterminal.com';
+  var typeMap={'ma':'M&A','earn':'EARNINGS','ai':'AI THREAT','disruption':'DISRUPTION'};
+  var txt='🚨 SENTINEL v7 — '+(typeMap[a.type]||'ALERT')+'\n['+a.sev+'] SCORE: '+(a.score||0)+'/100\n\n'+a.h.substring(0,200)+'\n\nSTOCKS: '+a.tks.join(' ')+(si?'\nSI: '+si:'')+'\n\nsentinelterminal.com';
   window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(txt),'_blank');
 }
 function shareTop(){
@@ -2663,22 +2656,10 @@ function init(){
     var k=localStorage.getItem('sv7k')||localStorage.getItem('sv5k');if(k&&k.length>=20){apiMain=k;document.getElementById('kMain').value=k;}
     var g=localStorage.getItem('sv7g')||localStorage.getItem('sv5g');if(g){apiGnews=g;document.getElementById('kGnews').value=g;}
     var n=localStorage.getItem('sv7n')||localStorage.getItem('sv5n');if(n){apiNd=n;document.getElementById('kNd').value=n;}
-    // Auto-dismiss overlay if any keys already saved
-    if(apiMain||apiGnews||apiNd){
-      var ov=document.getElementById('setupOv');
-      if(ov){ov.style.display='none';ov.style.visibility='hidden';ov.style.pointerEvents='none';}
-      try{updateKeyBadge();}catch(e){}
-    }
+    if(apiMain||apiGnews||apiNd){updateKeyBadge();document.getElementById('setupOv').style.display='none';}
   }catch(e){}
-  try{renderWL();}catch(e){}
-  try{renderKW();}catch(e){}
-  try{renderHistory();}catch(e){}
-  try{renderSI();}catch(e){}
-  try{renderEconCalendar();}catch(e){}
-  try{updateStats();}catch(e){}
-  try{loadEarnings();}catch(e){}
-  try{detectVolSpikes();}catch(e){}
-  try{loadSectorHeatmap();}catch(e){}
+  renderWL();renderKW();renderHistory();renderSI();renderEconCalendar();updateStats();
+  loadEarnings();detectVolSpikes();loadSectorHeatmap();
 }
 window.addEventListener('DOMContentLoaded',init);
 </script>
