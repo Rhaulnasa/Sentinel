@@ -1573,57 +1573,95 @@ function cluster(list){
 // NEWS SOURCES
 // ═══════════════════════════════════════════════════
 async function fetchRSS(){
-  // Standard news RSS feeds
-  // CREDIBLE SOURCES ONLY — no aggregators, no clickbait blogs
+  // Direct XML parse via proxy — works from ANY hosted domain
+  // rss2json.com blocks hosted origins, only works on localhost/file://
+  async function fetchAndParseRSS(feedUrl, srcName, isTwitter){
+    var proxies=[
+      'https://api.allorigins.win/raw?url=',
+      'https://corsproxy.io/?',
+      'https://api.codetabs.com/v1/proxy?quest='
+    ];
+    var xml=null;
+    for(var pi=0;pi<proxies.length;pi++){
+      try{
+        var r=await fetch(proxies[pi]+encodeURIComponent(feedUrl),{signal:AbortSignal.timeout(8000)});
+        if(r.ok){xml=await r.text();break;}
+      }catch(e){}
+    }
+    if(!xml||xml.length<100)return [];
+    var items=[];
+    // Split on <item> tags
+    var parts=xml.split('<item');
+    for(var pi2=1;pi2<parts.length&&items.length<12;pi2++){
+      var block=parts[pi2];
+      var endIdx=block.indexOf('</item>');
+      if(endIdx>=0)block=block.slice(0,endIdx);
+      function extractTag(b,tag){
+        var re=new RegExp('<'+tag+'[^>]*>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?</'+tag+'>','i');
+        var m=b.match(re);
+        return m?m[1].replace(/<[^>]+>/g,'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim():'';
+      }
+      var title=extractTag(block,'title');
+      var link=extractTag(block,'link')||extractTag(block,'guid');
+      var desc=extractTag(block,'description').substring(0,120);
+      if(!title||title.length<10)continue;
+      if(!link||link.indexOf('http')<0){
+        var linkM=block.match(/https?:\/\/[^\s<"]+/);
+        link=linkM?linkM[0]:'#';
+      }
+      var headline=isTwitter?('['+srcName+'] '+title):(title+(desc?' — '+desc:''));
+      items.push({h:headline,src:srcName,url:link,isTwitter:isTwitter});
+    }
+    return items;
+  }
+
   var newsFeeds=[
-    {u:'https://feeds.reuters.com/reuters/businessNews',n:'Reuters'},
-    {u:'https://feeds.reuters.com/reuters/technologyNews',n:'Reuters Tech'},
-    {u:'https://feeds.reuters.com/reuters/companyNews',n:'Reuters Corp'},
+    {u:'https://feeds.reuters.com/reuters/businessNews',      n:'Reuters'},
+    {u:'https://feeds.reuters.com/reuters/technologyNews',    n:'Reuters Tech'},
+    {u:'https://feeds.reuters.com/reuters/companyNews',       n:'Reuters Corp'},
     {u:'https://www.cnbc.com/id/19854910/device/rss/rss.html',n:'CNBC'},
-    {u:'https://feeds.a.dj.com/rss/RSSWSJD.xml',n:'WSJ'},
-    {u:'https://www.ft.com/technology?format=rss',n:'FT'},
-    {u:'https://www.marketwatch.com/rss/topstories',n:'MarketWatch'},
-    {u:'https://feeds.bloomberg.com/markets/news.rss',n:'Bloomberg'},
-    {u:'https://techcrunch.com/category/enterprise/feed/',n:'TechCrunch Enterprise'},
-    {u:'https://fortune.com/feed/fortune-feeds/?id=3230629',n:'Fortune Finance'},
+    {u:'https://feeds.a.dj.com/rss/RSSWSJD.xml',             n:'WSJ'},
+    {u:'https://www.ft.com/technology?format=rss',            n:'FT'},
+    {u:'https://www.marketwatch.com/rss/topstories',          n:'MarketWatch'},
+    {u:'https://feeds.bloomberg.com/markets/news.rss',        n:'Bloomberg'},
+    {u:'https://techcrunch.com/category/enterprise/feed/',    n:'TechCrunch'},
+    {u:'https://fortune.com/feed/fortune-feeds/?id=3230629',  n:'Fortune'},
   ];
-  // Twitter/X accounts via multiple Nitter instances (RSS mirrors)
-  // Nitter is a public Twitter front-end that provides RSS feeds
-  var NITTER_INSTANCES=['https://nitter.privacydev.net','https://nitter.net','https://nitter.1d4.us','https://nitter.kavin.rocks'];
-  var N=NITTER_INSTANCES[Math.floor(Date.now()/3600000)%NITTER_INSTANCES.length]; // rotate hourly
+
+  var NITTER=['https://nitter.privacydev.net','https://nitter.net','https://nitter.1d4.us','https://nitter.kavin.rocks'];
+  var N=NITTER[Math.floor(Date.now()/3600000)%NITTER.length];
   var twitterFeeds=[
-    {u:N+'/FastStockNews/rss',n:'FastStockNews 🐦'},
-    {u:N+'/DeItaone/rss',n:'Bloomberg Delta1 🐦'},
-    {u:N+'/realDonaldTrump/rss',n:'Trump 🐦'},
-    {u:N+'/MarioNawfal/rss',n:'MarioNawfal 🐦'},
-    {u:N+'/zerohedge/rss',n:'ZeroHedge 🐦'},
-    {u:N+'/unusual_whales/rss',n:'UnusualWhales 🐦'},
-    {u:N+'/MarketCurrents/rss',n:'MarketCurrents 🐦'},
-    {u:N+'/elerianm/rss',n:'El-Erian 🐦'},
+    {u:N+'/FastStockNews/rss',  n:'FastStockNews'},
+    {u:N+'/DeItaone/rss',       n:'Bloomberg Delta1'},
+    {u:N+'/unusual_whales/rss', n:'UnusualWhales'},
+    {u:N+'/MarketCurrents/rss', n:'MarketCurrents'},
+    {u:N+'/elerianm/rss',       n:'El-Erian'},
   ];
-  var allFeeds=newsFeeds.concat(twitterFeeds);
-  var sel=allFeeds.sort(function(){return Math.random()-.5;}).slice(0,9);
+
+  var newsSel=newsFeeds.sort(function(){return Math.random()-.5;}).slice(0,6);
+  var twitSel=twitterFeeds.sort(function(){return Math.random()-.5;}).slice(0,3);
+  var allJobs=newsSel.map(function(f){return fetchAndParseRSS(f.u,f.n,false);}).concat(
+               twitSel.map(function(f){return fetchAndParseRSS(f.u,f.n,true);}));
+
   var arts=[],seen=new Set();
-  await Promise.all(sel.map(function(f){
-    var isTwitter=f.n.indexOf('🐦')>=0;
-    return fetch('https://api.rss2json.com/v1/api.json?rss_url='+encodeURIComponent(f.u)+'&count=12')
-      .then(function(r){return r.json();})
-      .then(function(d){
-        if(d.items)d.items.forEach(function(i){
-          if(i.title&&i.title.length>10&&!seen.has(i.link)){
-            seen.add(i.link);
-            var desc=(i.description||'').replace(/<[^>]+>/g,'').substring(0,120);
-            var title=isTwitter?'['+f.n.replace(' 🐦','')+'] '+i.title:i.title;
-            arts.push({h:title+((!isTwitter&&desc)?' — '+desc:''),src:f.n,url:i.link||'#',isTwitter:isTwitter});
-          }
-        });
-      }).catch(function(){});
-  }));
-  document.getElementById('spRss').className='srcp on';
-  var hasTw=arts.some(function(a){return a.isTwitter;});
-  var twEl=document.getElementById('spTw');if(twEl)twEl.className='srcp '+(hasTw?'on':'off');
+  var results=await Promise.allSettled(allJobs);
+  results.forEach(function(r){
+    if(r.status==='fulfilled'&&Array.isArray(r.value)){
+      r.value.forEach(function(item){
+        if(!seen.has(item.url)){seen.add(item.url);arts.push(item);}
+      });
+    }
+  });
+
+  var liveNews=arts.filter(function(a){return !a.isTwitter;}).length;
+  var liveTw=arts.filter(function(a){return a.isTwitter;}).length;
+  document.getElementById('spRss').className='srcp '+(liveNews?'on':'off');
+  var twEl=document.getElementById('spTw');if(twEl)twEl.className='srcp '+(liveTw?'on':'off');
+  console.log('RSS: '+arts.length+' articles ('+liveNews+' news, '+liveTw+' twitter)');
   return arts;
 }
+
+
 async function fetchTNA(k){
   var qs=['Claude Anthropic banking automation','AI replaces jobs workers sectors','generative AI financial services disruption','acquisition merger deal'];
   var arts=[],seen=new Set();
