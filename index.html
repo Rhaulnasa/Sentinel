@@ -503,6 +503,7 @@ footer p{font-size:8px;color:var(--text3);letter-spacing:2px;}
     <button class="cbtn" onclick="exportCSV()">⬇ CSV</button>
     <button class="cbtn" onclick="doClear()">✕ CLEAR</button>
     <button class="cbtn" onclick="refreshAllPrices()">💹 PRICES</button>
+    <button class="cbtn" onclick="bustPriceCache()" style="border-color:rgba(176,48,48,.3);color:var(--red2);">⚡ FORCE REFRESH</button>
     <button class="cbtn" onclick="loadEarnings()">📊 EARNINGS</button>
     <button class="cbtn" onclick="detectVolSpikes()">⚡ VOLUME</button>
   </div>
@@ -584,7 +585,7 @@ footer p{font-size:8px;color:var(--text3);letter-spacing:2px;}
           <div id="hmSignalBadges" style="margin-top:5px;display:flex;flex-wrap:wrap;gap:3px;"></div>
         </div>
         <div style="padding:4px 10px 6px;font-size:8px;color:var(--tx3);display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--b1);">
-          <span id="hmSrcLabel">SOURCE: FMP / YAHOO FINANCE · SECTOR ETFs · AUTO-REFRESH 5MIN</span>
+          <span id="hmSrcLabel">SOURCE: YAHOO FINANCE REAL-TIME · ETF 1-DAY · SECTOR ETFs · AUTO-REFRESH 5MIN</span>
           <span id="hmTs"></span>
         </div>
       </div>
@@ -942,99 +943,100 @@ var PROXY='https://api.allorigins.win/raw?url=';
 // YAHOO FINANCE: PRICES
 // ═══════════════════════════════════════════════════
 async function fetchQuote(tickers){
-  var need=tickers.filter(function(t){return!priceCache[t]||Date.now()-priceCache[t].ts>120000;});
+  // REAL-TIME: Yahoo Finance — no FMP demo (demo = 15-min delayed)
+  var now=Date.now();
+  var need=tickers.filter(function(t){return!priceCache[t]||now-priceCache[t].ts>30000;});
   if(!need.length)return;
-  for(var i=0;i<need.length;i+=8){
-    var batch=need.slice(i,i+8).join(',');
+
+  for(var i=0;i<need.length;i+=10){
+    var batch=need.slice(i,i+10);
+    var batchStr=batch.join(',');
     var loaded=false;
-    // Try FMP first for individual batches - most reliable
+
+    // METHOD 1: Yahoo Finance v8 spark — no CORS issues, real-time
     try{
-      var fmpUrl='https://financialmodelingprep.com/api/v3/quote/'+batch+'?apikey=demo';
-      var rf=await fetch(fmpUrl,{signal:AbortSignal.timeout(6000)});
-      var df=await rf.json();
-      if(Array.isArray(df)&&df.length){
-        df.forEach(function(q){
-          if(q.price){
-            priceCache[q.symbol]={price:q.price,chg:q.changesPercentage||0,vol:q.volume||0,avgVol:q.avgVolume||0,hi52:q['52WeekHigh'],lo52:q['52WeekLow'],ts:Date.now(),src:'fmp'};
-          }
-        });
-        loaded=true;
+      var url='https://query1.finance.yahoo.com/v8/finance/spark?symbols='+encodeURIComponent(batchStr)+'&range=1d&interval=1m&_='+Date.now();
+      var r=await fetch(url,{signal:AbortSignal.timeout(6000)});
+      if(r.ok){
+        var d=await r.json();
+        var count=0;
+        if(d&&d.spark&&d.spark.result){
+          d.spark.result.forEach(function(item){
+            if(!item||!item.symbol)return;
+            var resp=item.response&&item.response[0];
+            if(!resp)return;
+            var meta=resp.meta||{};
+            var price=meta.regularMarketPrice||0;
+            if(price){
+              priceCache[item.symbol]={
+                price:price,
+                chg:meta.regularMarketChangePercent||0,
+                vol:meta.regularMarketVolume||0,
+                avgVol:meta.averageDailyVolume3Month||0,
+                ts:Date.now(),src:'YF-RT'
+              };
+              count++;
+            }
+          });
+        }
+        if(count>0){loaded=true;}
       }
     }catch(e){}
-    // Fallback: Yahoo Finance via proxy
+
+    // METHOD 2: Yahoo Finance v7 quote via proxy — real-time
     if(!loaded){
       try{
-        var url='https://query1.finance.yahoo.com/v7/finance/quote?symbols='+encodeURIComponent(batch)+'&fields=regularMarketPrice,regularMarketChangePercent,regularMarketVolume,averageDailyVolume3Month';
-        var r=await proxyFetch(url);
-        var d=await r.json();
-        if(d.quoteResponse&&d.quoteResponse.result){
-          d.quoteResponse.result.forEach(function(q){
+        var url2='https://query1.finance.yahoo.com/v7/finance/quote?symbols='+encodeURIComponent(batchStr)+'&fields=regularMarketPrice,regularMarketChangePercent,regularMarketVolume,averageDailyVolume3Month,fiftyTwoWeekHigh,fiftyTwoWeekLow&_='+Date.now();
+        var r2=await proxyFetch(url2);
+        var d2=await r2.json();
+        if(d2.quoteResponse&&d2.quoteResponse.result){
+          d2.quoteResponse.result.forEach(function(q){
             if(q.regularMarketPrice){
-              priceCache[q.symbol]={price:q.regularMarketPrice,chg:q.regularMarketChangePercent||0,vol:q.regularMarketVolume||0,avgVol:q.averageDailyVolume3Month||0,ts:Date.now(),src:'yf'};
+              priceCache[q.symbol]={
+                price:q.regularMarketPrice,
+                chg:q.regularMarketChangePercent||0,
+                vol:q.regularMarketVolume||0,
+                avgVol:q.averageDailyVolume3Month||0,
+                hi52:q.fiftyTwoWeekHigh,
+                lo52:q.fiftyTwoWeekLow,
+                ts:Date.now(),src:'YF-V7'
+              };
             }
           });
           loaded=true;
         }
       }catch(e){}
     }
-    if(i+8<need.length)await new Promise(function(r){setTimeout(r,250);});
+
+    // METHOD 3: Yahoo Finance v6 — alternate endpoint
+    if(!loaded){
+      try{
+        var url3='https://query2.finance.yahoo.com/v6/finance/quote?symbols='+encodeURIComponent(batchStr)+'&_='+Date.now();
+        var r3=await proxyFetch(url3);
+        var d3=await r3.json();
+        if(d3.quoteResponse&&d3.quoteResponse.result){
+          d3.quoteResponse.result.forEach(function(q){
+            if(q.regularMarketPrice){
+              priceCache[q.symbol]={price:q.regularMarketPrice,chg:q.regularMarketChangePercent||0,vol:q.regularMarketVolume||0,avgVol:q.averageDailyVolume3Month||0,ts:Date.now(),src:'YF-V6'};
+            }
+          });
+          loaded=true;
+        }
+      }catch(e){}
+    }
+
+    if(i+10<need.length)await new Promise(function(r){setTimeout(r,150);});
   }
 }
 
-// ═══════════════════════════════════════════════════
-// EARNINGS DATA
-// ═══════════════════════════════════════════════════
-var EARN_CALENDAR=[
-  {sym:'ACN',name:'Accenture',date:'2026-03-19',epsEst:'3.58',revEst:'17.2B',sector:'IT Consulting'},
-  {sym:'PAYX',name:'Paychex',date:'2026-03-25',epsEst:'1.52',revEst:'1.41B',sector:'HR / Payroll'},
-  {sym:'JPM',name:'JPMorgan',date:'2026-04-14',epsEst:'5.10',revEst:'45.2B',sector:'Banking'},
-  {sym:'GS',name:'Goldman Sachs',date:'2026-04-14',epsEst:'13.20',revEst:'15.8B',sector:'Banking'},
-  {sym:'BAC',name:'Bank of America',date:'2026-04-15',epsEst:'0.91',revEst:'27.8B',sector:'Banking'},
-  {sym:'MS',name:'Morgan Stanley',date:'2026-04-16',epsEst:'2.52',revEst:'17.1B',sector:'Banking'},
-  {sym:'INFY',name:'Infosys',date:'2026-04-16',epsEst:'0.23',revEst:'5.1B',sector:'IT Consulting'},
-  {sym:'WIT',name:'Wipro',date:'2026-04-17',epsEst:'0.08',revEst:'2.7B',sector:'IT Consulting'},
-  {sym:'IBM',name:'IBM Corp',date:'2026-04-22',epsEst:'1.55',revEst:'15.2B',sector:'Legacy Tech'},
-  {sym:'NOW',name:'ServiceNow',date:'2026-04-23',epsEst:'4.10',revEst:'3.28B',sector:'Enterprise SW'},
-  {sym:'V',name:'Visa',date:'2026-04-28',epsEst:'2.88',revEst:'10.1B',sector:'Payments'},
-  {sym:'MA',name:'Mastercard',date:'2026-04-29',epsEst:'3.82',revEst:'7.72B',sector:'Payments'},
-  {sym:'MSFT',name:'Microsoft',date:'2026-04-29',epsEst:'3.44',revEst:'72.1B',sector:'Mag 7'},
-  {sym:'META',name:'Meta',date:'2026-04-29',epsEst:'5.82',revEst:'44.2B',sector:'Mag 7'},
-  {sym:'GOOGL',name:'Alphabet',date:'2026-04-29',epsEst:'2.22',revEst:'94.8B',sector:'Mag 7'},
-  {sym:'AMZN',name:'Amazon',date:'2026-05-01',epsEst:'1.62',revEst:'163.5B',sector:'Mag 7'},
-  {sym:'CTSH',name:'Cognizant',date:'2026-05-07',epsEst:'1.18',revEst:'5.2B',sector:'IT Consulting'},
-  {sym:'CHGG',name:'Chegg',date:'2026-05-06',epsEst:'0.08',revEst:'138M',sector:'EdTech'},
-  {sym:'NET',name:'Cloudflare',date:'2026-05-08',epsEst:'0.20',revEst:'511M',sector:'Cybersecurity'},
-  {sym:'PANW',name:'Palo Alto',date:'2026-05-20',epsEst:'1.48',revEst:'2.48B',sector:'Cybersecurity'},
-  {sym:'NVDA',name:'NVIDIA',date:'2026-05-28',epsEst:'0.98',revEst:'46.5B',sector:'Mag 7'},
-  {sym:'CRWD',name:'CrowdStrike',date:'2026-06-03',epsEst:'1.10',revEst:'1.18B',sector:'Cybersecurity'},
-  {sym:'ORCL',name:'Oracle',date:'2026-06-11',epsEst:'1.82',revEst:'15.2B',sector:'Enterprise SW'},
-];
-
-var EARN_RECENT=[
-  {sym:'IBM',name:'IBM Corp',beat:true,epsActual:'1.60',epsEst:'1.40',epsSurprise:'+14.3%',revActual:'14.5B',revEst:'14.2B',revSurprise:'+2.1%',period:'Q4 2024'},
-  {sym:'MSFT',name:'Microsoft',beat:true,epsActual:'3.23',epsEst:'3.11',epsSurprise:'+3.9%',revActual:'69.6B',revEst:'68.9B',revSurprise:'+1.0%',period:'Q2 FY25'},
-  {sym:'GOOGL',name:'Alphabet',beat:true,epsActual:'2.15',epsEst:'2.01',epsSurprise:'+7.0%',revActual:'96.5B',revEst:'94.3B',revSurprise:'+2.3%',period:'Q4 2024'},
-  {sym:'AMZN',name:'Amazon',beat:true,epsActual:'1.86',epsEst:'1.49',epsSurprise:'+24.8%',revActual:'187.8B',revEst:'187.3B',revSurprise:'+0.3%',period:'Q4 2024'},
-  {sym:'META',name:'Meta',beat:true,epsActual:'8.02',epsEst:'6.76',epsSurprise:'+18.6%',revActual:'48.4B',revEst:'47.0B',revSurprise:'+3.0%',period:'Q4 2024'},
-  {sym:'NVDA',name:'NVIDIA',beat:true,epsActual:'0.89',epsEst:'0.85',epsSurprise:'+4.7%',revActual:'39.3B',revEst:'38.0B',revSurprise:'+3.4%',period:'Q4 FY25'},
-  {sym:'ACN',name:'Accenture',beat:false,miss:true,epsActual:'2.82',epsEst:'2.91',epsSurprise:'-3.1%',revActual:'16.7B',revEst:'17.0B',revSurprise:'-1.8%',period:'Q1 FY25'},
-  {sym:'CTSH',name:'Cognizant',beat:false,miss:true,epsActual:'1.05',epsEst:'1.13',epsSurprise:'-7.1%',revActual:'4.9B',revEst:'5.0B',revSurprise:'-2.0%',period:'Q4 2024'},
-  {sym:'INFY',name:'Infosys',beat:true,epsActual:'0.22',epsEst:'0.21',epsSurprise:'+4.8%',revActual:'4.9B',revEst:'4.8B',revSurprise:'+2.1%',period:'Q3 FY25'},
-  {sym:'CHGG',name:'Chegg',beat:false,miss:true,epsActual:'-0.02',epsEst:'0.09',epsSurprise:'-122%',revActual:'143M',revEst:'157M',revSurprise:'-8.9%',period:'Q4 2024'},
-  {sym:'JPM',name:'JPMorgan',beat:true,epsActual:'4.81',epsEst:'4.11',epsSurprise:'+17.0%',revActual:'44.3B',revEst:'43.1B',revSurprise:'+2.8%',period:'Q4 2024'},
-  {sym:'GS',name:'Goldman Sachs',beat:true,epsActual:'11.95',epsEst:'8.22',epsSurprise:'+45.4%',revActual:'13.9B',revEst:'12.4B',revSurprise:'+12.1%',period:'Q4 2024'},
-  {sym:'CRWD',name:'CrowdStrike',beat:true,epsActual:'1.03',epsEst:'0.85',epsSurprise:'+21.2%',revActual:'1.06B',revEst:'1.03B',revSurprise:'+2.9%',period:'Q3 FY25'},
-  {sym:'PANW',name:'Palo Alto',beat:true,epsActual:'1.56',epsEst:'1.50',epsSurprise:'+4.0%',revActual:'2.26B',revEst:'2.24B',revSurprise:'+0.9%',period:'Q2 FY25'},
-  {sym:'MAN',name:'ManpowerGroup',beat:false,miss:true,epsActual:'1.10',epsEst:'1.34',epsSurprise:'-17.9%',revActual:'4.5B',revEst:'4.6B',revSurprise:'-2.2%',period:'Q4 2024'},
-  {sym:'RHI',name:'Robert Half',beat:false,miss:true,epsActual:'0.49',epsEst:'0.58',epsSurprise:'-15.5%',revActual:'1.36B',revEst:'1.41B',revSurprise:'-3.5%',period:'Q4 2024'},
-  {sym:'ADP',name:'ADP',beat:true,epsActual:'2.35',epsEst:'2.27',epsSurprise:'+3.5%',revActual:'4.87B',revEst:'4.84B',revSurprise:'+0.6%',period:'Q2 FY25'},
-  {sym:'V',name:'Visa',beat:true,epsActual:'2.75',epsEst:'2.66',epsSurprise:'+3.4%',revActual:'9.5B',revEst:'9.3B',revSurprise:'+2.2%',period:'Q1 FY25'},
-  {sym:'PYPL',name:'PayPal',beat:true,epsActual:'1.19',epsEst:'1.12',epsSurprise:'+6.3%',revActual:'8.4B',revEst:'8.3B',revSurprise:'+1.2%',period:'Q4 2024'},
-  {sym:'PATH',name:'UiPath',beat:true,epsActual:'0.26',epsEst:'0.17',epsSurprise:'+52.9%',revActual:'424M',revEst:'407M',revSurprise:'+4.2%',period:'Q3 FY25'},
-  {sym:'DUOL',name:'Duolingo',beat:true,epsActual:'0.72',epsEst:'0.47',epsSurprise:'+53.2%',revActual:'210M',revEst:'204M',revSurprise:'+2.9%',period:'Q4 2024'},
-];
+// Bust ALL price cache (force real-time refresh)
+function bustPriceCache(){
+  priceCache={};
+  refreshAllPrices();
+}
 
 function dateOffset(days){var d=new Date();d.setDate(d.getDate()+days);return d.toISOString().slice(0,10);}
+
 
 async function fetchNasdaqEarningsDate(dateStr){
   try{
@@ -1176,69 +1178,52 @@ async function detectVolSpikes(){
 
   var results=[];
 
-  // SOURCE 1: FMP free API - most active stocks (no key needed, 250 calls/day free)
+  // SOURCE 1: Yahoo Finance real-time most-active (market hours)
+  // Use quote for a curated list of known high-volume stocks
+  var HIVOLSYMS=['NVDA','TSLA','AAPL','AMZN','META','MSFT','GOOGL','AMD','SPY','QQQ',
+    'PLTR','SOFI','BAC','F','GE','CRWD','PANW','ORCL','CRM','NFLX',
+    'IBM','ACN','JPM','GS','MS','V','MA','PYPL','SQ','COIN',
+    'OKTA','NET','ZS','FTNT','S','CYBR','PATH','NOW','WDAY','CTSH'];
+  try{
+    var hiVolBatch=HIVOLSYMS.join(',');
+    var hvUrl='https://query1.finance.yahoo.com/v8/finance/spark?symbols='+encodeURIComponent(hiVolBatch)+'&range=1d&interval=1m&_='+Date.now();
+    var hvr=await fetch(hvUrl,{signal:AbortSignal.timeout(8000)});
+    if(hvr.ok){
+      var hvd=await hvr.json();
+      if(hvd&&hvd.spark&&hvd.spark.result){
+        hvd.spark.result.forEach(function(item){
+          if(!item||!item.symbol)return;
+          var resp=item.response&&item.response[0];if(!resp)return;
+          var meta=resp.meta||{};
+          var price=meta.regularMarketPrice||0;
+          var vol=meta.regularMarketVolume||0;
+          var avgVol=meta.averageDailyVolume3Month||0;
+          if(price&&vol){
+            var wl=WL.find(function(w){return w.t===item.symbol;});
+            results.push({t:item.symbol,name:wl?wl.n:item.symbol,sector:wl?wl.s:'Market',vol:vol,avgVol:avgVol,mult:(avgVol>10000)?(vol/avgVol):null,chg:meta.regularMarketChangePercent||0,price:price,src:'YF-RT'});
+            priceCache[item.symbol]={price:price,chg:meta.regularMarketChangePercent||0,vol:vol,avgVol:avgVol,ts:Date.now(),src:'YF-RT'};
+          }
+        });
+        if(loading)loading.textContent='YF real-time: '+results.length+' stocks loaded...';
+      }
+    }
+  }catch(e){console.log('YF spark err:',e.message);}
+
+  // SOURCE 1b: FMP actives as supplement (delayed but gets market-wide data)
   try{
     var r=await fetch('https://financialmodelingprep.com/api/v3/stock_market/actives?apikey=demo',{signal:AbortSignal.timeout(8000)});
     var d=await r.json();
     if(Array.isArray(d)&&d.length){
-      d.slice(0,25).forEach(function(s){
-        if(!s.symbol)return;
+      d.slice(0,20).forEach(function(s){
+        if(!s.symbol||results.find(function(x){return x.t===s.symbol;}))return;
         var wl=WL.find(function(w){return w.t===s.symbol;});
-        results.push({
-          t:s.symbol,
-          name:s.name||(wl?wl.n:s.symbol),
-          sector:wl?wl.s:'Market',
-          vol:s.volume||0,
-          avgVol:s.avgVolume||0,
-          mult:(s.avgVolume&&s.avgVolume>0)?(s.volume/s.avgVolume):null,
-          chg:s.changesPercentage||0,
-          price:s.price||0,
-          src:'FMP'
-        });
+        results.push({t:s.symbol,name:s.name||(wl?wl.n:s.symbol),sector:wl?wl.s:'Market',vol:s.volume||0,avgVol:s.avgVolume||0,mult:(s.avgVolume&&s.avgVolume>0)?(s.volume/s.avgVolume):null,chg:s.changesPercentage||0,price:s.price||0,src:'FMP-15m'});
       });
-      if(loading)loading.textContent='FMP: '+results.length+' stocks loaded...';
+      if(loading)loading.textContent='YF+FMP: '+results.length+' stocks...';
     }
-  }catch(e){console.log('FMP actives err:',e.message);}
+  }catch(e){}
 
-  // SOURCE 2: Yahoo Finance via rss2json proxy trick - get quotes for known high-vol tickers
-  // If FMP worked, enrich with more of our watchlist
-  if(results.length===0){
-    // Fallback: Try Yahoo Finance quote for our WL in batches
-    var allT=WL.map(function(w){return w.t;}).slice(0,60);
-    if(loading)loading.textContent='Fetching Yahoo Finance quotes...';
-    for(var i=0;i<allT.length;i+=10){
-      await fetchQuote(allT.slice(i,i+10));
-      if(loading)loading.textContent='Loading... ('+(i/10+1)+'/6)';
-      await new Promise(function(r){setTimeout(r,200);});
-    }
-    allT.forEach(function(t){
-      var p=priceCache[t];
-      if(!p||!p.vol)return;
-      var wl=WL.find(function(w){return w.t===t;});
-      var mult=(p.avgVol&&p.avgVol>10000)?(p.vol/p.avgVol):null;
-      results.push({t:t,name:wl?wl.n:t,sector:wl?wl.s:'',vol:p.vol,avgVol:p.avgVol||0,mult:mult,chg:p.chg||0,price:p.price||0,src:'YF'});
-    });
-  }
-
-  // SOURCE 3: If still nothing, fetch FMP gainers + losers which also have volume
-  if(results.length===0){
-    try{
-      var urls=['https://financialmodelingprep.com/api/v3/stock_market/gainers?apikey=demo','https://financialmodelingprep.com/api/v3/stock_market/losers?apikey=demo'];
-      for(var u=0;u<urls.length;u++){
-        var r2=await fetch(urls[u],{signal:AbortSignal.timeout(6000)});
-        var d2=await r2.json();
-        if(Array.isArray(d2)){
-          d2.slice(0,15).forEach(function(s){
-            if(!s.symbol||results.find(function(x){return x.t===s.symbol;}))return;
-            var wl=WL.find(function(w){return w.t===s.symbol;});
-            results.push({t:s.symbol,name:s.name||(wl?wl.n:s.symbol),sector:wl?wl.s:'Market',vol:s.volume||0,avgVol:s.avgVolume||0,mult:(s.avgVolume&&s.avgVolume>0)?(s.volume/s.avgVolume):null,chg:s.changesPercentage||0,price:s.price||0,src:'FMP'});
-          });
-        }
-      }
-    }catch(e){}
-  }
-
-  // Sort by volume descending
+// Sort by volume descending
   results.sort(function(a,b){return b.vol-a.vol;});
 
   // Deduplicate by ticker
@@ -1688,7 +1673,7 @@ async function loadSectorHeatmap(){
   var etfTickers=SECTOR_ETFS.map(function(s){return s.etf;});
   var loaded=false;
 
-  // SOURCE 1: FMP - most reliable, free tier
+  // SOURCE 1: Yahoo Finance spark — real-time ETF data
   try{
     var r=await fetch('https://financialmodelingprep.com/api/v3/quote/'+etfTickers.join(',')+'?apikey=demo',{signal:AbortSignal.timeout(8000)});
     var d=await r.json();
@@ -2274,8 +2259,23 @@ function init(){
   renderWL();renderKW();renderHistory();renderSI();renderEconCalendar();updateStats();
   loadEarnings();detectVolSpikes();loadSectorHeatmap();
 }
+// Real-time data freshness indicator
+function updateFreshnessIndicator(){
+  var now=Date.now();
+  var prices=Object.values(priceCache);
+  if(!prices.length)return;
+  var oldest=Math.min.apply(null,prices.map(function(p){return p.ts;}));
+  var ageS=Math.round((now-oldest)/1000);
+  var ltxt=document.getElementById('ltxt');
+  if(ltxt&&ageS<999){
+    var src=prices[0]&&prices[0].src||'?';
+    var isRT=src.indexOf('YF')>=0;
+    ltxt.textContent=(ageS<60?ageS+'s AGO':(Math.floor(ageS/60)+'m AGO'))+(isRT?' · REAL-TIME':' · DELAYED');
+    ltxt.style.color=isRT&&ageS<120?'var(--green2)':ageS<300?'var(--gold2)':'var(--red2)';
+  }
+}
+setInterval(updateFreshnessIndicator,5000);
 window.addEventListener('DOMContentLoaded',init);
 </script>
 </body>
 </html>
-
