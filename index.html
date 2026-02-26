@@ -880,10 +880,45 @@ var SECTOR_MAP={
   'Western Union':['WU'],
 };
 
-var HIGH_T=['replaces','replace ','eliminates','threatens','disrupts','disruption','at risk','existential','selloff','fall sharply','drops sharply','cut headcount','job losses','layoffs','COBOL','direct threat','obsolete','redundant','displacement','no longer needed','cuts jobs','mass layoff','acquisition','merger','buyout','takeover bid','strategic review','activist investor','profit warning','guidance cut','revenue miss','beats expectations','blowout quarter','record earnings'];
+// HIGH_T: only concrete, verifiable financial-action terms. NOT generic AI fear words.
+var HIGH_T=[
+  // M&A — definitive corporate actions
+  'acquisition','acquires','acquired','merger','buyout','takeover bid','strategic review','activist investor','hostile bid','going private','leveraged buyout',
+  // Earnings — actual results
+  'earnings miss','revenue miss','profit warning','guidance cut','beats expectations','blowout quarter','record earnings','guidance raised','reaffirms guidance',
+  // Workforce — confirmed headcount actions (not speculation)
+  'layoffs','mass layoff','cut headcount','job cuts','workforce reduction','redundancies announced','cuts jobs',
+  // Legacy tech — concrete technical displacement
+  'COBOL','mainframe migration','decommission','end of life','sunset','legacy replacement',
+  // Market moves — confirmed price action
+  'fall sharply','drops sharply','selloff','shares plunge','stock halted','trading halted',
+  // Debt/distress
+  'bankruptcy','chapter 11','debt restructuring','default','credit downgrade',
+];
+// These are MEDIUM at best — generic AI commentary, speculation, punditry
+var NOISE_WORDS=['will replace','could replace','might replace','may replace','fears','worry','concern','speculation','analysts say','experts say','report says','study finds','survey shows','chatgpt will','ai will','robots will'];
 var MED_T=['competes','competition','pressure','challenges','testing','piloting','migrat','moderniz','warns','rival','concern','partnership','joint venture','integration','upgrade','transition'];
 
-var SOURCE_CRED={'Bloomberg':95,'Reuters':92,'Financial Times':90,'WSJ':90,'CNBC':82,'Forbes':75,'MarketWatch':78,'TechCrunch':72,'Wired':70,'Fortune':76,'AP':88,'NYT':88,'VentureBeat':65,'Barrons':88,'TheStreet':72,'Investopedia':65};
+var SOURCE_CRED={'Bloomberg':95,'Reuters':92,'Financial Times':90,'WSJ':90,'CNBC':85,'AP':88,'NYT':88,'Barrons':88,'MarketWatch':80,'Fortune':76,'Forbes':74,'TechCrunch':72,'Wired':70,'VentureBeat':65,'TheStreet':68,'Investopedia':60,'FastStockNews 🐦':82,'Bloomberg Delta1 🐦':90,'UnusualWhales 🐦':80,'El-Erian 🐦':88,'MarketCurrents 🐦':75,'ZeroHedge 🐦':60,'MarioNawfal 🐦':55,'Trump 🐦':70};
+
+// Domains that are NOISE — clickbait, generic AI blogs, aggregators
+var BLOCKLIST_DOMAINS=['activistpost','intoday','indiatoday','brandequity','economictimes','dailymail','zerohedge.com','yahoo.com/news','businessinsider','huffpost','buzzfeed','medium.com','substack.com','seekingalpha','motleyfool','fool.com','investorplace','finbold','benzinga','gurufocus','thestreet','globenewswire','prnewswire','businesswire','accesswire','einpresswire','proactiveinvestors'];
+
+// Only these domains are credible enough for HIGH alerts
+var CREDIBLE_SOURCES=['bloomberg','reuters','wsj','ft.com','cnbc','ap.org','nytimes','barrons','marketwatch','fortune','techcrunch','wired','venturebeat','axios','economist','theinformation'];
+
+function isDomainCredible(url){
+  if(!url||url==='#')return true; // no url = internal
+  var u=url.toLowerCase();
+  if(BLOCKLIST_DOMAINS.some(function(d){return u.indexOf(d)>=0;}))return false;
+  return true;
+}
+
+function isHighCredibility(src,url){
+  var srcLow=(src||'').toLowerCase();
+  var u=(url||'').toLowerCase();
+  return CREDIBLE_SOURCES.some(function(d){return srcLow.indexOf(d)>=0||u.indexOf(d)>=0;});
+}
 var AI_TERMS=['Claude','Anthropic','GPT','ChatGPT','Gemini','OpenAI','generative AI','LLM','large language model','AI agent','agentic AI'];
 var MA_TERMS=['acquisition','merger','buyout','takeover','deal','acquired','acquires','merges','strategic review','activist investor'];
 
@@ -1462,15 +1497,25 @@ function analyze(h){
   var sev='LOW';
   for(var i=0;i<HIGH_T.length;i++){if(hl.indexOf(HIGH_T[i].toLowerCase())>=0){sev='HIGH';break;}}
   if(sev!=='HIGH')for(var j=0;j<MED_T.length;j++){if(hl.indexOf(MED_T[j].toLowerCase())>=0){sev='MEDIUM';break;}}
-  if(sev==='LOW')sev='MEDIUM';
+  // Generic "AI replaces/threatens" talk from unknown sources → cap at MEDIUM
+  // Only proven financial news outlets can fire HIGH
   var type=isAI?'ai':isMA?'ma':isEarnings?'earn':'disruption';
   return{isDisruptive:true,severity:sev,matchedKeywords:kwm.slice(0,6),affectedTickers:Array.from(tickers).slice(0,8),analysis:(isMA?'M&A signal: ':isEarnings?'Earnings: ':'AI threat: ')+(kwm[0]||type)+' — '+Array.from(tickers).slice(0,3).join(', ')+' flagged',type:type};
 }
 
 function scoreAlert(a){
   var s=0;
-  if(a.sev==='HIGH')s+=40;else if(a.sev==='MEDIUM')s+=20;
-  s+=Math.round((SOURCE_CRED[a.src]||60)/10);
+  // Blocklist check — unknown/spammy domains get buried
+  if(!isDomainCredible(a.url)){s-=50;}  // hard penalty
+  var credScore=SOURCE_CRED[a.src]||40; // default 40, not 60
+  var isHighCred=isHighCredibility(a.src,a.url);
+  // Only credible outlets can push HIGH
+  var effectiveSev=a.sev;
+  if(a.sev==='HIGH'&&!isHighCred)effectiveSev='MEDIUM';
+  if(effectiveSev==='HIGH')s+=40;else if(effectiveSev==='MEDIUM')s+=18;else s+=5;
+  // Patch the stored severity too
+  if(effectiveSev!==a.sev)a.sev=effectiveSev;
+  s+=Math.round(credScore/10);
   s+=Math.min(a.kws.length*4,16);s+=Math.min(a.tks.length*3,12);
   var hl=(a.h||'').toLowerCase();
   ['COBOL','mainframe','existential','replaces','IBM','Anthropic','acquisition','merger','earnings beat','layoffs'].forEach(function(k){if(hl.indexOf(k.toLowerCase())>=0)s+=4;});
@@ -1529,16 +1574,18 @@ function cluster(list){
 // ═══════════════════════════════════════════════════
 async function fetchRSS(){
   // Standard news RSS feeds
+  // CREDIBLE SOURCES ONLY — no aggregators, no clickbait blogs
   var newsFeeds=[
     {u:'https://feeds.reuters.com/reuters/businessNews',n:'Reuters'},
     {u:'https://feeds.reuters.com/reuters/technologyNews',n:'Reuters Tech'},
+    {u:'https://feeds.reuters.com/reuters/companyNews',n:'Reuters Corp'},
     {u:'https://www.cnbc.com/id/19854910/device/rss/rss.html',n:'CNBC'},
     {u:'https://feeds.a.dj.com/rss/RSSWSJD.xml',n:'WSJ'},
-    {u:'https://feeds.feedburner.com/venturebeat/SZYF',n:'VentureBeat'},
-    {u:'https://techcrunch.com/feed/',n:'TechCrunch'},
     {u:'https://www.ft.com/technology?format=rss',n:'FT'},
     {u:'https://www.marketwatch.com/rss/topstories',n:'MarketWatch'},
-    {u:'https://fortune.com/feed/',n:'Fortune'},
+    {u:'https://feeds.bloomberg.com/markets/news.rss',n:'Bloomberg'},
+    {u:'https://techcrunch.com/category/enterprise/feed/',n:'TechCrunch Enterprise'},
+    {u:'https://fortune.com/feed/fortune-feeds/?id=3230629',n:'Fortune Finance'},
   ];
   // Twitter/X accounts via multiple Nitter instances (RSS mirrors)
   // Nitter is a public Twitter front-end that provides RSS feeds
@@ -1816,11 +1863,15 @@ async function doScan(){
       document.getElementById('ltxt').textContent='ERROR';resetBtn();return;
     }
     raw.forEach(function(item,i){
+      // Hard block: drop garbage domains entirely — don't even add to allHL
+      if(!isDomainCredible(item.url)){return;}
       var id=Date.now()+i;
       newHL.push({id:id,src:item.src,h:item.h,url:item.url,time:now,live:true});
       var res=analyze(item.h);
       if(res&&res.affectedTickers.length){
         var a={id:id,src:item.src,h:item.h,url:item.url,time:now,live:true,isTwitter:item.isTwitter||false,sev:res.severity,kws:res.matchedKeywords,tks:res.affectedTickers,an:res.analysis,isnew:true,type:res.type||'ai'};
+        // Apply credibility cap: uncredible source → max MEDIUM
+        if(!isHighCredibility(a.src,a.url)&&a.sev==='HIGH'){a.sev='MEDIUM';}
         newA.push(a);
         res.affectedTickers.forEach(function(t){hitCount[t]=(hitCount[t]||0)+1;});
       }
