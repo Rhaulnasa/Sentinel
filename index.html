@@ -505,7 +505,6 @@ footer p{font-size:8px;color:var(--text3);letter-spacing:2px;}
     <button class="cbtn" onclick="refreshAllPrices()">💹 PRICES</button>
     <button class="cbtn" onclick="bustPriceCache()" style="border-color:rgba(176,48,48,.3);color:var(--red2);">⚡ FORCE REFRESH</button>
     <button class="cbtn" onclick="loadEarnings()">📊 EARNINGS</button>
-    <button class="cbtn" onclick="detectVolSpikes()">⚡ VOLUME</button>
   </div>
 
   <!-- STATS BAR -->
@@ -537,7 +536,6 @@ footer p{font-size:8px;color:var(--text3);letter-spacing:2px;}
         <div class="ftabs">
           <button class="ftab on" id="ftabAlerts"       onclick="setFV('alerts')">🚨 ALERTS</button>
           <button class="ftab"    id="ftabEarnings"      onclick="setFV('earnings')">📊 EARNINGS</button>
-          <button class="ftab"    id="ftabVolume"        onclick="setFV('volume')">⚡ VOLUME</button>
           <button class="ftab"    id="ftabAll"           onclick="setFV('all')">📰 ALL NEWS</button>
           <button class="ftab"    id="ftabHistory"       onclick="setFV('history')">📋 HISTORY</button>
           <button class="ftab"    id="ftabPatterns"      onclick="setFV('patterns')">🧠 PATTERNS</button>
@@ -634,28 +632,6 @@ footer p{font-size:8px;color:var(--text3);letter-spacing:2px;}
           <div class="earn-loading">Earnings load after first scan or click 📊 EARNINGS...</div>
         </div>
         <div class="earn-src" id="earnSrc"></div>
-      </div>
-
-      <div class="panel">
-        <div class="ph">
-          <div class="pt">SHORT INTEREST</div>
-          <div class="pact"><span class="real-badge">REAL · YAHOO FINANCE</span></div>
-        </div>
-        <div class="si-loading" id="siLoading" style="padding:14px;font-size:10px;color:var(--tx2);font-family:var(--sans);">Short interest loads after first scan...</div>
-        <div class="si-list" id="siList" style="display:none;"></div>
-        <div class="si-src" id="siSrc"></div>
-      </div>
-
-      <div class="panel">
-        <div class="ph">
-          <div class="pt">VOLUME SPIKES</div>
-          <div class="pact">
-            <span class="real-badge">REAL · YAHOO FINANCE</span>
-            <span class="chip cO" id="volChip">0 SPIKES</span>
-          </div>
-        </div>
-        <div id="volLoading" style="padding:14px;font-size:10px;color:var(--tx2);font-family:var(--sans);">Volume spikes load after scan or click ⚡ VOLUME...</div>
-        <div class="vol-list" id="volList" style="display:none;"></div>
       </div>
 
       <div class="panel">
@@ -1073,6 +1049,53 @@ function bustPriceCache(){
 function dateOffset(days){var d=new Date();d.setDate(d.getDate()+days);return d.toISOString().slice(0,10);}
 
 
+var EARN_CALENDAR=[
+  {sym:'ACN', name:'Accenture',       date:'2026-03-19',epsEst:'3.58', revEst:'17.2B', sector:'IT Consulting'},
+  {sym:'PAYX',name:'Paychex',         date:'2026-03-25',epsEst:'1.52', revEst:'1.41B', sector:'HR/Payroll'},
+  {sym:'JPM', name:'JPMorgan',        date:'2026-04-14',epsEst:'5.10', revEst:'45.2B', sector:'Banking'},
+  {sym:'GS',  name:'Goldman Sachs',   date:'2026-04-14',epsEst:'13.20',revEst:'15.8B', sector:'Banking'},
+  {sym:'BAC', name:'Bank of America', date:'2026-04-15',epsEst:'0.91', revEst:'27.8B', sector:'Banking'},
+  {sym:'MS',  name:'Morgan Stanley',  date:'2026-04-16',epsEst:'2.52', revEst:'17.1B', sector:'Banking'},
+  {sym:'INFY',name:'Infosys',         date:'2026-04-16',epsEst:'0.23', revEst:'5.1B',  sector:'IT Consulting'},
+  {sym:'WIT', name:'Wipro',           date:'2026-04-17',epsEst:'0.08', revEst:'2.7B',  sector:'IT Consulting'},
+  {sym:'IBM', name:'IBM Corp',        date:'2026-04-22',epsEst:'1.55', revEst:'15.2B', sector:'Legacy Tech'},
+  {sym:'NOW', name:'ServiceNow',      date:'2026-04-23',epsEst:'4.10', revEst:'3.28B', sector:'Enterprise SW'},
+  {sym:'V',   name:'Visa',            date:'2026-04-28',epsEst:'2.88', revEst:'10.1B', sector:'Payments'},
+  {sym:'MA',  name:'Mastercard',      date:'2026-04-29',epsEst:'3.82', revEst:'7.72B', sector:'Payments'},
+  {sym:'MSFT',name:'Microsoft',       date:'2026-04-29',epsEst:'3.44', revEst:'72.1B', sector:'Mag 7'},
+  {sym:'META',name:'Meta',            date:'2026-04-29',epsEst:'5.82', revEst:'44.2B', sector:'Mag 7'},
+  {sym:'GOOGL',name:'Alphabet',       date:'2026-04-29',epsEst:'2.22', revEst:'94.8B', sector:'Mag 7'},
+  {sym:'AMZN',name:'Amazon',          date:'2026-05-01',epsEst:'1.62', revEst:'163.5B',sector:'Mag 7'},
+  {sym:'CTSH',name:'Cognizant',       date:'2026-05-07',epsEst:'1.18', revEst:'5.2B',  sector:'IT Consulting'},
+  {sym:'CHGG',name:'Chegg',           date:'2026-05-06',epsEst:'0.08', revEst:'138M',  sector:'EdTech'},
+  {sym:'NET', name:'Cloudflare',      date:'2026-05-08',epsEst:'0.20', revEst:'511M',  sector:'Cybersecurity'},
+  {sym:'PANW',name:'Palo Alto',       date:'2026-05-20',epsEst:'1.48', revEst:'2.48B', sector:'Cybersecurity'},
+  {sym:'NVDA',name:'NVIDIA',          date:'2026-05-28',epsEst:'0.98', revEst:'46.5B', sector:'Mag 7'},
+  {sym:'CRWD',name:'CrowdStrike',     date:'2026-06-03',epsEst:'1.10', revEst:'1.18B', sector:'Cybersecurity'},
+  {sym:'ORCL',name:'Oracle',          date:'2026-06-11',epsEst:'1.82', revEst:'15.2B', sector:'Enterprise SW'},
+];
+var EARN_RECENT=[
+  {sym:'IBM', name:'IBM Corp',      beat:true, epsActual:'1.60', epsEst:'1.40',epsSurprise:'+14.3%',revActual:'14.5B', revEst:'14.2B',revSurprise:'+2.1%', period:'Q4 2024'},
+  {sym:'MSFT',name:'Microsoft',     beat:true, epsActual:'3.23', epsEst:'3.11',epsSurprise:'+3.9%', revActual:'69.6B', revEst:'68.9B',revSurprise:'+1.0%', period:'Q2 FY25'},
+  {sym:'GOOGL',name:'Alphabet',     beat:true, epsActual:'2.15', epsEst:'2.01',epsSurprise:'+7.0%', revActual:'96.5B', revEst:'94.3B',revSurprise:'+2.3%', period:'Q4 2024'},
+  {sym:'AMZN',name:'Amazon',        beat:true, epsActual:'1.86', epsEst:'1.49',epsSurprise:'+24.8%',revActual:'187.8B',revEst:'187.3B',revSurprise:'+0.3%',period:'Q4 2024'},
+  {sym:'META',name:'Meta',          beat:true, epsActual:'8.02', epsEst:'6.76',epsSurprise:'+18.6%',revActual:'48.4B', revEst:'47.0B',revSurprise:'+3.0%', period:'Q4 2024'},
+  {sym:'NVDA',name:'NVIDIA',        beat:true, epsActual:'0.89', epsEst:'0.85',epsSurprise:'+4.7%', revActual:'39.3B', revEst:'38.0B',revSurprise:'+3.4%', period:'Q4 FY25'},
+  {sym:'ACN', name:'Accenture',     beat:false,miss:true,epsActual:'2.82',epsEst:'2.91',epsSurprise:'-3.1%',revActual:'16.7B',revEst:'17.0B',revSurprise:'-1.8%',period:'Q1 FY25'},
+  {sym:'CTSH',name:'Cognizant',     beat:false,miss:true,epsActual:'1.05',epsEst:'1.13',epsSurprise:'-7.1%',revActual:'4.9B',revEst:'5.0B',revSurprise:'-2.0%',period:'Q4 2024'},
+  {sym:'INFY',name:'Infosys',       beat:true, epsActual:'0.22', epsEst:'0.21',epsSurprise:'+4.8%', revActual:'4.9B',  revEst:'4.8B', revSurprise:'+2.1%', period:'Q3 FY25'},
+  {sym:'CHGG',name:'Chegg',         beat:false,miss:true,epsActual:'-0.02',epsEst:'0.09',epsSurprise:'-122%',revActual:'143M',revEst:'157M',revSurprise:'-8.9%',period:'Q4 2024'},
+  {sym:'JPM', name:'JPMorgan',      beat:true, epsActual:'4.81', epsEst:'4.11',epsSurprise:'+17.0%',revActual:'44.3B', revEst:'43.1B',revSurprise:'+2.8%', period:'Q4 2024'},
+  {sym:'GS',  name:'Goldman Sachs', beat:true, epsActual:'11.95',epsEst:'8.22',epsSurprise:'+45.4%',revActual:'13.9B', revEst:'12.4B',revSurprise:'+12.1%',period:'Q4 2024'},
+  {sym:'CRWD',name:'CrowdStrike',   beat:true, epsActual:'1.03', epsEst:'0.85',epsSurprise:'+21.2%',revActual:'1.06B',revEst:'1.03B',revSurprise:'+2.9%', period:'Q3 FY25'},
+  {sym:'PANW',name:'Palo Alto',     beat:true, epsActual:'1.56', epsEst:'1.50',epsSurprise:'+4.0%', revActual:'2.26B',revEst:'2.24B',revSurprise:'+0.9%', period:'Q2 FY25'},
+  {sym:'MAN', name:'ManpowerGroup', beat:false,miss:true,epsActual:'1.10',epsEst:'1.34',epsSurprise:'-17.9%',revActual:'4.5B',revEst:'4.6B',revSurprise:'-2.2%',period:'Q4 2024'},
+  {sym:'RHI', name:'Robert Half',   beat:false,miss:true,epsActual:'0.49',epsEst:'0.58',epsSurprise:'-15.5%',revActual:'1.36B',revEst:'1.41B',revSurprise:'-3.5%',period:'Q4 2024'},
+  {sym:'V',   name:'Visa',          beat:true, epsActual:'2.75', epsEst:'2.66',epsSurprise:'+3.4%', revActual:'9.5B',  revEst:'9.3B', revSurprise:'+2.2%', period:'Q1 FY25'},
+  {sym:'PYPL',name:'PayPal',        beat:true, epsActual:'1.19', epsEst:'1.12',epsSurprise:'+6.3%', revActual:'8.4B',  revEst:'8.3B', revSurprise:'+1.2%', period:'Q4 2024'},
+  {sym:'PATH',name:'UiPath',        beat:true, epsActual:'0.26', epsEst:'0.17',epsSurprise:'+52.9%',revActual:'424M', revEst:'407M', revSurprise:'+4.2%', period:'Q3 FY25'},
+  {sym:'DUOL',name:'Duolingo',      beat:true, epsActual:'0.72', epsEst:'0.47',epsSurprise:'+53.2%',revActual:'210M', revEst:'204M', revSurprise:'+2.9%', period:'Q4 2024'},
+];
 async function fetchNasdaqEarningsDate(dateStr){
   try{
     var url='https://api.nasdaq.com/api/calendar/earnings?date='+dateStr;
@@ -1385,7 +1408,7 @@ async function fetchOptionsFlow(tickers){
 async function refreshAllPrices(){
   var allT=WL.map(function(w){return w.t;}).slice(0,60);
   await fetchQuote(allT);
-  renderWL();renderFeed();renderTicker();checkPriceAlerts();detectVolSpikes();
+  renderWL();renderFeed();renderTicker();checkPriceAlerts();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1921,8 +1944,7 @@ async function doScan(){
   var allTks=[...new Set(clustered.reduce(function(acc,a){return acc.concat(a.tks);},[])).values()];
   document.getElementById('ltxt').textContent='FETCHING DATA...';
   await Promise.all([fetchQuote(allTks),fetchShortInterest(allTks.slice(0,8)),fetchOptionsFlow(allTks.slice(0,5))]);
-  await detectVolSpikes();
-
+  
   allHL=newHL.concat(allHL).slice(0,600);
   if(clustered.length){
     clustered.forEach(function(a){a.score=scoreAlert(a);});
@@ -1948,7 +1970,7 @@ async function doScan(){
     renderEarnings();
   }
 
-  renderFeed();renderWL();renderTicker();renderHeatmapVisual();renderSI();renderPatterns();renderHistory();updateStats();calcPort();checkPriceAlerts();
+  renderFeed();renderWL();renderTicker();renderHeatmapVisual();renderPatterns();renderHistory();updateStats();calcPort();checkPriceAlerts();
   resetBtn();document.getElementById('ltxt').textContent='LIVE';bump();
 }
 
@@ -2010,19 +2032,64 @@ function renderFeed(){
   if(feedView==='correlations'){renderCorrelations();return;}
   if(feedView==='earnings'){
     document.getElementById('fbar').style.display='none';
-    if(!earningsData.length){list.innerHTML='<div class="empty"><div class="ei">📊</div><div class="et">No earnings data</div><div class="es">CLICK 📊 EARNINGS BUTTON</div></div>';}
-    else{earningsData.forEach(function(e){
-      var wl=WL.find(function(w){return w.t===e.sym;});var p=priceCache[e.sym];
-      var div=document.createElement('div');div.className='ac '+(e.beat?'acE':'acH');
-      div.innerHTML='<div class="ac-hd">'+(e.beat?'<span class="sb bE">BEAT</span>':e.miss?'<span class="sb bH">MISS</span>':'<span class="sb bL">INLINE</span>')+'<span class="srctag dt">EARNINGS</span><span style="font-size:10px;color:var(--tx2);font-family:var(--sans);">'+(wl?wl.n:e.sym)+'</span></div><div class="ac-title">'+e.sym+(e.epsActual?' — EPS: '+e.epsActual+' vs est '+e.epsEst:'')+(e.revActual?' · Rev: '+e.revActual:'')+' '+(e.epsSurprise?'('+e.epsSurprise+')':'')+'</div>'+(p?'<div class="trow"><span class="tk"><span class="tk-s">'+e.sym+'</span>'+pTag(e.sym)+siTag(e.sym)+'</span></div>':'');
-      list.appendChild(div);
-    });}
-    return;
-  }
-  if(feedView==='volume'){
-    document.getElementById('fbar').style.display='none';
-    if(!volCache||!Array.isArray(volCache)||!volCache.length){list.innerHTML='<div class="empty"><div class="ei">⚡</div><div class="et">No volume data</div><div class="es">CLICK ⚡ VOLUME BUTTON</div></div>';}
-    else{volCache.forEach(function(v){var wl=WL.find(function(w){return w.t===v.t;});var div=document.createElement('div');div.className='ac acV';div.innerHTML='<div class="ac-hd"><span class="sb bV">VOLUME</span><span style="font-size:11px;color:var(--slate2);font-weight:700;">'+v.mult.toFixed(1)+'× AVG</span><span class="act">TODAY</span></div><div class="ac-title">'+(wl?wl.n:v.t)+' — Volume '+v.mult.toFixed(1)+'× above 3-month average. '+(v.chg>=0?'Price ▲':'Price ▼')+Math.abs(v.chg).toFixed(2)+'% today.</div><div class="trow"><span class="tk"><span class="tk-s">'+v.t+'</span>'+pTag(v.t)+siTag(v.t)+volTag(v.t)+'</span></div>';list.appendChild(div);});}
+    if(!earningsData.length&&!upcomingEarnings.length){
+      list.innerHTML='<div class="empty"><div class="ei">📊</div><div class="et">Loading earnings...</div><div class="es">FETCHING FROM NASDAQ</div></div>';
+      loadEarnings();
+      return;
+    }
+    list.innerHTML='';
+    if(upcomingEarnings.length){
+      var uhdr=document.createElement('div');
+      uhdr.style.cssText='padding:5px 10px;font-size:8px;letter-spacing:3px;color:var(--gold2);background:rgba(0,0,0,.3);border-bottom:1px solid var(--b1);font-weight:700;';
+      uhdr.textContent='UPCOMING EARNINGS — '+upcomingEarnings.length+' REPORTS';
+      list.appendChild(uhdr);
+      var todayStr=new Date().toISOString().slice(0,10);
+      upcomingEarnings.slice(0,25).forEach(function(e){
+        var wl=WL.find(function(w){return w.t===e.sym;});var p=priceCache[e.sym];
+        var earnDate=e.date||(e.earningsDates&&e.earningsDates[0]?new Date(e.earningsDates[0]*1000).toISOString().slice(0,10):null);
+        var dispDate=earnDate?new Date(earnDate+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}):'TBD';
+        var dU=earnDate?Math.round((new Date(earnDate)-new Date(todayStr))/(1000*86400)):null;
+        var div=document.createElement('div');div.className='ac acE';
+        var badge=dU===0?'<span class="sb bE">TODAY</span>':dU===1?'<span class="sb bE">TMR</span>':dU!==null&&dU<=7?'<span class="sb bE">'+dU+'d</span>':'<span style="font-size:9px;padding:2px 6px;border-radius:2px;background:var(--gold3,rgba(152,112,0,.1));color:var(--gold2);border:1px solid rgba(152,112,0,.2);">'+dispDate+'</span>';
+        div.innerHTML=
+          '<div class="ac-hd">'+badge+
+          '<span style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text);">'+e.sym+'</span>'+
+          '<span style="font-size:10px;color:var(--tx2);margin-left:4px;">'+(e.name||(wl?wl.n:''))+'</span>'+
+          (e.timeLabel?'<span style="font-size:8px;padding:1px 4px;background:rgba(0,88,120,.08);color:var(--cyan2,#4ab);border-radius:2px;margin-left:3px;">'+e.timeLabel+'</span>':'')+
+          '</div>'+
+          '<div class="trow">'+
+          '<span class="tk"><span class="tk-s">'+e.sym+'</span>'+pTag(e.sym)+'</span>'+
+          (e.epsEst?'<span style="font-size:9px;padding:2px 5px;border-radius:2px;background:rgba(152,112,0,.1);color:var(--gold2);border:1px solid rgba(152,112,0,.18);">EPS EST '+e.epsEst+'</span>':'')+
+          (e.sector?'<span style="font-size:9px;padding:2px 5px;border-radius:2px;background:rgba(255,255,255,.02);color:var(--tx3);border:1px solid var(--b1);">'+e.sector+'</span>':'')+
+          '</div>';
+        list.appendChild(div);
+      });
+    }
+    if(earningsData.length){
+      var rhdr=document.createElement('div');
+      rhdr.style.cssText='padding:5px 10px;font-size:8px;letter-spacing:3px;color:var(--text2);background:rgba(0,0,0,.3);border-bottom:1px solid var(--b1);border-top:1px solid var(--b2);font-weight:700;margin-top:2px;';
+      rhdr.textContent='RECENT RESULTS — '+earningsData.length+' REPORTS';
+      list.appendChild(rhdr);
+      earningsData.slice(0,25).forEach(function(e){
+        var wl=WL.find(function(w){return w.t===e.sym;});
+        var isPos=e.epsSurprise&&e.epsSurprise.indexOf('-')<0;
+        var div=document.createElement('div');div.className='ac '+(e.beat?'acE':'acH');
+        div.innerHTML=
+          '<div class="ac-hd">'+
+          (e.beat?'<span class="sb bE">BEAT</span>':e.miss?'<span class="sb bH">MISS</span>':'<span class="sb bL">INLINE</span>')+
+          '<span style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text);">'+e.sym+'</span>'+
+          '<span style="font-size:10px;color:var(--tx2);margin-left:4px;">'+(e.name||(wl?wl.n:''))+'</span>'+
+          (e.period?'<span style="font-size:8px;color:var(--tx3);margin-left:4px;">'+e.period+'</span>':'')+
+          (e.epsSurprise?'<span style="font-size:9px;padding:2px 5px;border-radius:2px;margin-left:4px;background:'+(isPos?'rgba(0,112,64,.12)':'rgba(176,48,48,.12)')+';color:'+(isPos?'var(--green2)':'var(--red2)')+';border:1px solid '+(isPos?'rgba(0,112,64,.2)':'rgba(176,48,48,.2)') + ';">'+e.epsSurprise+'</span>':'')+
+          '</div>'+
+          '<div class="trow">'+
+          '<span class="tk"><span class="tk-s">'+e.sym+'</span>'+pTag(e.sym)+'</span>'+
+          (e.epsActual?'<span style="font-size:9px;padding:2px 5px;border-radius:2px;background:rgba(255,255,255,.02);color:var(--tx2);border:1px solid var(--b2);">EPS '+e.epsActual+' vs '+e.epsEst+'</span>':'')+
+          (e.revActual?'<span style="font-size:9px;padding:2px 5px;border-radius:2px;background:rgba(255,255,255,.015);color:var(--tx3);border:1px solid var(--b1);">Rev '+e.revActual+'</span>':'')+
+          '</div>';
+        list.appendChild(div);
+      });
+    }
     return;
   }
   if(feedView==='all'){
@@ -2281,7 +2348,7 @@ function toggleSound(){soundOn=!soundOn;var b=document.getElementById('soundBtn'
 function doClear(){
   alerts=[];allHL=[];hitCount={};totalHL=0;volSpikes=0;earningsData=[];
   seenHeadlines.clear(); // also clear the global dedup set so fresh scans work
-  renderFeed();renderWL();renderHeatmapVisual();renderSI();renderPatterns();renderTicker();renderVolSpikes();updateStats();
+  renderFeed();renderWL();renderHeatmapVisual();renderPatterns();renderTicker();updateStats();
 }
 function doToggleAuto(){
   var el=document.getElementById('autotog');var on=el.classList.toggle('on');
@@ -2345,8 +2412,8 @@ function init(){
     var n=localStorage.getItem('sv7n')||localStorage.getItem('sv5n');if(n){apiNd=n;document.getElementById('kNd').value=n;}
     if(apiMain||apiGnews||apiNd){updateKeyBadge();document.getElementById('setupOv').style.display='none';}
   }catch(e){}
-  renderWL();renderKW();renderHistory();renderSI();renderEconCalendar();updateStats();
-  loadEarnings();detectVolSpikes();loadSectorHeatmap();
+  renderWL();renderKW();renderHistory();renderEconCalendar();updateStats();
+  loadEarnings();loadSectorHeatmap();
 }
 // Real-time data freshness indicator
 function updateFreshnessIndicator(){
