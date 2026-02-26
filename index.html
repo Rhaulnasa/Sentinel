@@ -956,7 +956,6 @@ var PROXY='https://api.allorigins.win/raw?url=';
 // YAHOO FINANCE: PRICES
 // ═══════════════════════════════════════════════════
 async function fetchQuote(tickers){
-  // REAL-TIME: Yahoo Finance — no FMP demo (demo = 15-min delayed)
   var now=Date.now();
   var need=tickers.filter(function(t){return!priceCache[t]||now-priceCache[t].ts>30000;});
   if(!need.length)return;
@@ -966,35 +965,23 @@ async function fetchQuote(tickers){
     var batchStr=batch.join(',');
     var loaded=false;
 
-    // METHOD 1: Yahoo Finance v8 spark — no CORS issues, real-time
-    try{
-      var url='https://query1.finance.yahoo.com/v8/finance/spark?symbols='+encodeURIComponent(batchStr)+'&range=1d&interval=1m&_='+Date.now();
-      var r=await fetch(url,{signal:AbortSignal.timeout(6000)});
-      if(r.ok){
-        var d=await r.json();
-        var count=0;
-        if(d&&d.spark&&d.spark.result){
-          d.spark.result.forEach(function(item){
-            if(!item||!item.symbol)return;
-            var resp=item.response&&item.response[0];
-            if(!resp)return;
-            var meta=resp.meta||{};
-            var price=meta.regularMarketPrice||0;
-            if(price){
-              priceCache[item.symbol]={
-                price:price,
-                chg:meta.regularMarketChangePercent||0,
-                vol:meta.regularMarketVolume||0,
-                avgVol:meta.averageDailyVolume3Month||0,
-                ts:Date.now(),src:'YF-RT'
-              };
-              count++;
-            }
-          });
+    // METHOD 1: Backend proxy (no CORS)
+    if(BACKEND_URL&&!loaded){
+      try{
+        var rb=await fetch(BACKEND_URL+'/api/prices?symbols='+encodeURIComponent(batchStr),{signal:AbortSignal.timeout(8000)});
+        if(rb.ok){
+          var db=await rb.json();
+          if(db.ok&&db.prices){
+            var count=0;
+            Object.keys(db.prices).forEach(function(sym){
+              var q=db.prices[sym];
+              if(q.price){priceCache[sym]={price:q.price,chg:q.chg||0,vol:q.vol||0,avgVol:q.avgVol||0,ts:Date.now(),src:'BE'};count++;}
+            });
+            if(count>0){loaded=true;console.log('Backend prices: '+count+' tickers');}
+          }
         }
-        if(count>0){loaded=true;}
-      }
-    }catch(e){}
+      }catch(e){console.log('Backend prices failed, using proxy fallback');}
+    }
 
     // METHOD 2: Yahoo Finance v7 quote via proxy — real-time
     if(!loaded){
@@ -1252,36 +1239,30 @@ async function detectVolSpikes(){
 
   var results=[];
 
-  // SOURCE 1: Yahoo Finance real-time most-active (market hours)
-  // Use quote for a curated list of known high-volume stocks
+  // SOURCE 1: Backend proxy for prices (no CORS)
   var HIVOLSYMS=['NVDA','TSLA','AAPL','AMZN','META','MSFT','GOOGL','AMD','SPY','QQQ',
     'PLTR','SOFI','BAC','F','GE','CRWD','PANW','ORCL','CRM','NFLX',
     'IBM','ACN','JPM','GS','MS','V','MA','PYPL','SQ','COIN',
     'OKTA','NET','ZS','FTNT','S','CYBR','PATH','NOW','WDAY','CTSH'];
-  try{
-    var hiVolBatch=HIVOLSYMS.join(',');
-    var hvUrl='https://query1.finance.yahoo.com/v8/finance/spark?symbols='+encodeURIComponent(hiVolBatch)+'&range=1d&interval=1m&_='+Date.now();
-    var hvr=await fetch(hvUrl,{signal:AbortSignal.timeout(8000)});
-    if(hvr.ok){
-      var hvd=await hvr.json();
-      if(hvd&&hvd.spark&&hvd.spark.result){
-        hvd.spark.result.forEach(function(item){
-          if(!item||!item.symbol)return;
-          var resp=item.response&&item.response[0];if(!resp)return;
-          var meta=resp.meta||{};
-          var price=meta.regularMarketPrice||0;
-          var vol=meta.regularMarketVolume||0;
-          var avgVol=meta.averageDailyVolume3Month||0;
-          if(price&&vol){
-            var wl=WL.find(function(w){return w.t===item.symbol;});
-            results.push({t:item.symbol,name:wl?wl.n:item.symbol,sector:wl?wl.s:'Market',vol:vol,avgVol:avgVol,mult:(avgVol>10000)?(vol/avgVol):null,chg:meta.regularMarketChangePercent||0,price:price,src:'YF-RT'});
-            priceCache[item.symbol]={price:price,chg:meta.regularMarketChangePercent||0,vol:vol,avgVol:avgVol,ts:Date.now(),src:'YF-RT'};
-          }
-        });
-        if(loading)loading.textContent='YF real-time: '+results.length+' stocks loaded...';
+  if(BACKEND_URL){
+    try{
+      var rb=await fetch(BACKEND_URL+'/api/prices?symbols='+encodeURIComponent(HIVOLSYMS.join(',')),{signal:AbortSignal.timeout(10000)});
+      if(rb.ok){
+        var db=await rb.json();
+        if(db.ok&&db.prices){
+          Object.keys(db.prices).forEach(function(sym){
+            var q=db.prices[sym];
+            if(q.price&&q.vol){
+              var wl=WL.find(function(w){return w.t===sym;});
+              results.push({t:sym,name:wl?wl.n:sym,sector:wl?wl.s:'Market',vol:q.vol,avgVol:q.avgVol||0,mult:(q.avgVol>10000)?(q.vol/q.avgVol):null,chg:q.chg||0,price:q.price,src:'BE'});
+              priceCache[sym]={price:q.price,chg:q.chg||0,vol:q.vol,avgVol:q.avgVol||0,ts:Date.now(),src:'BE'};
+            }
+          });
+          if(loading)loading.textContent='Backend: '+results.length+' stocks loaded...';
+        }
       }
-    }
-  }catch(e){console.log('YF spark err:',e.message);}
+    }catch(e){console.log('Backend vol err:',e.message);}
+  }
 
   // SOURCE 1b: FMP actives as supplement (delayed but gets market-wide data)
   try{
