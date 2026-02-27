@@ -965,23 +965,24 @@ async function fetchQuote(tickers){
     var batchStr=batch.join(',');
     var loaded=false;
 
-    // METHOD 1: Backend proxy (no CORS)
-    if(BACKEND_URL&&!loaded){
-      try{
-        var rb=await fetch(BACKEND_URL+'/api/prices?symbols='+encodeURIComponent(batchStr),{signal:AbortSignal.timeout(8000)});
-        if(rb.ok){
-          var db=await rb.json();
-          if(db.ok&&db.prices){
-            var count=0;
-            Object.keys(db.prices).forEach(function(sym){
-              var q=db.prices[sym];
-              if(q.price){priceCache[sym]={price:q.price,chg:q.chg||0,vol:q.vol||0,avgVol:q.avgVol||0,ts:Date.now(),src:'BE'};count++;}
-            });
-            if(count>0){loaded=true;console.log('Backend prices: '+count+' tickers');}
-          }
+    // METHOD 1: Vercel backend — no CORS, server-side Yahoo fetch
+    try{
+      var rb=await fetch(BACKEND_URL+'/api/prices?symbols='+encodeURIComponent(batchStr),{signal:AbortSignal.timeout(8000)});
+      if(rb.ok){
+        var db=await rb.json();
+        if(db.ok&&db.prices){
+          var count=0;
+          Object.keys(db.prices).forEach(function(sym){
+            var q=db.prices[sym];
+            if(q&&q.price){
+              priceCache[sym]={price:q.price,chg:q.chg||0,vol:q.vol||0,avgVol:q.avgVol||0,ts:Date.now(),src:'BE'};
+              count++;
+            }
+          });
+          if(count>0){loaded=true;console.log('Backend prices: '+count+' loaded');}
         }
-      }catch(e){console.log('Backend prices failed, using proxy fallback');}
-    }
+      }
+    }catch(e){console.log('Backend prices failed, trying proxy');}
 
     // METHOD 2: Yahoo Finance v7 quote via proxy — real-time
     if(!loaded){
@@ -1239,30 +1240,28 @@ async function detectVolSpikes(){
 
   var results=[];
 
-  // SOURCE 1: Backend proxy for prices (no CORS)
   var HIVOLSYMS=['NVDA','TSLA','AAPL','AMZN','META','MSFT','GOOGL','AMD','SPY','QQQ',
     'PLTR','SOFI','BAC','F','GE','CRWD','PANW','ORCL','CRM','NFLX',
     'IBM','ACN','JPM','GS','MS','V','MA','PYPL','SQ','COIN',
     'OKTA','NET','ZS','FTNT','S','CYBR','PATH','NOW','WDAY','CTSH'];
-  if(BACKEND_URL){
-    try{
-      var rb=await fetch(BACKEND_URL+'/api/prices?symbols='+encodeURIComponent(HIVOLSYMS.join(',')),{signal:AbortSignal.timeout(10000)});
-      if(rb.ok){
-        var db=await rb.json();
-        if(db.ok&&db.prices){
-          Object.keys(db.prices).forEach(function(sym){
-            var q=db.prices[sym];
-            if(q.price&&q.vol){
-              var wl=WL.find(function(w){return w.t===sym;});
-              results.push({t:sym,name:wl?wl.n:sym,sector:wl?wl.s:'Market',vol:q.vol,avgVol:q.avgVol||0,mult:(q.avgVol>10000)?(q.vol/q.avgVol):null,chg:q.chg||0,price:q.price,src:'BE'});
-              priceCache[sym]={price:q.price,chg:q.chg||0,vol:q.vol,avgVol:q.avgVol||0,ts:Date.now(),src:'BE'};
-            }
-          });
-          if(loading)loading.textContent='Backend: '+results.length+' stocks loaded...';
-        }
+  // SOURCE 1: Backend proxy for vol stocks
+  try{
+    var rb=await fetch(BACKEND_URL+'/api/prices?symbols='+encodeURIComponent(HIVOLSYMS.join(',')),{signal:AbortSignal.timeout(10000)});
+    if(rb.ok){
+      var db=await rb.json();
+      if(db.ok&&db.prices){
+        Object.keys(db.prices).forEach(function(sym){
+          var q=db.prices[sym];
+          if(q&&q.price&&q.vol){
+            var wl=WL.find(function(w){return w.t===sym;});
+            results.push({t:sym,name:wl?wl.n:sym,sector:wl?wl.s:'Market',vol:q.vol,avgVol:q.avgVol||0,mult:(q.avgVol>10000)?(q.vol/q.avgVol):null,chg:q.chg||0,price:q.price,src:'BE'});
+            priceCache[sym]={price:q.price,chg:q.chg||0,vol:q.vol,avgVol:q.avgVol||0,ts:Date.now(),src:'BE'};
+          }
+        });
+        if(loading)loading.textContent='Backend: '+results.length+' stocks loaded...';
       }
-    }catch(e){console.log('Backend vol err:',e.message);}
-  }
+    }
+  }catch(e){console.log('Backend vol err:',e.message);}
 
   // SOURCE 1b: FMP actives as supplement (delayed but gets market-wide data)
   try{
@@ -1404,8 +1403,10 @@ async function fetchOptionsFlow(tickers){
 
 async function refreshAllPrices(){
   var allT=WL.map(function(w){return w.t;}).slice(0,60);
+  document.getElementById("ltxt").textContent="LOADING PRICES...";
   await fetchQuote(allT);
   renderWL();renderFeed();renderTicker();checkPriceAlerts();
+  document.getElementById("ltxt").textContent="LIVE";
 }
 
 // ═══════════════════════════════════════════════════
@@ -1794,17 +1795,23 @@ async function loadSectorHeatmap(){
   var etfTickers=SECTOR_ETFS.map(function(s){return s.etf;});
   var loaded=false;
 
-  // SOURCE 1: Yahoo Finance spark — real-time ETF data
+  // SOURCE 1: Backend proxy for ETF prices (replaces broken FMP demo key)
   try{
-    var r=await fetch('https://financialmodelingprep.com/api/v3/quote/'+etfTickers.join(',')+'?apikey=demo',{signal:AbortSignal.timeout(8000)});
-    var d=await r.json();
-    if(Array.isArray(d)&&d.length>=3){
-      d.forEach(function(q){
-        sectorEtfCache[q.symbol]={price:q.price||0,chg:q.changesPercentage||0,vol:q.volume||0,name:q.name||q.symbol,ts:Date.now(),live:true,src:'FMP'};
-      });
-      loaded=true;
+    var rb=await fetch(BACKEND_URL+'/api/prices?symbols='+encodeURIComponent(etfTickers.join(',')),{signal:AbortSignal.timeout(8000)});
+    if(rb.ok){
+      var db=await rb.json();
+      if(db.ok&&db.prices&&Object.keys(db.prices).length>=3){
+        Object.keys(db.prices).forEach(function(sym){
+          var q=db.prices[sym];
+          if(q&&q.price){
+            sectorEtfCache[sym]={price:q.price,chg:q.chg||0,vol:q.vol||0,name:sym,ts:Date.now(),live:true,src:'BE'};
+          }
+        });
+        loaded=true;
+        console.log('Backend heatmap: '+Object.keys(db.prices).length+' ETFs loaded');
+      }
     }
-  }catch(e){console.log('heatmap FMP err:',e.message);}
+  }catch(e){console.log('Backend heatmap err:',e.message);}
 
   // SOURCE 2: Yahoo Finance via proxy fallback
   if(!loaded){
