@@ -1402,11 +1402,39 @@ async function fetchOptionsFlow(tickers){
 }
 
 async function refreshAllPrices(){
-  var allT=WL.map(function(w){return w.t;}).slice(0,60);
   document.getElementById("ltxt").textContent="LOADING PRICES...";
-  await fetchQuote(allT);
+  var allT=WL.map(function(w){return w.t;});
+  
+  // Try backend in one big batch first
+  var backendLoaded=false;
+  if(BACKEND_URL){
+    try{
+      // Send all symbols in chunks of 50 (Twelve Data supports large batches)
+      for(var bi=0;bi<allT.length;bi+=50){
+        var bsyms=allT.slice(bi,bi+50).join(',');
+        var rb=await fetch(BACKEND_URL+'/api/prices?symbols='+encodeURIComponent(bsyms),{signal:AbortSignal.timeout(10000)});
+        if(rb.ok){
+          var db=await rb.json();
+          if(db.ok&&db.prices){
+            var cnt=0;
+            Object.keys(db.prices).forEach(function(sym){
+              var q=db.prices[sym];
+              if(q&&q.price){priceCache[sym]={price:q.price,chg:q.chg||0,vol:q.vol||0,avgVol:q.avgVol||0,ts:Date.now(),src:'BE'};cnt++;}
+            });
+            if(cnt>0){backendLoaded=true;console.log('Prices loaded: '+cnt+' stocks');}
+          }
+        }
+      }
+    }catch(e){console.log('Backend price load failed:',e.message);}
+  }
+  
+  // Only use old fetchQuote proxy method if backend completely failed
+  if(!backendLoaded){
+    await fetchQuote(allT.slice(0,60));
+  }
+  
   renderWL();renderFeed();renderTicker();checkPriceAlerts();
-  document.getElementById("ltxt").textContent="LIVE";
+  document.getElementById("ltxt").textContent=backendLoaded?"LIVE":"LIVE";
 }
 
 // ═══════════════════════════════════════════════════
